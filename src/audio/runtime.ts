@@ -7,6 +7,7 @@ import { SampleLibrary } from "./SampleLibrary";
 import { playSample } from "./SamplePlayer";
 import { markersInWindow, ctxTimeForMarker } from "./Scheduler";
 import { resolveTrackBehavior } from "../domain/mode";
+import { startPlaySession, endPlaySession, updatePlay } from "../scoring/playSession";
 
 let engine: AudioEngine | null = null;
 let source: BaseFlowSource | null = null;
@@ -56,6 +57,9 @@ export async function play(): Promise<void> {
   await preloadTrackSounds();
   source.play();
   useStore.getState().setPlaying(true);
+  if (useStore.getState().mode === "play") {
+    startPlaySession();
+  }
   lastScheduledMs = source.currentTimeMs();
   startScheduler();
   startRaf();
@@ -66,6 +70,7 @@ export function pause(): void {
   source.pause();
   useStore.getState().setPlaying(false);
   stopScheduler();
+  endPlaySession();
   stopRaf();
   useStore.getState().setPlayheadMs(source.currentTimeMs());
 }
@@ -116,10 +121,15 @@ function startRaf(): void {
   if (rafId !== null) return;
   const tick = () => {
     if (!source) return;
-    useStore.getState().setPlayheadMs(source.currentTimeMs());
+    const st = useStore.getState();
+    st.setPlayheadMs(source.currentTimeMs());
+    if (st.mode === "play") {
+      updatePlay(source.currentTimeMs());
+    }
     if (!source.isPlaying()) {
       useStore.getState().setPlaying(false);
       stopScheduler();
+      endPlaySession();
       rafId = null;
       return;
     }
