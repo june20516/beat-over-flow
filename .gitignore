@@ -1,0 +1,25 @@
+# 브레인스토밍 비주얼 컴패니언 런타임/목업 (스펙 문서에 결정 내용 반영됨)
+.superpowers/
+
+# 의존성
+node_modules/
+
+# 빌드 산출물
+dist/
+build/
+
+# 로그/캐시
+*.log
+.vite/
+.cache/
+
+# 환경
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+
+# Claude Code 로컬 설정 (머신별, 비공유)
+.claude/settings.local.json
