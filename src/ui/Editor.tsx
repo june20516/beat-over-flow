@@ -9,7 +9,9 @@ import { TransportBar } from "./TransportBar";
 import { TrackList } from "./TrackList";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { StepSequencerPanel } from "./StepSequencerPanel";
+import { ScoreHud } from "./ScoreHud";
 import { startKeyboard } from "../input/KeyboardController";
+import { startPlaySession, endPlaySession } from "../scoring/playSession";
 
 interface Props {
   onExit: () => void;
@@ -28,6 +30,11 @@ export function Editor({ onExit }: Props) {
     const stop = startKeyboard();
     return stop;
   }, []);
+
+  useEffect(() => {
+    if (mode === "play") startPlaySession();
+    else endPlaySession();
+  }, [mode]);
 
   useEffect(() => {
     if (!project) return;
@@ -58,6 +65,7 @@ export function Editor({ onExit }: Props) {
 
   return (
     <div>
+      <ScoreHud />
       <div style={{ display: "flex", justifyContent: "space-between", padding: 8 }}>
         <strong>{project.name}</strong>
         <ModeSwitcher />
