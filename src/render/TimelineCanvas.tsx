@@ -1,66 +1,94 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "../store/useStore";
+import type { Track } from "../types";
 
 interface Props {
   peaks: Float32Array | null;
   durationMs: number;
+  tracks: Track[];
   onSeek: (ms: number) => void;
+  onLaneClick: (trackId: string, timeMs: number) => void;
 }
 
-const LANE_HEIGHT = 80;
+const BASE_HEIGHT = 80;
+const TRACK_HEIGHT = 40;
 
-export function TimelineCanvas({ peaks, durationMs, onSeek }: Props) {
+export function TimelineCanvas({ peaks, durationMs, tracks, onSeek, onLaneClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playheadMs = useStore((s) => s.playheadMs);
+  const height = BASE_HEIGHT + tracks.length * TRACK_HEIGHT;
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w, canvas.height);
 
-    // 베이스 레인 배경
+    // 베이스 레인
     ctx.fillStyle = "#10131a";
-    ctx.fillRect(0, 0, w, LANE_HEIGHT);
-
-    // 파형
+    ctx.fillRect(0, 0, w, BASE_HEIGHT);
     if (peaks && peaks.length > 0) {
       ctx.fillStyle = "#6cc4ff";
-      const mid = LANE_HEIGHT / 2;
+      const mid = BASE_HEIGHT / 2;
       const barW = w / peaks.length;
       for (let i = 0; i < peaks.length; i++) {
-        const bh = peaks[i] * (LANE_HEIGHT - 8);
+        const bh = peaks[i] * (BASE_HEIGHT - 8);
         ctx.fillRect(i * barW, mid - bh / 2, Math.max(1, barW - 1), bh);
       }
     }
+
+    // 트랙 레인 + 마커
+    tracks.forEach((t, idx) => {
+      const top = BASE_HEIGHT + idx * TRACK_HEIGHT;
+      ctx.fillStyle = idx % 2 === 0 ? "#161a22" : "#12151c";
+      ctx.fillRect(0, top, w, TRACK_HEIGHT);
+      ctx.strokeStyle = "#222833";
+      ctx.strokeRect(0, top, w, TRACK_HEIGHT);
+      if (durationMs > 0) {
+        ctx.fillStyle = t.color;
+        const cy = top + TRACK_HEIGHT / 2;
+        for (const m of t.markers) {
+          const x = (m.timeMs / durationMs) * w;
+          ctx.beginPath();
+          ctx.arc(x, cy, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
 
     // 플레이헤드
     if (durationMs > 0) {
       const x = (playheadMs / durationMs) * w;
       ctx.fillStyle = "#ff7b7b";
-      ctx.fillRect(x - 1, 0, 2, h);
+      ctx.fillRect(x - 1, 0, 2, canvas.height);
     }
-  }, [peaks, durationMs, playheadMs]);
+  }, [peaks, durationMs, tracks, playheadMs, height]);
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
     if (!canvas || durationMs <= 0) return;
     const rect = canvas.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    onSeek(ratio * durationMs);
+    const xRatio = (e.clientX - rect.left) / rect.width;
+    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    const timeMs = xRatio * durationMs;
+    if (y < BASE_HEIGHT) {
+      onSeek(timeMs);
+    } else {
+      const idx = Math.floor((y - BASE_HEIGHT) / TRACK_HEIGHT);
+      const track = tracks[idx];
+      if (track) onLaneClick(track.id, timeMs);
+    }
   }
 
   return (
     <canvas
       ref={canvasRef}
       width={1000}
-      height={LANE_HEIGHT}
+      height={height}
       onClick={handleClick}
-      style={{ width: "100%", height: LANE_HEIGHT, cursor: "pointer", display: "block" }}
+      style={{ width: "100%", height, cursor: "pointer", display: "block" }}
     />
   );
 }
