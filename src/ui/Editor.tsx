@@ -3,9 +3,13 @@ import { useStore } from "../store/useStore";
 import { getEngine, loadBaseFlow, seek } from "../audio/runtime";
 import { getAsset } from "../persistence/assets";
 import { computePeaks } from "../render/waveform";
+import { resolveTrackBehavior } from "../domain/mode";
 import { TimelineCanvas } from "../render/TimelineCanvas";
 import { TransportBar } from "./TransportBar";
 import { TrackList } from "./TrackList";
+import { ModeSwitcher } from "./ModeSwitcher";
+import { StepSequencerPanel } from "./StepSequencerPanel";
+import { startKeyboard } from "../input/KeyboardController";
 
 interface Props {
   onExit: () => void;
@@ -14,8 +18,16 @@ interface Props {
 export function Editor({ onExit }: Props) {
   const project = useStore((s) => s.project);
   const tracks = useStore((s) => s.project?.tracks ?? []);
+  const mode = useStore((s) => s.mode);
   const addMarker = useStore((s) => s.addMarker);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
+  const [region, setRegion] = useState({ startMs: 0, endMs: 4000 });
+  const [stepCount, setStepCount] = useState(8);
+
+  useEffect(() => {
+    const stop = startKeyboard();
+    return stop;
+  }, []);
 
   useEffect(() => {
     if (!project) return;
@@ -35,10 +47,20 @@ export function Editor({ onExit }: Props) {
 
   if (!project) return null;
 
+  function handleLaneClick(trackId: string, timeMs: number) {
+    // 레코드 모드 + write 트랙에서만 클릭으로 마커 추가
+    const track = tracks.find((t) => t.id === trackId);
+    if (!track) return;
+    if (resolveTrackBehavior(mode, track.status) === "record") {
+      addMarker(trackId, timeMs);
+    }
+  }
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", padding: 8 }}>
         <strong>{project.name}</strong>
+        <ModeSwitcher />
         <button onClick={onExit}>← 목록</button>
       </div>
       <TransportBar />
@@ -49,11 +71,19 @@ export function Editor({ onExit }: Props) {
             peaks={peaks}
             durationMs={project.baseFlow.durationMs}
             tracks={tracks}
+            region={region}
+            stepCount={stepCount}
             onSeek={seek}
-            onLaneClick={(trackId, timeMs) => addMarker(trackId, timeMs)}
+            onLaneClick={handleLaneClick}
           />
         </div>
       </div>
+      <StepSequencerPanel
+        region={region}
+        setRegion={setRegion}
+        stepCount={stepCount}
+        setStepCount={setStepCount}
+      />
     </div>
   );
 }
