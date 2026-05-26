@@ -5,6 +5,7 @@ import { getAsset } from "../persistence/assets";
 import { computePeaks } from "../render/waveform";
 import { TimelineCanvas } from "../render/TimelineCanvas";
 import { TransportBar } from "./TransportBar";
+import { TrackList } from "./TrackList";
 
 interface Props {
   onExit: () => void;
@@ -12,6 +13,8 @@ interface Props {
 
 export function Editor({ onExit }: Props) {
   const project = useStore((s) => s.project);
+  const tracks = useStore((s) => s.project?.tracks ?? []);
+  const addMarker = useStore((s) => s.addMarker);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
 
   useEffect(() => {
@@ -39,11 +42,18 @@ export function Editor({ onExit }: Props) {
         <button onClick={onExit}>← 목록</button>
       </div>
       <TransportBar />
-      <TimelineCanvas
-        peaks={peaks}
-        durationMs={project.baseFlow.durationMs}
-        onSeek={seek}
-      />
+      <div style={{ display: "flex" }}>
+        <TrackList />
+        <div style={{ flex: 1 }}>
+          <TimelineCanvas
+            peaks={peaks}
+            durationMs={project.baseFlow.durationMs}
+            tracks={tracks}
+            onSeek={seek}
+            onLaneClick={(trackId, timeMs) => addMarker(trackId, timeMs)}
+          />
+        </div>
+      </div>
     </div>
   );
 }
