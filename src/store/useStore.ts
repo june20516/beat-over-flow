@@ -8,6 +8,7 @@ interface StoreState {
   mode: GlobalMode;
   playing: boolean;
   playheadMs: number;
+  selectedTrackId: string | null;
 
   setProject: (project: Project | null) => void;
   renameProject: (name: string) => void;
@@ -25,6 +26,11 @@ interface StoreState {
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
   removeMarker: (trackId: string, markerId: string) => void;
+
+  setSelectedTrack: (trackId: string | null) => void;
+  toggleMarkerAt: (trackId: string, timeMs: number, toleranceMs: number) => void;
+  removeMarkersInRange: (trackId: string, fromMs: number, toMs: number) => void;
+  addMarkersBulk: (trackId: string, timesMs: number[]) => void;
 }
 
 function clamp01(v: number): number {
@@ -49,6 +55,7 @@ export const useStore = create<StoreState>((set) => ({
   mode: "listening",
   playing: false,
   playheadMs: 0,
+  selectedTrackId: null,
 
   setProject: (project) => set({ project }),
   renameProject: (name) =>
@@ -115,6 +122,43 @@ export const useStore = create<StoreState>((set) => ({
           ...t,
           markers: t.markers.filter((m) => m.id !== markerId),
         })),
+      ),
+    ),
+
+  setSelectedTrack: (trackId) => set({ selectedTrackId: trackId }),
+
+  toggleMarkerAt: (trackId, timeMs, toleranceMs) =>
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => {
+          const hit = t.markers.find((m) => Math.abs(m.timeMs - timeMs) <= toleranceMs);
+          if (hit) {
+            return { ...t, markers: t.markers.filter((m) => m.id !== hit.id) };
+          }
+          const markers = [...t.markers, { id: newId(), timeMs }].sort((a, b) => a.timeMs - b.timeMs);
+          return { ...t, markers };
+        }),
+      ),
+    ),
+
+  removeMarkersInRange: (trackId, fromMs, toMs) =>
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => ({
+          ...t,
+          markers: t.markers.filter((m) => m.timeMs < fromMs || m.timeMs > toMs),
+        })),
+      ),
+    ),
+
+  addMarkersBulk: (trackId, timesMs) =>
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => {
+          const added = timesMs.map((timeMs) => ({ id: newId(), timeMs }));
+          const markers = [...t.markers, ...added].sort((a, b) => a.timeMs - b.timeMs);
+          return { ...t, markers };
+        }),
       ),
     ),
 }));
