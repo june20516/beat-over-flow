@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "../types";
 import { newId } from "../domain/ids";
 import { pickColor } from "../domain/palette";
+import { emptyScore, type ScoreState } from "../scoring/scoring";
 
 interface StoreState {
   project: Project | null;
@@ -9,6 +10,7 @@ interface StoreState {
   playing: boolean;
   playheadMs: number;
   selectedTrackId: string | null;
+  score: ScoreState;
 
   setProject: (project: Project | null) => void;
   renameProject: (name: string) => void;
@@ -31,6 +33,9 @@ interface StoreState {
   toggleMarkerAt: (trackId: string, timeMs: number, toleranceMs: number) => void;
   removeMarkersInRange: (trackId: string, fromMs: number, toMs: number) => void;
   addMarkersBulk: (trackId: string, timesMs: number[]) => void;
+
+  setScore: (score: ScoreState) => void;
+  resetScore: () => void;
 }
 
 function clamp01(v: number): number {
@@ -56,6 +61,7 @@ export const useStore = create<StoreState>((set) => ({
   playing: false,
   playheadMs: 0,
   selectedTrackId: null,
+  score: emptyScore(),
 
   setProject: (project) => set({ project }),
   renameProject: (name) =>
@@ -161,4 +167,7 @@ export const useStore = create<StoreState>((set) => ({
         }),
       ),
     ),
+
+  setScore: (score) => set({ score }),
+  resetScore: () => set({ score: emptyScore() }),
 }));

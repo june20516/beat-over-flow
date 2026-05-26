@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useStore } from "./useStore";
 import type { GlobalMode, Project } from "../types";
+import { emptyScore, applyJudgment } from "../scoring/scoring";
 
 function sampleProject(): Project {
   return {
@@ -16,7 +17,7 @@ function sampleProject(): Project {
 
 describe("useStore", () => {
   beforeEach(() => {
-    useStore.setState({ project: null, playing: false, playheadMs: 0, mode: "listening", selectedTrackId: null });
+    useStore.setState({ project: null, playing: false, playheadMs: 0, mode: "listening", selectedTrackId: null, score: emptyScore() });
   });
 
   it("setProject로 현재 프로젝트를 교체한다", () => {
@@ -42,7 +43,7 @@ describe("useStore", () => {
 
 describe("useStore 트랙/마커", () => {
   beforeEach(() => {
-    useStore.setState({ project: sampleProject(), playing: false, playheadMs: 0, mode: "listening", selectedTrackId: null });
+    useStore.setState({ project: sampleProject(), playing: false, playheadMs: 0, mode: "listening", selectedTrackId: null, score: emptyScore() });
   });
 
   it("addTrack은 기본 트랙을 추가한다", () => {
@@ -99,6 +100,7 @@ describe("useStore 시퀀서 보조 액션", () => {
       playheadMs: 0,
       mode: "listening",
       selectedTrackId: null,
+      score: emptyScore(),
     });
     useStore.getState().addTrack();
   });
@@ -133,5 +135,24 @@ describe("useStore 시퀀서 보조 액션", () => {
     expect(useStore.getState().project!.tracks[0].markers.map((m) => m.timeMs)).toEqual([
       100, 250, 400,
     ]);
+  });
+});
+
+describe("useStore 점수", () => {
+  beforeEach(() => {
+    useStore.setState({
+      project: sampleProject(), playing: false, playheadMs: 0,
+      mode: "play", selectedTrackId: null, score: emptyScore(),
+    });
+  });
+  it("setScore로 점수 상태 교체", () => {
+    const s = applyJudgment(emptyScore(), "perfect");
+    useStore.getState().setScore(s);
+    expect(useStore.getState().score.score).toBe(100);
+  });
+  it("resetScore로 초기화", () => {
+    useStore.getState().setScore(applyJudgment(emptyScore(), "perfect"));
+    useStore.getState().resetScore();
+    expect(useStore.getState().score.totalJudged).toBe(0);
   });
 });
