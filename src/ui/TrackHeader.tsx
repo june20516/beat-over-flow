@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useStore } from "../store/useStore";
 import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
 import type { Track, TrackStatus } from "../types";
@@ -15,10 +16,23 @@ export function TrackHeader({ track }: { track: Track }) {
   const setTrackName = useStore((s) => s.setTrackName);
   const setTrackVolume = useStore((s) => s.setTrackVolume);
   const setTrackSound = useStore((s) => s.setTrackSound);
+  const setTrackKeyBinding = useStore((s) => s.setTrackKeyBinding);
   const removeTrack = useStore((s) => s.removeTrack);
+  const setSelectedTrack = useStore((s) => s.setSelectedTrack);
+  const selectedTrackId = useStore((s) => s.selectedTrackId);
+  const [capturing, setCapturing] = useState(false);
+
+  function onKeyCapture(e: React.KeyboardEvent) {
+    e.preventDefault();
+    setTrackKeyBinding(track.id, e.code);
+    setCapturing(false);
+  }
+
+  const selected = selectedTrackId === track.id;
 
   return (
     <div
+      onClick={() => setSelectedTrack(track.id)}
       style={{
         display: "flex",
         gap: 6,
@@ -26,12 +40,13 @@ export function TrackHeader({ track }: { track: Track }) {
         height: 40,
         padding: "0 6px",
         borderLeft: `4px solid ${track.color}`,
+        background: selected ? "#1d2433" : undefined,
       }}
     >
       <input
         value={track.name}
         onChange={(e) => setTrackName(track.id, e.target.value)}
-        style={{ width: 80 }}
+        style={{ width: 70 }}
       />
       <select
         value={track.status}
@@ -53,6 +68,16 @@ export function TrackHeader({ track }: { track: Track }) {
           </option>
         ))}
       </select>
+      <button
+        onKeyDown={capturing ? onKeyCapture : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+          setCapturing(true);
+        }}
+        title="클릭 후 키를 누르세요"
+      >
+        {capturing ? "키 입력..." : track.keyBinding ?? "키 없음"}
+      </button>
       <input
         type="range"
         min={0}
@@ -60,9 +85,16 @@ export function TrackHeader({ track }: { track: Track }) {
         step={0.01}
         value={track.volume}
         onChange={(e) => setTrackVolume(track.id, Number(e.target.value))}
-        style={{ width: 60 }}
+        style={{ width: 50 }}
       />
-      <button onClick={() => removeTrack(track.id)}>✕</button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          removeTrack(track.id);
+        }}
+      >
+        ✕
+      </button>
     </div>
   );
 }
