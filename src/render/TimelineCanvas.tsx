@@ -6,6 +6,8 @@ interface Props {
   peaks: Float32Array | null;
   durationMs: number;
   tracks: Track[];
+  region: { startMs: number; endMs: number } | null;
+  stepCount: number;
   onSeek: (ms: number) => void;
   onLaneClick: (trackId: string, timeMs: number) => void;
 }
@@ -13,7 +15,7 @@ interface Props {
 const BASE_HEIGHT = 80;
 const TRACK_HEIGHT = 40;
 
-export function TimelineCanvas({ peaks, durationMs, tracks, onSeek, onLaneClick }: Props) {
+export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, onSeek, onLaneClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playheadMs = useStore((s) => s.playheadMs);
   const height = BASE_HEIGHT + tracks.length * TRACK_HEIGHT;
@@ -58,13 +60,34 @@ export function TimelineCanvas({ peaks, durationMs, tracks, onSeek, onLaneClick 
       }
     });
 
+    // 구간 + 그리드 오버레이
+    if (region && durationMs > 0) {
+      const x0 = (region.startMs / durationMs) * w;
+      const x1 = (region.endMs / durationMs) * w;
+      ctx.fillStyle = "rgba(255,216,107,0.10)";
+      ctx.fillRect(x0, 0, x1 - x0, canvas.height);
+      ctx.strokeStyle = "rgba(255,216,107,0.5)";
+      ctx.beginPath();
+      ctx.moveTo(x0, 0); ctx.lineTo(x0, canvas.height);
+      ctx.moveTo(x1, 0); ctx.lineTo(x1, canvas.height);
+      ctx.stroke();
+      // 칸 경계
+      ctx.strokeStyle = "rgba(255,216,107,0.25)";
+      for (let i = 1; i < stepCount; i++) {
+        const gx = x0 + ((x1 - x0) * i) / stepCount;
+        ctx.beginPath();
+        ctx.moveTo(gx, 0); ctx.lineTo(gx, canvas.height);
+        ctx.stroke();
+      }
+    }
+
     // 플레이헤드
     if (durationMs > 0) {
       const x = (playheadMs / durationMs) * w;
       ctx.fillStyle = "#ff7b7b";
       ctx.fillRect(x - 1, 0, 2, canvas.height);
     }
-  }, [peaks, durationMs, tracks, playheadMs, height]);
+  }, [peaks, durationMs, tracks, playheadMs, height, region, stepCount]);
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
