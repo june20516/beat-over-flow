@@ -5,12 +5,30 @@ EXECUTION.md 프로토콜에 따라 `docs/superpowers/plans`의 계획 1→4를 
 
 ## 진행 로그
 
-### 계획 1 — 기반 + 베이스 플로우 재생 (진행 중)
+### 계획 1 — 기반 + 베이스 플로우 재생 ✅ 완료 (push: 606f54e)
 
-- Task 1 스캐폴드: 완료. 커밋 `0e83189`.
-- Task 2 도메인 타입+id: 완료.
-- Task 3 디바운스: 완료. 커밋 `d99c3e5`.
-- Task 4 AssetRepository / Task 5 ProjectRepository: 완료 (테스트 5/5 통과).
+- Task 1~15 전부 구현. 전체 17 테스트 통과, `tsc -b` 통과.
+- autosave 테스트: 계획의 `advanceTimersByTimeAsync(0)`는 fake-indexeddb 내부
+  setImmediate 큐를 플러시하지 못해 타임아웃 → `runAllTimersAsync()`로 교체(저장 동작은 동일).
+
+### 계획 2 — 트랙 + 사운드 + 리스닝 모드 ✅ 완료 (push: d50ebd4)
+
+- Task 1~9 전부 구현. 전체 33 테스트 통과, `tsc -b` 통과.
+- Task 5 샘플: ffmpeg/sox 부재 → `scripts/gen-samples.mjs`로 퍼커션 6종을 직접 합성(자작=CC0),
+  16-bit PCM WAV 내용을 `.ogg` 파일명으로 저장. decodeAudioData는 내용으로 판별하므로 실제 재생됨.
+
+### 계획 3 — 레코드 모드 + 스텝 시퀀서 ✅ 완료 (push: dad31f5)
+
+- Task 1~8 전부 구현. 전체 45 테스트 통과, `tsc -b` 통과.
+
+### 계획 4 — 플레이 모드 + 채점 ✅ 완료
+
+- Task 1~8 전부 구현. **전체 61 테스트 통과, `tsc -b` 통과, `npm run build`(vite) 통과(76 모듈).**
+
+## 최종 상태
+
+4개 계획 모두 구현 완료. `npm run test:run`(61 통과), `npx tsc -b`(통과), `npm run build`(통과).
+`tsconfig.tsbuildinfo`(빌드 캐시)를 .gitignore에 추가하고 추적 해제함.
 
 ## 계획에서 벗어난 결정 (deviation)
 
