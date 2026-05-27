@@ -332,65 +332,50 @@ input[type="range"]:focus::-webkit-slider-thumb {
   flex: 1;
   min-width: 0;
   background: var(--bg-inset);
-  border-radius: 0 var(--r) var(--r) 0;
+  border-radius: var(--r);
   overflow: hidden;
 }
 
-/* --- 트랙 리스트 -------------------------------------------------------- */
-.tracklist {
-  width: 384px;
-  flex: none;
-  border-radius: var(--r) 0 0 var(--r);
-  border-right: none;
+/* --- v2 Timeline 레이아웃: 헤더 행 + 트랙 행들 ---------------------------- */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   overflow: hidden;
 }
-.tracklist__head {
+/* 헤더 행: 좌측 고정 컬럼 | 우측 arrange(베이스 파형) */
+.timeline__header-row {
+  display: flex;
+  align-items: stretch;
+  flex: none;
+}
+.timeline__fixed-col {
+  width: 384px;
+  flex: none;
+  border-right: 1px solid var(--line);
+}
+.timeline__head {
   display: flex;
   align-items: center;
   height: 80px;
   padding: 0 14px;
   border-bottom: 1px solid var(--line);
 }
-.tracklist__head .section-title {
+.timeline__head .section-title {
   font-size: 16px;
 }
-.tracklist__head button {
+.timeline__head button {
   margin-left: auto;
 }
-
-.track-row {
+/* 트랙 행 목록: 세로 스크롤 */
+.timeline__rows {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 10px 0 8px;
-  border-bottom: 1px solid var(--line);
-  border-left: 4px solid var(--track-color, var(--purple));
-  cursor: pointer;
-  overflow: hidden;
-  transition: background 0.15s ease;
-}
-.track-row:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-.track-row--selected {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--track-color, var(--purple)) 16%, transparent), transparent 70%);
-}
-.track-row__name {
-  width: 52px;
-  flex: none;
-  padding: 5px 6px;
-  font-size: 12px;
-}
-.track-row select {
-  flex: none;
-  width: 58px;
-  font-size: 11px;
-  padding: 5px 18px 5px 6px;
-}
-.track-row input[type="range"] {
-  width: 40px;
-  flex: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* 키 바인딩 키캡 */

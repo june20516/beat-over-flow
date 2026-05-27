@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
+import { Plus } from "@phosphor-icons/react";
+import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { BaseFlowLane } from "./BaseFlowLane";
 import { PlayheadOverlay } from "./PlayheadOverlay";
+import { TrackRow } from "./TrackRow";
 
 interface TimelineProps {
   peaks: Float32Array | null;
@@ -17,12 +20,16 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
   const panByPx = useViewport((s) => s.panByPx);
   const zoomAt = useViewport((s) => s.zoomAt);
 
+  const tracks = useStore((s) => s.project?.tracks ?? []);
+  const selectedTrackId = useStore((s) => s.selectedTrackId);
+  const addTrack = useStore((s) => s.addTrack);
+
   // 프로젝트 길이 반영
   useEffect(() => {
     setDuration(durationMs);
   }, [durationMs, setDuration]);
 
-  // 우측 arrange 폭 측정
+  // 우측 arrange 폭 측정(모든 레인의 가시 폭 = containerWidthPx)
   useEffect(() => {
     const el = arrangeRef.current;
     if (!el) return;
@@ -61,18 +68,37 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
 
   return (
     <div className="timeline">
-      <div className="timeline__fixed-col">
-        {/* 헤더 슬롯: 좌측 고정 컬럼(트랙 에디터 컬럼)은 계획 2에서 채운다. */}
+      {/* 헤더 행: 좌측 고정 컬럼(트랙 헤더) | 우측 arrange(베이스 파형 + 플레이헤드) */}
+      <div className="timeline__header-row">
+        <div className="timeline__fixed-col">
+          <div className="timeline__head">
+            <h2 className="section-title">트랙</h2>
+            <button className="btn--primary" onClick={addTrack}>
+              <Plus size={15} weight="bold" />
+              트랙
+            </button>
+          </div>
+        </div>
+        <div
+          ref={arrangeRef}
+          className="timeline__arrange"
+          style={{ position: "relative", flex: 1, overflow: "hidden" }}
+        >
+          <BaseFlowLane peaks={peaks} durationMs={durationMs} />
+          <PlayheadOverlay />
+        </div>
       </div>
-      <div
-        ref={arrangeRef}
-        className="timeline__arrange"
-        style={{ position: "relative", flex: 1, overflow: "hidden" }}
-      >
-        <BaseFlowLane peaks={peaks} durationMs={durationMs} />
-        {/* 트랙 레인 영역 stub — 계획 2에서 TrackRow[]로 채운다. */}
-        <div className="timeline__tracks-stub" />
-        <PlayheadOverlay />
+
+      {/* 트랙 행들: 좌측 TrackEditor | 우측 MarkerEditor가 한 행 안에서 세로 정렬 */}
+      <div className="timeline__rows">
+        {tracks.map((t, index) => (
+          <TrackRow
+            key={t.id}
+            track={t}
+            index={index}
+            focused={selectedTrackId === t.id}
+          />
+        ))}
       </div>
     </div>
   );

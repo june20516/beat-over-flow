@@ -5,7 +5,6 @@ import { getAsset } from "../persistence/assets";
 import { computePeaks } from "../render/waveform";
 import { Timeline } from "./Timeline";
 import { TransportBar } from "./TransportBar";
-import { TrackList } from "./TrackList";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { StepSequencerPanel } from "./StepSequencerPanel";
 import { ScoreHud } from "./ScoreHud";
@@ -65,7 +64,6 @@ export function Editor({ onExit }: Props) {
       </header>
       <TransportBar />
       <div className="editor-main">
-        <TrackList />
         <div className="editor-main__timeline">
           <Timeline peaks={peaks} durationMs={project.baseFlow.durationMs} />
         </div>
