@@ -1,5 +1,5 @@
 import { type CSSProperties } from "react";
-import { X, Trash, DotsSixVertical } from "@phosphor-icons/react";
+import { Trash, DotsSixVertical } from "@phosphor-icons/react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useStore } from "../store/useStore";
@@ -21,7 +21,6 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   const setTrackSound = useStore((s) => s.setTrackSound);
   const setTrackKeyBinding = useStore((s) => s.setTrackKeyBinding);
   const clearMarkers = useStore((s) => s.clearMarkers);
-  const removeTrack = useStore((s) => s.removeTrack);
 
   const {
     attributes,
@@ -62,7 +61,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackName(track.id, e.target.value)}
       />
-      <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} />
+      <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
       <select
         value={track.sound.kind === "builtin" ? track.sound.sampleId : ""}
         onClick={(e) => e.stopPropagation()}
@@ -76,27 +75,19 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
       </select>
       <KeyCap code={track.keyBinding} onCapture={(code) => setTrackKeyBinding(track.id, code)} />
       <VolumeControl value={track.volume} onChange={(v) => setTrackVolume(track.id, v)} />
-      <button
-        type="button"
-        className="btn--icon track-editor__clear"
-        title="마커 전체 비우기"
-        onClick={(e) => {
-          e.stopPropagation();
-          clearMarkers(track.id);
-        }}
-      >
-        <Trash size={14} />
-      </button>
-      <button
-        className="btn--danger"
-        onClick={(e) => {
-          e.stopPropagation();
-          removeTrack(track.id);
-        }}
-        title="트랙 삭제"
-      >
-        <X size={14} weight="bold" />
-      </button>
+      {focused && (
+        <button
+          type="button"
+          className="btn--icon track-editor__clear"
+          title="마커 전체 비우기"
+          onClick={(e) => {
+            e.stopPropagation();
+            clearMarkers(track.id);
+          }}
+        >
+          <Trash size={14} />
+        </button>
+      )}
     </div>
   );
 }

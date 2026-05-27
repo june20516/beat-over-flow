@@ -938,3 +938,20 @@ input[type="range"]:focus::-webkit-slider-thumb {
   box-shadow: var(--shadow);
   cursor: grabbing;
 }
+
+/* 언포커스 상태 한 글자 (폴리싱 #2) */
+.status-grid--compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--tone);
+  border-radius: 6px;
+  color: var(--tone);
+}
+.status-grid__letter {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}

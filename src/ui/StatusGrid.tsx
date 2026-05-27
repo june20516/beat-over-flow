@@ -4,6 +4,7 @@ import type { TrackStatus } from "../types";
 interface StatusGridProps {
   value: TrackStatus;
   onChange: (s: TrackStatus) => void;
+  compact?: boolean;
 }
 
 interface StatusMeta {
@@ -20,7 +21,15 @@ const STATUS_META: StatusMeta[] = [
   { status: "write", letter: "W", label: "라이트", color: "#ec4899" },
 ];
 
-export function StatusGrid({ value, onChange }: StatusGridProps) {
+export function StatusGrid({ value, onChange, compact }: StatusGridProps) {
+  if (compact) {
+    const m = STATUS_META.find((x) => x.status === value)!;
+    return (
+      <div className="status-grid status-grid--compact" title={m.label} style={{ "--tone": m.color } as CSSProperties}>
+        <span className="status-grid__letter">{m.letter}</span>
+      </div>
+    );
+  }
   return (
     <div className="status-grid" role="group" aria-label="트랙 상태">
       {STATUS_META.map((m) => {
