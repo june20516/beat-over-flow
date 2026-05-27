@@ -11,6 +11,8 @@ import { useLaneGesture } from "../input/useLaneGesture";
 import { dragToRegion } from "../timeline/laneGesture";
 import { useEditorUi } from "../store/editorUi";
 import type { Track } from "../types";
+import { LanePlayhead } from "./LanePlayhead";
+import { resolveTrackBehavior } from "../domain/mode";
 
 interface MarkerEditorProps {
   track: Track;
@@ -21,8 +23,14 @@ const HIT_TOLERANCE_PX = 8;
 const OVERVIEW_HEIGHT = 28;
 
 export function MarkerEditor({ track, focused }: MarkerEditorProps) {
-  if (focused) return <FocusedMarkerEditor track={track} />;
-  return <OverviewMarkerEditor track={track} />;
+  const mode = useStore((s) => s.mode);
+  const showPlayhead = mode === "play" && resolveTrackBehavior("play", track.status) === "perform";
+  return (
+    <>
+      {focused ? <FocusedMarkerEditor track={track} /> : <OverviewMarkerEditor track={track} />}
+      {showPlayhead && <LanePlayhead />}
+    </>
+  );
 }
 
 /** 포커스 트랙: 가상화 SVG. 좌클릭 추가 / 우클릭 삭제(레코드 동작에서만) / 드래그=구간 설정. */
