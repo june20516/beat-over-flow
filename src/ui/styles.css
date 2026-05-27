@@ -908,18 +908,6 @@ input[type="range"]:focus::-webkit-slider-thumb {
 }
 .editor-toolbar__sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
 
-/* 구간 드래그 오버레이 (폴리싱 #7) */
-.region-drag-overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: rgba(168, 85, 247, 0.22);
-  border-left: 1px solid var(--purple);
-  border-right: 1px solid var(--purple);
-  pointer-events: none;
-  z-index: 5;
-}
-
 /* 트랙 드래그 고스트 (폴리싱 #5) */
 .track-drag-overlay {
   display: flex;
