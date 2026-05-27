@@ -78,3 +78,42 @@ export function estimateBpm(env, hopSec, { min = 90, max = 160 } = {}) {
   }
   return 60 / (bestLag * hopSec);
 }
+
+/** 한 채널 신호의 대역제한 스펙트럴 플럭스 온셋 엔벨로프. */
+export function spectralFluxEnvelope(samples, sampleRate, { fftSize = 1024, hop = 512, loHz = 20, hiHz = 20000 } = {}) {
+  const win = new Float32Array(fftSize);
+  for (let i = 0; i < fftSize; i++) win[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (fftSize - 1)); // Hann
+  const loBin = Math.max(1, Math.floor((loHz * fftSize) / sampleRate));
+  const hiBin = Math.min(fftSize >> 1, Math.ceil((hiHz * fftSize) / sampleRate));
+  const frames = Math.max(0, Math.floor((samples.length - fftSize) / hop) + 1);
+  const env = new Array(frames).fill(0);
+  let prev = new Float32Array(hiBin - loBin + 1);
+  const re = new Float32Array(fftSize), im = new Float32Array(fftSize);
+  for (let f = 0; f < frames; f++) {
+    const start = f * hop;
+    for (let i = 0; i < fftSize; i++) { re[i] = samples[start + i] * win[i]; im[i] = 0; }
+    fft(re, im);
+    let flux = 0;
+    for (let b = loBin; b <= hiBin; b++) {
+      const mag = Math.hypot(re[b], im[b]);
+      const d = mag - prev[b - loBin];
+      if (d > 0) flux += d;
+      prev[b - loBin] = mag;
+    }
+    env[f] = flux;
+  }
+  return { env, hopSec: hop / sampleRate };
+}
+
+/** 대역별 온셋(ms)을 6개 드럼 트랙으로 분배한다(결정적). */
+export function routeOnsets(peaks, beatMs, phaseMs) {
+  const sixteenth = beatMs / 4;
+  const grid = (t) => Math.round((t - phaseMs) / sixteenth); // 16분 인덱스
+  const beatPos = (t) => ((grid(t) % 4) + 4) % 4; // 비트 내 0..3
+  const beatIdx = (t) => Math.round((t - phaseMs) / beatMs);
+  const out = { kick: [], snare: [], hat: [], clap: [], tom: [], perc: [] };
+  for (const t of peaks.low) (beatPos(t) === 0 || beatPos(t) === 2 ? out.kick : out.tom).push(t);
+  for (const t of peaks.mid) (((beatIdx(t) % 2) + 2) % 2 === 1 ? out.snare : out.clap).push(t);
+  for (const t of peaks.high) (beatPos(t) % 2 === 0 ? out.hat : out.perc).push(t);
+  return out;
+}

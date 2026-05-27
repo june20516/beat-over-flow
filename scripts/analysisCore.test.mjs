@@ -1,6 +1,7 @@
 // scripts/analysisCore.test.mjs
 import { describe, it, expect } from "vitest";
 import { fft, quantize, dedupeSorted, peakPick, estimateBpm } from "./analysisCore.mjs";
+import { spectralFluxEnvelope, routeOnsets } from "./analysisCore.mjs";
 
 function magnitudes(re, im) {
   const out = new Array(re.length);
@@ -62,5 +63,35 @@ describe("estimateBpm", () => {
     for (let i = 0; i < 256; i++) env.push(i % 4 === 0 ? 1 : 0);
     const bpm = estimateBpm(env, hopSec, { min: 90, max: 160 });
     expect(bpm).toBeCloseTo(120, 0);
+  });
+});
+
+describe("spectralFluxEnvelope", () => {
+  it("무음→톤 전환 지점에서 플럭스가 솟는다", () => {
+    const sr = 8000, n = 8000;
+    const sig = new Float32Array(n);
+    for (let i = 0; i < n; i++) sig[i] = i < n / 2 ? 0 : Math.sin((2 * Math.PI * 440 * i) / sr);
+    const { env, hopSec } = spectralFluxEnvelope(sig, sr, { fftSize: 512, hop: 256, loHz: 100, hiHz: 2000 });
+    const onsetFrame = Math.round(n / 2 / 256);
+    let argmax = 0;
+    for (let i = 1; i < env.length; i++) if (env[i] > env[argmax]) argmax = i;
+    expect(Math.abs(argmax - onsetFrame)).toBeLessThanOrEqual(2);
+    expect(hopSec).toBeCloseTo(256 / sr, 6);
+  });
+});
+
+describe("routeOnsets", () => {
+  it("대역 온셋을 6개 트랙으로 분배한다", () => {
+    const beatMs = 500, phaseMs = 0;
+    const peaks = {
+      low: [0, 250, 1000, 1250],
+      mid: [500, 1000],
+      high: [0, 125, 250, 375],
+    };
+    const out = routeOnsets(peaks, beatMs, phaseMs);
+    expect(Object.keys(out).sort()).toEqual(["clap", "hat", "kick", "perc", "snare", "tom"]);
+    expect(out.kick.length + out.tom.length).toBe(4);
+    expect(out.snare.length + out.clap.length).toBe(2);
+    expect(out.hat.length + out.perc.length).toBe(4);
   });
 });
