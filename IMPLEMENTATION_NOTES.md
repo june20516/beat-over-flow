@@ -246,3 +246,13 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
 - P1(#3·#6·#7) · P2(#1·#2·#5·#8·#9) · P3(#4·#10) 구현·검증·푸시.
 - 최종: `yarn test:run` 184 통과, `yarn tsc -b` 통과, `yarn build` 통과. 브랜치 `feat/editor-v2`(PR #1).
 - 사람 검증 권장(헤드리스 한계): perform 모드 미리듣기/채점 소리 청취, 줌/드래그/페이드인의 실제 사용 감.
+
+## 폴리싱 2차 (시퀀서 상호작용 정리) — ✅ 완료
+요청: 시퀀서는 W트랙+레코드 모드에서만 / 마커도 레코드에서만(확인) / 드래그 구간선택은 시퀀서 열렸을 때만(자동열기 X) / 시퀀서 열린 동안 선택 구간 지속 표시.
+- 공유 추상화: `useSequencerActive`(토글ON+포커스트랙 레코드동작) + `RegionOverlay`(editorUi.region 지속 밴드). 커밋 `d77d22f`.
+- TrackRow 시퀀서 게이팅(`98355fa`), BaseFlowLane/MarkerEditor 드래그 게이팅+자동열기 제거+지속 오버레이(`283979b`), 죽은 .region-drag-overlay CSS 제거(`aa94dd8`). 결합 리뷰 ✅. 전체 184 통과, tsc/build OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/polish2.mjs`, 데모 mp3):
+  - 시퀀서 패널: listening(또는 W지만 비레코드)=0, record+W+포커스+토글ON=1.
+  - RegionOverlay: 활성 시 2개(베이스 파형 + 포커스 마커 레인) 지속 표시.
+  - 드래그: 활성 시 region 실시간 갱신(0~4000→33472~80334), 토글 OFF 시 드래그 무효(overlay 0), 자동 열기 없음.
+  - 마커: 레코드에서 클릭=추가(0→1). 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-polish2-active.png`.
