@@ -64,17 +64,21 @@ export function Editor({ onExit }: Props) {
   }
 
   return (
-    <div>
+    <div className="app-shell">
       <ScoreHud />
-      <div style={{ display: "flex", justifyContent: "space-between", padding: 8 }}>
-        <strong>{project.name}</strong>
+      <header className="top-bar">
+        <span className="top-bar__name">{project.name}</span>
+        <span className="top-bar__spacer" />
         <ModeSwitcher />
-        <button onClick={onExit}>← 목록</button>
-      </div>
+        <span className="top-bar__spacer" />
+        <button className="btn--ghost" onClick={onExit}>
+          ← 목록
+        </button>
+      </header>
       <TransportBar />
-      <div style={{ display: "flex" }}>
+      <div className="editor-main">
         <TrackList />
-        <div style={{ flex: 1 }}>
+        <div className="editor-main__timeline">
           <TimelineCanvas
             peaks={peaks}
             durationMs={project.baseFlow.durationMs}

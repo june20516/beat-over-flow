@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { X } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
 import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
 import type { Track, TrackStatus } from "../types";
@@ -33,20 +34,13 @@ export function TrackHeader({ track }: { track: Track }) {
   return (
     <div
       onClick={() => setSelectedTrack(track.id)}
-      style={{
-        display: "flex",
-        gap: 6,
-        alignItems: "center",
-        height: 40,
-        padding: "0 6px",
-        borderLeft: `4px solid ${track.color}`,
-        background: selected ? "#1d2433" : undefined,
-      }}
+      className={selected ? "track-row track-row--selected" : "track-row"}
+      style={{ "--track-color": track.color } as CSSProperties}
     >
       <input
+        className="track-row__name"
         value={track.name}
         onChange={(e) => setTrackName(track.id, e.target.value)}
-        style={{ width: 70 }}
       />
       <select
         value={track.status}
@@ -69,6 +63,7 @@ export function TrackHeader({ track }: { track: Track }) {
         ))}
       </select>
       <button
+        className={capturing ? "keycap keycap--capturing" : "keycap"}
         onKeyDown={capturing ? onKeyCapture : undefined}
         onClick={(e) => {
           e.stopPropagation();
@@ -76,24 +71,27 @@ export function TrackHeader({ track }: { track: Track }) {
         }}
         title="클릭 후 키를 누르세요"
       >
-        {capturing ? "키 입력..." : track.keyBinding ?? "키 없음"}
+        {capturing ? "입력…" : track.keyBinding ?? "키 없음"}
       </button>
       <input
+        className="range-fill"
+        style={{ "--pct": `${track.volume * 100}%` } as CSSProperties}
         type="range"
         min={0}
         max={1}
         step={0.01}
         value={track.volume}
         onChange={(e) => setTrackVolume(track.id, Number(e.target.value))}
-        style={{ width: 50 }}
       />
       <button
+        className="btn--danger"
         onClick={(e) => {
           e.stopPropagation();
           removeTrack(track.id);
         }}
+        title="트랙 삭제"
       >
-        ✕
+        <X size={14} weight="bold" />
       </button>
     </div>
   );

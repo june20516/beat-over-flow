@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+import { Play, Pause, SpeakerHigh } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
 import { play, pause, seek } from "../audio/runtime";
 
@@ -13,31 +15,35 @@ export function TransportBar() {
   const project = useStore((s) => s.project);
   const setMasterVolume = useStore((s) => s.setMasterVolume);
   const durationMs = project?.baseFlow.durationMs ?? 0;
+  const playedPct = durationMs > 0 ? (playheadMs / durationMs) * 100 : 0;
 
   return (
-    <div style={{ display: "flex", gap: 12, alignItems: "center", padding: 8 }}>
-      <button onClick={() => (playing ? pause() : void play())}>
-        {playing ? "⏸" : "▶"}
+    <div className="transport panel">
+      <button className="btn--icon btn--primary" onClick={() => (playing ? pause() : void play())}>
+        {playing ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}
       </button>
-      <span style={{ fontFamily: "monospace" }}>
+      <span className="transport__time">
         {fmt(playheadMs)} / {fmt(durationMs)}
       </span>
       <input
+        className="transport__seek range-fill"
+        style={{ "--pct": `${playedPct}%` } as CSSProperties}
         type="range"
         min={0}
         max={durationMs}
         value={playheadMs}
         onChange={(e) => seek(Number(e.target.value))}
-        style={{ flex: 1 }}
       />
-      <label>
-        🔊
+      <label className="transport__vol">
+        <SpeakerHigh size={18} />
         <input
+          className="range-fill"
+          style={{ "--pct": `${(project?.master.volume ?? 1) * 100}%` } as CSSProperties}
           type="range"
           min={0}
           max={1}
           step={0.01}
-          defaultValue={project?.master.volume ?? 1}
+          value={project?.master.volume ?? 1}
           onChange={(e) => setMasterVolume(Number(e.target.value))}
         />
       </label>

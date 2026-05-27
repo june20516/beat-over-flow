@@ -29,10 +29,13 @@ export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, o
     ctx.clearRect(0, 0, w, canvas.height);
 
     // 베이스 레인
-    ctx.fillStyle = "#10131a";
+    ctx.fillStyle = "#100c24";
     ctx.fillRect(0, 0, w, BASE_HEIGHT);
     if (peaks && peaks.length > 0) {
-      ctx.fillStyle = "#6cc4ff";
+      const grad = ctx.createLinearGradient(0, 0, w, 0);
+      grad.addColorStop(0, "#a855f7");
+      grad.addColorStop(1, "#ec4899");
+      ctx.fillStyle = grad;
       const mid = BASE_HEIGHT / 2;
       const barW = w / peaks.length;
       for (let i = 0; i < peaks.length; i++) {
@@ -44,12 +47,14 @@ export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, o
     // 트랙 레인 + 마커
     tracks.forEach((t, idx) => {
       const top = BASE_HEIGHT + idx * TRACK_HEIGHT;
-      ctx.fillStyle = idx % 2 === 0 ? "#161a22" : "#12151c";
+      ctx.fillStyle = idx % 2 === 0 ? "#171041" : "#130d33";
       ctx.fillRect(0, top, w, TRACK_HEIGHT);
-      ctx.strokeStyle = "#222833";
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
       ctx.strokeRect(0, top, w, TRACK_HEIGHT);
       if (durationMs > 0) {
         ctx.fillStyle = t.color;
+        ctx.shadowColor = t.color;
+        ctx.shadowBlur = 8;
         const cy = top + TRACK_HEIGHT / 2;
         for (const m of t.markers) {
           const x = (m.timeMs / durationMs) * w;
@@ -57,6 +62,7 @@ export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, o
           ctx.arc(x, cy, 5, 0, Math.PI * 2);
           ctx.fill();
         }
+        ctx.shadowBlur = 0;
       }
     });
 
@@ -64,15 +70,15 @@ export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, o
     if (region && durationMs > 0) {
       const x0 = (region.startMs / durationMs) * w;
       const x1 = (region.endMs / durationMs) * w;
-      ctx.fillStyle = "rgba(255,216,107,0.10)";
+      ctx.fillStyle = "rgba(168,85,247,0.12)";
       ctx.fillRect(x0, 0, x1 - x0, canvas.height);
-      ctx.strokeStyle = "rgba(255,216,107,0.5)";
+      ctx.strokeStyle = "rgba(236,72,153,0.6)";
       ctx.beginPath();
       ctx.moveTo(x0, 0); ctx.lineTo(x0, canvas.height);
       ctx.moveTo(x1, 0); ctx.lineTo(x1, canvas.height);
       ctx.stroke();
       // 칸 경계
-      ctx.strokeStyle = "rgba(255,216,107,0.25)";
+      ctx.strokeStyle = "rgba(168,85,247,0.28)";
       for (let i = 1; i < stepCount; i++) {
         const gx = x0 + ((x1 - x0) * i) / stepCount;
         ctx.beginPath();
@@ -84,8 +90,11 @@ export function TimelineCanvas({ peaks, durationMs, tracks, region, stepCount, o
     // 플레이헤드
     if (durationMs > 0) {
       const x = (playheadMs / durationMs) * w;
-      ctx.fillStyle = "#ff7b7b";
+      ctx.fillStyle = "#22d3ee";
+      ctx.shadowColor = "#22d3ee";
+      ctx.shadowBlur = 8;
       ctx.fillRect(x - 1, 0, 2, canvas.height);
+      ctx.shadowBlur = 0;
     }
   }, [peaks, durationMs, tracks, playheadMs, height, region, stepCount]);
 
