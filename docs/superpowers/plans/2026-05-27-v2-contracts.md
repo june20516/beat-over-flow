@@ -90,6 +90,9 @@ export function timeToX(ms: number, vp: Viewport): number;  // ms*pxPerMs - scro
 export function xToTime(x: number, vp: Viewport): number;   // (x + scrollLeftPx)/pxPerMs
 // 커서(anchorX)의 시간이 제자리 유지되도록 줌. factor>1 확대.
 export function zoomedViewport(vp: Viewport, durationMs: number, factor: number, anchorX: number): Viewport;
+// auto-follow: timeMs가 가시영역 가로 중앙에 오도록 한 scrollLeftPx (클램프 포함).
+// = clampScrollLeftPx(timeMs*pxPerMs - containerWidthPx/2, vp, durationMs)
+export function centeredScrollLeftPx(timeMs: number, vp: Viewport, durationMs: number): number;
 ```
 
 `zoomedViewport`: `anchorTime = xToTime(anchorX, vp)` → `newPx = clampPxPerMs(vp.pxPerMs*factor, ...)` → `newScroll = clampScrollLeftPx(anchorTime*newPx - anchorX, {pxPerMs:newPx,...}, durationMs)`.
@@ -102,16 +105,25 @@ interface ViewportState {
   scrollLeftPx: number;
   containerWidthPx: number;
   durationMs: number;
-  setContainerWidth: (px: number) => void; // 변경 시 pxPerMs/scroll 재클램프
-  setDuration: (ms: number) => void;        // 프로젝트 로드 시. 재클램프 + 필요시 fitAll
-  fitAll: () => void;                        // pxPerMs=minPxPerMs, scrollLeftPx=0
-  panByPx: (dx: number) => void;             // scrollLeftPx 클램프 이동
-  zoomAt: (factor: number, anchorX: number) => void; // zoomedViewport 적용
+  followPlayhead: boolean;                   // 기본 true. 재생 중 플레이헤드 auto-follow.
+  setContainerWidth: (px: number) => void;   // 변경 시 pxPerMs/scroll 재클램프
+  setDuration: (ms: number) => void;          // 프로젝트 로드 시. 재클램프 + 필요시 fitAll
+  fitAll: () => void;                          // pxPerMs=minPxPerMs, scrollLeftPx=0
+  panByPx: (dx: number) => void;               // scrollLeftPx 클램프 이동 + followPlayhead=false (수동 팬)
+  zoomAt: (factor: number, anchorX: number) => void; // zoomedViewport 적용 (follow 유지)
+  setFollowPlayhead: (b: boolean) => void;
+  followTo: (timeMs: number) => void;          // followPlayhead면 centeredScrollLeftPx로 scrollLeftPx 갱신, 아니면 no-op
 }
 export const useViewport = create<ViewportState>(...)
 ```
 
-모든 클램프는 §4 함수 사용. `containerWidthPx` 초기값 1(0 분모 방지), `durationMs` 초기 0.
+모든 클램프는 §4 함수 사용. `containerWidthPx` 초기값 1(0 분모 방지), `durationMs` 초기 0, `followPlayhead` 초기 true.
+
+**auto-follow 연동(요구: 작은 뷰포트에서 재생 시 플레이헤드 추종):**
+- 재생 RAF 루프(`audio/runtime.ts`)가 매 프레임 `setPlayheadMs(ms)` **직후** `useViewport.getState().followTo(ms)` 호출(비-React 직접 호출).
+- `play()` 시작 시 `useViewport.getState().setFollowPlayhead(true)`로 추종 재활성. `seek(ms)` 시 `followTo(ms)` 1회 호출.
+- `panByPx`(사용자 수동 팬)는 `followPlayhead=false`로 끈다. `zoomAt`은 follow 유지.
+- 최소줌에선 `maxScrollLeftPx=0`이라 `followTo`가 클램프로 no-op → "뷰포트가 작을 때만 추종"이 자동 성립.
 
 ## 6. 에디터 UI 스토어 (`src/store/editorUi.ts`)
 

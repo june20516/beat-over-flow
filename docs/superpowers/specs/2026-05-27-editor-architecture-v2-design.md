@@ -63,6 +63,7 @@ Editor
 - `pxPerMs: number` — 줌(픽셀/밀리초).
 - `scrollLeftPx: number` — 가로 스크롤 오프셋(px).
 - `containerWidthPx: number` — 마커 에디터 가시 폭(레이아웃 측정값).
+- `followPlayhead: boolean` — 재생 중 플레이헤드 auto-follow 여부(기본 `true`).
 
 **파생/규칙:**
 - `minPxPerMs = containerWidthPx / durationMs` (곡 전체가 가시폭에 딱 맞음 = 100%).
@@ -72,10 +73,16 @@ Editor
 - `xToTime(x) = (x + scrollLeftPx) / pxPerMs`
 
 **인터랙션:**
-- 휠(deltaY/deltaX) → `scrollLeftPx` 가로 팬.
-- Shift + 휠 → 줌. **커서 위치의 시간이 제자리에 유지되도록** 앵커링(`scrollLeftPx` 재계산).
+- 휠(deltaY/deltaX) → `scrollLeftPx` 가로 팬. **수동 팬은 `followPlayhead`를 `false`로 끈다**(사용자와 다투지 않기 위해).
+- Shift + 휠 → 줌. **커서 위치의 시간이 제자리에 유지되도록** 앵커링(`scrollLeftPx` 재계산). 줌은 follow를 유지한다(배율만 바뀌고, 다음 follow 갱신이 다시 중앙 정렬).
 - 베이스 파형 더블클릭 → `pxPerMs = minPxPerMs`, `scrollLeftPx = 0` (최소줌 리셋).
 - 프로젝트 변경/`durationMs` 변경/컨테이너 리사이즈 시 뷰포트 재계산(최소 클램프 유지).
+
+**재생 중 auto-follow (요구: 뷰포트가 작을 때 재생하면 플레이헤드를 따라 이동):**
+- 재생 중 `followPlayhead`가 켜져 있으면, 플레이헤드가 **가시영역의 가로 중앙에 오도록** 뷰포트가 따라 스크롤한다(`scrollLeftPx = playheadMs*pxPerMs - containerWidthPx/2`, 클램프). 결과적으로 진행 방향을 타고 자연스럽게 이동한다.
+- **최소줌(곡 전체가 보임)에서는 `maxScrollLeftPx=0`이라 자동으로 no-op** — 별도 분기 없이 클램프만으로 "뷰포트가 작을 때만 따라감"이 성립한다.
+- **수동 팬 시 follow 해제**, **재생 시작(`play()`) 시 follow 재활성**. (선택) `EditorToolbar`에 follow on/off 토글을 둘 수 있다.
+- 구현 위치: 재생 RAF 루프(`audio/runtime.ts`)가 매 프레임 `playheadMs` 갱신 후 뷰포트의 follow 갱신을 호출한다(React 이펙트가 아니라 비-React 직접 호출로 매 프레임 비용 최소화). seek 시에도 1회 갱신.
 
 ## 6. 데이터 모델 변경 (`types.ts`)
 

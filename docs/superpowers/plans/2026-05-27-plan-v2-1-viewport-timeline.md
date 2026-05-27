@@ -846,6 +846,142 @@ EOF
 
 ---
 
+### Task 7: 재생 중 auto-follow (계약 §4 `centeredScrollLeftPx`, §5 follow API)
+
+뷰포트가 작을(줌인된) 때 재생하면 플레이헤드가 가시영역 중앙을 유지하도록 뷰포트가 따라 스크롤한다. 수동 팬 시 해제, 재생 시작 시 재활성. 최소줌에선 클램프로 자동 no-op.
+
+**Files:**
+- Modify: `src/timeline/viewportMath.ts` (+ `viewportMath.test.ts`)
+- Modify: `src/store/viewport.ts` (+ `viewport.test.ts`)
+- Modify: `src/audio/runtime.ts`
+
+- [ ] **Step 1: `centeredScrollLeftPx` 실패 테스트 추가** (`src/timeline/viewportMath.test.ts`)
+
+```ts
+import { centeredScrollLeftPx } from "./viewportMath";
+
+describe("centeredScrollLeftPx", () => {
+  const vp = { pxPerMs: 0.1, scrollLeftPx: 0, containerWidthPx: 1000 };
+  it("플레이헤드를 가시영역 중앙에 두는 scrollLeft", () => {
+    // 곡 100000ms*0.1=10000px, container 1000 → maxScroll 9000
+    expect(centeredScrollLeftPx(50000, vp, 100000)).toBe(4500); // 5000-500
+  });
+  it("시작 부근은 0으로 클램프", () => {
+    expect(centeredScrollLeftPx(0, vp, 100000)).toBe(0);
+    expect(centeredScrollLeftPx(2000, vp, 100000)).toBe(0); // 200-500<0
+  });
+  it("끝 부근은 maxScrollLeftPx로 클램프", () => {
+    expect(centeredScrollLeftPx(100000, vp, 100000)).toBe(9000); // 9500>9000
+  });
+  it("최소줌(곡 전체 가시)이면 항상 0", () => {
+    const min = { pxPerMs: 0.01, scrollLeftPx: 0, containerWidthPx: 1000 }; // width=duration*px
+    expect(centeredScrollLeftPx(50000, min, 100000)).toBe(0);
+  });
+});
+```
+
+- [ ] **Step 2: 실패 확인** — Run: `yarn vitest run src/timeline/viewportMath.test.ts` → FAIL ("centeredScrollLeftPx is not a function").
+
+- [ ] **Step 3: `centeredScrollLeftPx` 구현** (`src/timeline/viewportMath.ts` 끝에 추가)
+
+```ts
+/** auto-follow: timeMs가 가시영역 가로 중앙에 오도록 한 scrollLeftPx (클램프 포함). */
+export function centeredScrollLeftPx(timeMs: number, vp: Viewport, durationMs: number): number {
+  return clampScrollLeftPx(timeMs * vp.pxPerMs - vp.containerWidthPx / 2, vp, durationMs);
+}
+```
+
+- [ ] **Step 4: 통과 확인** — Run: `yarn vitest run src/timeline/viewportMath.test.ts` → PASS.
+
+- [ ] **Step 5: 스토어 follow 실패 테스트 추가** (`src/store/viewport.test.ts`)
+
+```ts
+it("followTo: followPlayhead면 플레이헤드를 중앙에 두도록 scrollLeftPx 갱신", () => {
+  const v = useViewport.getState();
+  v.setContainerWidth(1000);
+  v.setDuration(100000);
+  useViewport.setState({ pxPerMs: 0.1, followPlayhead: true });
+  useViewport.getState().followTo(50000);
+  expect(useViewport.getState().scrollLeftPx).toBe(4500);
+});
+it("followTo: followPlayhead=false면 no-op", () => {
+  useViewport.setState({ followPlayhead: false, scrollLeftPx: 123 });
+  useViewport.getState().followTo(80000);
+  expect(useViewport.getState().scrollLeftPx).toBe(123);
+});
+it("panByPx는 followPlayhead를 끈다", () => {
+  useViewport.setState({ followPlayhead: true });
+  useViewport.getState().panByPx(100);
+  expect(useViewport.getState().followPlayhead).toBe(false);
+});
+```
+
+- [ ] **Step 6: 실패 확인** — Run: `yarn vitest run src/store/viewport.test.ts` → FAIL (followTo/followPlayhead 없음).
+
+- [ ] **Step 7: 스토어에 follow 추가** (`src/store/viewport.ts`) — `centeredScrollLeftPx` import, 초기 상태에 `followPlayhead: true`, `panByPx`에 `followPlayhead: false` 추가, 액션 2개 추가:
+
+```ts
+import { /* ...기존... */ centeredScrollLeftPx } from "../timeline/viewportMath";
+
+// create(...) 내부:
+followPlayhead: true,
+
+panByPx: (dx) =>
+  set((s) => ({
+    scrollLeftPx: clampScrollLeftPx(s.scrollLeftPx + dx, s, s.durationMs),
+    followPlayhead: false, // 수동 팬은 추종 해제
+  })),
+
+setFollowPlayhead: (b) => set({ followPlayhead: b }),
+
+followTo: (timeMs) =>
+  set((s) => {
+    if (!s.followPlayhead) return s;
+    const next = centeredScrollLeftPx(timeMs, s, s.durationMs);
+    return next === s.scrollLeftPx ? s : { scrollLeftPx: next };
+  }),
+```
+
+`ViewportState` 인터페이스에 `followPlayhead: boolean`, `setFollowPlayhead: (b: boolean) => void`, `followTo: (timeMs: number) => void` 선언을 추가한다(계약 §5).
+
+- [ ] **Step 8: 통과 확인** — Run: `yarn vitest run src/store/viewport.test.ts` → PASS.
+
+- [ ] **Step 9: 재생 RAF/seek/play에 연동** (`src/audio/runtime.ts`) — `useViewport` import 추가 후:
+  - RAF tick의 `st.setPlayheadMs(source.currentTimeMs())` **직후**에 `useViewport.getState().followTo(source.currentTimeMs())` 추가.
+  - `play()`에서 `useStore.getState().setPlaying(true)` 부근에 `useViewport.getState().setFollowPlayhead(true)` 추가(재생 시작 시 추종 재활성).
+  - `seek(ms)`에서 playhead 갱신 후 `useViewport.getState().followTo(useStore.getState().playheadMs)` 1회 호출.
+
+```ts
+import { useViewport } from "../store/viewport";
+// RAF tick 내부, setPlayheadMs 직후:
+useViewport.getState().followTo(source.currentTimeMs());
+```
+
+- [ ] **Step 10: 타입·테스트 그린** — Run: `yarn test:run && yarn tsc -b` → 둘 다 통과.
+
+- [ ] **Step 11: 브라우저 검증** — 단위테스트로 못 잡는 실제 추종 동작 확인. dev 서버 후 드라이버로:
+  - 에디터 진입 → shift+wheel로 충분히 줌인 → 재생 → **플레이헤드가 화면 중앙을 유지하며 파형이 흘러가는지** 스크린샷 비교(재생 중 2장).
+  - 재생 중 수동 휠 팬 → 추종이 멈추는지. 다시 재생(play) → 추종 재개되는지.
+  - 무인 실행이면 `IMPLEMENTATION_NOTES.md`에 "사람 검증 필요: auto-follow 추종/수동해제/재활성"으로 기록(성공 꾸미지 말 것).
+
+- [ ] **Step 12: 커밋**
+
+```bash
+git add src/timeline/viewportMath.ts src/timeline/viewportMath.test.ts src/store/viewport.ts src/store/viewport.test.ts src/audio/runtime.ts
+git commit -m "$(cat <<'EOF'
+feat(viewport): 재생 중 플레이헤드 auto-follow
+
+centeredScrollLeftPx + useViewport.followTo/followPlayhead. 재생 RAF가 매
+프레임 followTo로 플레이헤드를 가시영역 중앙에 유지(작은 뷰포트일 때만, 최소줌은
+클램프로 no-op). 수동 팬 시 해제, 재생 시작 시 재활성.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
 ## Self-review (계약 대조)
 
 - 계약 §4 함수 7개 + 상수 전부 Task 1에 구현·테스트(minPxPerMs, clampPxPerMs, maxScrollLeftPx, clampScrollLeftPx, timeToX, xToTime, zoomedViewport, MAX_PX_PER_MS). 시그니처/`Viewport` 타입 정확히 일치, any 없음. ✓
@@ -854,5 +990,6 @@ EOF
 - 설계 §4·§5 `Timeline`(좌/우 레이아웃, ResizeObserver→setContainerWidth, wheel 팬, shift+wheel 줌 앵커) Task 5. 트랙 레인은 stub. ✓
 - 계약 §1·§10 `TimelineCanvas` 삭제(rm 단계 포함) + Editor 교체 Task 6. ✓
 - 요구 10 코어(공유 가로 스크롤/줌이 베이스 파형·플레이헤드에 동기 적용, 최소줌=폭100%, 더블클릭 리셋, 커서 앵커 줌) 전부 커버. 트랙 마커 동기는 계획 2에서 같은 뷰포트를 구독하므로 자동.
+- 재생 중 auto-follow(작은 뷰포트에서 플레이헤드 중심 추종, 수동 팬 해제, 재생 시 재활성): 계약 §4 `centeredScrollLeftPx`·§5 follow API를 Task 7에서 TDD + runtime 연동. 최소줌은 클램프로 no-op. ✓
 - 순수 로직(뷰포트 수학·스토어)은 진짜 TDD. 캔버스/스크롤/줌 UI는 브라우저 검증 스텝 + 무인 시 IMPLEMENTATION_NOTES 기록 규약 준수. 플레이스홀더 없음(모든 코드 스텝에 실제 코드).
 - 각 Task 종료에 `yarn test:run && yarn tsc -b` 검증 스텝 존재. 커밋 메시지 끝에 Co-Authored-By 포함.
