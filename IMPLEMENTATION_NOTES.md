@@ -134,6 +134,21 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
 - 알려진 향후 개선(결함 아님): wheel 팬/줌 리스너가 헤더 arrange에만 등록됨(공유 뷰포트라 모든 레인에
   반영되나, 트랙 레인 위에서 직접 휠 시도는 페이지 스크롤). 필요 시 후속 계획에서 컨테이너로 확장 가능.
 
+## 계획 v2-3 (트랙에디터 컨트롤 고도화) — ✅ 완료
+- Task1 formatKeyCode(TDD, 16테스트): 커밋 `4770a2b`. 스펙+품질 ✅.
+- Task2 clearMarkers 액션(TDD, append): 커밋 `2f7a574`. 스펙+품질 ✅.
+- Task3 KeyCap: 커밋 `9973c2a`. 결합 리뷰 ✅.
+- Task4 StatusGrid(+CSS): 커밋 `255f1fc`. 결합 리뷰 ✅.
+- Task5 VolumeControl(+CSS): 커밋 `14d981a`. 결합 리뷰 ✅.
+- Task6 TrackEditor 통합: 커밋 `5a5d061`. 스펙+품질 ✅.
+- 전체 130 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-3-shot.mjs`) — **모두 확인됨:**
+  - StatusGrid 4칸[M,L,P,W], 선택 1개, 라이트 클릭 시 선택 이동(요구 2).
+  - KeyCap: "Key" → A키 입력 → "A"(formatKeyCode, 요구 3).
+  - VolumeControl: 스피커 클릭→팝오버(세로 range) 표시 → Escape로 닫힘(요구 1).
+  - 마커 비우기 버튼: 마커 2 → 0(요구 7).
+  - 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v23-controls.png`.
+
 ## Editor v2 — 사람 검증 필요 항목
 - (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
   좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
