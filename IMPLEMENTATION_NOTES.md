@@ -206,3 +206,21 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
   좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
   더 긴 오디오로 사람이 shift+wheel 줌/가로 팬 시 커서 기준 확대·페이지 스크롤 없음 확인 권장.
 - (계획 v2-1) auto-follow의 "수동 팬 시 추종 해제 → 재생 누르면 재활성"의 실제 사용 느낌(단위테스트는 통과).
+
+---
+
+# Editor v2 폴리싱 (설계: 2026-05-27-editor-v2-polish-design.md)
+
+데모 베이스플로우 `public/samples/moodmode-demo.mp3`(2:16, no-copyright) 추가. 헤드리스 검증에 사용.
+
+## 계획 P1 (줌/휠 + 제스처 + 구간드래그, #3·#6·#7) — ✅ 완료
+- 순수 TDD: zoomByAtCenter(`f87a005`), resolveWheelIntent(`35cb26a`), laneGesture(`7a62f22`). 결합 리뷰 ✅.
+- useLaneGesture 훅(`a8a710f`), Timeline 휠 전체영역+dominant(`adf0374`), 툴바 +/-/맞춤+더블클릭 제거(`931ba0c`),
+  BaseFlowLane 제스처(`adacebf`), MarkerEditor 제스처(`5b2c86b`). UI 통합 결합 리뷰 ✅.
+- 전체 178 통과, tsc OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p1-shot.mjs`, 데모 mp3 2:16) — **모두 확인:**
+  - **#3 줌 버그 수정 확정:** 캔버스폭 1016→2497(Shift+deltaY)→6138(**Shift+deltaX=macOS 케이스도 줌됨**).
+    축소/맞춤 버튼 동작, **트랙 레인 위에서도 줌**(laneZoomWorks). 더블클릭=fitAll 제거(클릭 seek 선점 해소).
+  - **#6:** 마커는 클릭(up)에서만 추가(0→1), 드래그는 마커 안 찍힘.
+  - **#7:** 드래그가 시퀀서 region 설정+자동 열기.
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p1-{zoom,marker}.png`.
