@@ -15,8 +15,6 @@ export function BaseFlowLane({ peaks, durationMs }: BaseFlowLaneProps) {
   const pxPerMs = useViewport((s) => s.pxPerMs);
   const scrollLeftPx = useViewport((s) => s.scrollLeftPx);
   const containerWidthPx = useViewport((s) => s.containerWidthPx);
-  const fitAll = useViewport((s) => s.fitAll);
-
   // 캔버스 내부 해상도 = 콘텐츠 전체 폭(durationMs*pxPerMs). 화면엔 컨테이너 폭만.
   const contentWidth = Math.max(1, Math.round(durationMs * pxPerMs));
 
@@ -54,7 +52,6 @@ export function BaseFlowLane({ peaks, durationMs }: BaseFlowLaneProps) {
     <div
       className="base-flow-lane"
       onClick={handleClick}
-      onDoubleClick={fitAll}
       style={{ position: "relative", width: "100%", height: HEIGHT, overflow: "hidden", cursor: "pointer" }}
     >
       <canvas
