@@ -868,3 +868,18 @@ input[type="range"]:focus::-webkit-slider-thumb {
   transform: rotate(-90deg);
   transform-origin: center;
 }
+
+/* 트랙 드래그 핸들 (요구 8) */
+.track-editor__drag-handle {
+  cursor: grab;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  touch-action: none;
+}
+.track-editor__drag-handle:active {
+  cursor: grabbing;
+}

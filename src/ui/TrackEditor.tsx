@@ -1,5 +1,7 @@
 import { type CSSProperties } from "react";
-import { X, Trash } from "@phosphor-icons/react";
+import { X, Trash, DotsSixVertical } from "@phosphor-icons/react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useStore } from "../store/useStore";
 import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
 import { StatusGrid } from "./StatusGrid";
@@ -21,11 +23,39 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   const clearMarkers = useStore((s) => s.clearMarkers);
   const removeTrack = useStore((s) => s.removeTrack);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: track.id });
+
+  const style: CSSProperties = {
+    "--track-color": track.color,
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  } as CSSProperties;
+
   return (
     <div
+      ref={setNodeRef}
       className={focused ? "track-editor track-editor--focused" : "track-editor"}
-      style={{ "--track-color": track.color } as CSSProperties}
+      style={style}
     >
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        className="track-editor__drag-handle"
+        aria-label={`${track.name} 트랙 순서 이동`}
+        {...attributes}
+        {...listeners}
+      >
+        <DotsSixVertical weight="bold" />
+      </button>
       <input
         className="track-editor__name"
         value={track.name}
