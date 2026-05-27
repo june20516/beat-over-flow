@@ -3,7 +3,7 @@ import { useViewport } from "./viewport";
 import { MAX_PX_PER_MS } from "../timeline/viewportMath";
 
 function reset() {
-  useViewport.setState({ pxPerMs: 0, scrollLeftPx: 0, containerWidthPx: 1, durationMs: 0 });
+  useViewport.setState({ pxPerMs: 0, scrollLeftPx: 0, containerWidthPx: 1, durationMs: 0, followPlayhead: true });
 }
 
 describe("useViewport", () => {
@@ -75,5 +75,24 @@ describe("useViewport", () => {
     useViewport.setState({ pxPerMs: 0.4 });
     s.zoomAt(100, 0);
     expect(useViewport.getState().pxPerMs).toBe(MAX_PX_PER_MS);
+  });
+
+  it("followTo: followPlayhead면 플레이헤드를 중앙에 두도록 scrollLeftPx 갱신", () => {
+    const v = useViewport.getState();
+    v.setContainerWidth(1000);
+    v.setDuration(100000);
+    useViewport.setState({ pxPerMs: 0.1, followPlayhead: true });
+    useViewport.getState().followTo(50000);
+    expect(useViewport.getState().scrollLeftPx).toBe(4500);
+  });
+  it("followTo: followPlayhead=false면 no-op", () => {
+    useViewport.setState({ followPlayhead: false, scrollLeftPx: 123 });
+    useViewport.getState().followTo(80000);
+    expect(useViewport.getState().scrollLeftPx).toBe(123);
+  });
+  it("panByPx는 followPlayhead를 끈다", () => {
+    useViewport.setState({ followPlayhead: true });
+    useViewport.getState().panByPx(100);
+    expect(useViewport.getState().followPlayhead).toBe(false);
   });
 });

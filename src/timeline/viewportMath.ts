@@ -47,6 +47,11 @@ export function xToTime(x: number, vp: Viewport): number {
   return (x + vp.scrollLeftPx) / vp.pxPerMs;
 }
 
+/** auto-follow: timeMs가 가시영역 가로 중앙에 오도록 한 scrollLeftPx (클램프 포함). */
+export function centeredScrollLeftPx(timeMs: number, vp: Viewport, durationMs: number): number {
+  return clampScrollLeftPx(timeMs * vp.pxPerMs - vp.containerWidthPx / 2, vp, durationMs);
+}
+
 /**
  * 커서(anchorX)의 시간이 제자리 유지되도록 줌. factor>1 확대.
  * anchorTime = xToTime(anchorX) → newPx = clampPxPerMs(pxPerMs*factor)

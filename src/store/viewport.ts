@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   clampPxPerMs,
   clampScrollLeftPx,
+  centeredScrollLeftPx,
   minPxPerMs,
   zoomedViewport,
   type Viewport,
@@ -12,11 +13,14 @@ interface ViewportState {
   scrollLeftPx: number;
   containerWidthPx: number;
   durationMs: number;
+  followPlayhead: boolean;
   setContainerWidth: (px: number) => void;
   setDuration: (ms: number) => void;
   fitAll: () => void;
   panByPx: (dx: number) => void;
   zoomAt: (factor: number, anchorX: number) => void;
+  setFollowPlayhead: (b: boolean) => void;
+  followTo: (timeMs: number) => void;
 }
 
 /** 현재 스토어 상태에서 Viewport(순수타입)를 추출. */
@@ -33,6 +37,7 @@ export const useViewport = create<ViewportState>((set) => ({
   scrollLeftPx: 0,
   containerWidthPx: 1,
   durationMs: 0,
+  followPlayhead: true,
 
   setContainerWidth: (px) =>
     set((s) => {
@@ -61,11 +66,21 @@ export const useViewport = create<ViewportState>((set) => ({
   panByPx: (dx) =>
     set((s) => ({
       scrollLeftPx: clampScrollLeftPx(s.scrollLeftPx + dx, toVp(s), s.durationMs),
+      followPlayhead: false,
     })),
 
   zoomAt: (factor, anchorX) =>
     set((s) => {
       const z = zoomedViewport(toVp(s), s.durationMs, factor, anchorX);
       return { pxPerMs: z.pxPerMs, scrollLeftPx: z.scrollLeftPx };
+    }),
+
+  setFollowPlayhead: (b) => set({ followPlayhead: b }),
+
+  followTo: (timeMs) =>
+    set((s) => {
+      if (!s.followPlayhead) return s;
+      const next = centeredScrollLeftPx(timeMs, toVp(s), s.durationMs);
+      return next === s.scrollLeftPx ? s : { scrollLeftPx: next };
     }),
 }));

@@ -8,6 +8,7 @@ import {
   timeToX,
   xToTime,
   zoomedViewport,
+  centeredScrollLeftPx,
   type Viewport,
 } from "./viewportMath";
 
@@ -98,5 +99,23 @@ describe("zoomedViewport", () => {
     const v = vp({ pxPerMs: 0.1, scrollLeftPx: 0, containerWidthPx: 1000 });
     const z = zoomedViewport(v, 10000, 2, 0);
     expect(z.scrollLeftPx).toBe(0);
+  });
+});
+
+describe("centeredScrollLeftPx", () => {
+  const vp = { pxPerMs: 0.1, scrollLeftPx: 0, containerWidthPx: 1000 };
+  it("플레이헤드를 가시영역 중앙에 두는 scrollLeft", () => {
+    expect(centeredScrollLeftPx(50000, vp, 100000)).toBe(4500);
+  });
+  it("시작 부근은 0으로 클램프", () => {
+    expect(centeredScrollLeftPx(0, vp, 100000)).toBe(0);
+    expect(centeredScrollLeftPx(2000, vp, 100000)).toBe(0);
+  });
+  it("끝 부근은 maxScrollLeftPx로 클램프", () => {
+    expect(centeredScrollLeftPx(100000, vp, 100000)).toBe(9000);
+  });
+  it("최소줌(곡 전체 가시)이면 항상 0", () => {
+    const min = { pxPerMs: 0.01, scrollLeftPx: 0, containerWidthPx: 1000 };
+    expect(centeredScrollLeftPx(50000, min, 100000)).toBe(0);
   });
 });
