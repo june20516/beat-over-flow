@@ -126,7 +126,7 @@ describe("findNearestMarker", () => {
 - [ ] **Step 2: 테스트가 실패하는지 확인**
 
 ```bash
-npx vitest run src/timeline/markerMath.test.ts
+yarn vitest run src/timeline/markerMath.test.ts
 ```
 모듈 미존재로 실패해야 한다.
 
@@ -184,7 +184,7 @@ export function findNearestMarker(
 - [ ] **Step 4: 테스트 통과 확인**
 
 ```bash
-npx vitest run src/timeline/markerMath.test.ts && npx tsc -b
+yarn vitest run src/timeline/markerMath.test.ts && yarn tsc -b
 ```
 
 - [ ] **Step 5: 커밋**
@@ -315,7 +315,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
 - [ ] **Step 2: 타입체크 통과 확인**
 
 ```bash
-npx tsc -b
+yarn tsc -b
 ```
 
 - [ ] **Step 3: 커밋**
@@ -455,7 +455,7 @@ function OverviewMarkerEditor({ track }: { track: Track }) {
 - [ ] **Step 2: 타입체크 통과 확인**
 
 ```bash
-npx tsc -b
+yarn tsc -b
 ```
 계획 1의 `useViewport`/`viewportMath` export(`pxPerMs`, `scrollLeftPx`, `containerWidthPx`, `xToTime`, `Viewport`)와 시그니처가 일치하는지 확인한다. 어긋나면 계약 §4·§5에 맞춰 본 파일의 구독 셀렉터를 조정한다(계약이 단일 기준).
 
@@ -516,7 +516,7 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
 - [ ] **Step 2: 타입체크 통과 확인**
 
 ```bash
-npx tsc -b
+yarn tsc -b
 ```
 
 - [ ] **Step 3: 커밋**
@@ -619,7 +619,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - [ ] **Step 2: 빌드 무결성 확인(스타일은 브라우저 검증 대상)**
 
 ```bash
-npx tsc -b
+yarn tsc -b
 ```
 CSS 자체는 타입체크 대상이 아니므로, 실제 레이아웃·포커스 높이 트랜지션은 Task 7의 브라우저 검증에서 확인한다.
 
@@ -702,7 +702,7 @@ git rm src/ui/TrackList.tsx src/ui/TrackHeader.tsx
 - [ ] **Step 5: 전체 테스트 + 타입체크 통과 확인**
 
 ```bash
-npm run test:run && npx tsc -b
+yarn test:run && yarn tsc -b
 ```
 `TrackList`/`TrackHeader`를 import하던 곳이 더 없는지(`grep -rn "TrackList\|TrackHeader" src`) 확인한다.
 
@@ -748,7 +748,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - [ ] **Step 3: 최종 그린 확인**
 
 ```bash
-npm run test:run && npx tsc -b
+yarn test:run && yarn tsc -b
 ```
 
 - [ ] **Step 4: 커밋(노트 기록 시)**
@@ -772,6 +772,6 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - **삭제(§1):** Task 6에서 `TrackList`/`TrackHeader` `git rm`. ✔
 - **분리 가능한 순수 로직 TDD:** Task 1에서 게이팅·가상화·우클릭 대상 찾기 단위테스트. SVG/캔버스/애니메이션은 Task 7 브라우저 검증/미검증 기록. ✔
 - **계획 1 의존:** `useViewport`/`viewportMath` export에 `MarkerEditor`를 결선, 어긋나면 계약 기준으로 셀렉터 조정(Task 3 Step 2 명시). 시퀀서 자식·dnd-kit은 범위 밖(계획 4/5). ✔
-- **각 Task 종료 시 `npm run test:run && npx tsc -b`:** Task 1·6에 명시, 코드 Task(2·3·4·5)는 `npx tsc -b` + 전체 그린은 Task 6에서 확정. ✔
+- **각 Task 종료 시 `yarn test:run && yarn tsc -b`:** Task 1·6에 명시, 코드 Task(2·3·4·5)는 `yarn tsc -b` + 전체 그린은 Task 6에서 확정. ✔
 - **any 미사용:** `CSSProperties` 캐스팅 외 명시 타입만 사용. ✔
 ```

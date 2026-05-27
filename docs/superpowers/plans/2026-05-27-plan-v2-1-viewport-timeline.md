@@ -130,7 +130,7 @@ describe("zoomedViewport", () => {
 });
 ```
 
-- [ ] **실패 확인** — 실행: `npx vitest run src/timeline/viewportMath.test.ts`. 예상: 모듈 `./viewportMath`를 찾을 수 없어 전체 실패(import error).
+- [ ] **실패 확인** — 실행: `yarn vitest run src/timeline/viewportMath.test.ts`. 예상: 모듈 `./viewportMath`를 찾을 수 없어 전체 실패(import error).
 
 - [ ] **최소 구현** — `src/timeline/viewportMath.ts` 생성:
 
@@ -207,9 +207,9 @@ export function zoomedViewport(
 }
 ```
 
-- [ ] **통과 확인** — 실행: `npx vitest run src/timeline/viewportMath.test.ts`. 예상: 모든 테스트(8 describe 블록) green.
+- [ ] **통과 확인** — 실행: `yarn vitest run src/timeline/viewportMath.test.ts`. 예상: 모든 테스트(8 describe 블록) green.
 
-- [ ] **태스크 검증** — 실행: `npm run test:run && npx tsc -b`. 예상: 둘 다 통과.
+- [ ] **태스크 검증** — 실행: `yarn test:run && yarn tsc -b`. 예상: 둘 다 통과.
 
 - [ ] **커밋**:
 
@@ -322,7 +322,7 @@ describe("useViewport", () => {
 });
 ```
 
-- [ ] **실패 확인** — 실행: `npx vitest run src/store/viewport.test.ts`. 예상: `./viewport` 모듈 없음으로 전체 실패.
+- [ ] **실패 확인** — 실행: `yarn vitest run src/store/viewport.test.ts`. 예상: `./viewport` 모듈 없음으로 전체 실패.
 
 - [ ] **최소 구현** — `src/store/viewport.ts` 생성:
 
@@ -402,9 +402,9 @@ export const useViewport = create<ViewportState>((set) => ({
 
 > 비고: `setDuration`은 초기 `pxPerMs=0`이 `clampPxPerMs`를 거치며 `minPxPerMs`로 올라가므로 별도 fitAll 분기 없이도 "필요시 fitAll" 효과를 낸다(테스트 3번이 이를 검증). 명시적 fitAll은 `BaseFlowLane` 더블클릭과 프로젝트 로드 시 `Timeline`에서 호출한다.
 
-- [ ] **통과 확인** — 실행: `npx vitest run src/store/viewport.test.ts`. 예상: 모든 테스트 green.
+- [ ] **통과 확인** — 실행: `yarn vitest run src/store/viewport.test.ts`. 예상: 모든 테스트 green.
 
-- [ ] **태스크 검증** — 실행: `npm run test:run && npx tsc -b`. 예상: 둘 다 통과.
+- [ ] **태스크 검증** — 실행: `yarn test:run && yarn tsc -b`. 예상: 둘 다 통과.
 
 - [ ] **커밋**:
 
@@ -515,7 +515,7 @@ export function BaseFlowLane({ peaks, durationMs }: BaseFlowLaneProps) {
 
 > 비고: 클릭 좌표 `x`는 컨테이너 기준이라 transform과 무관하게 `xToTime(x, vp)`가 올바르다(`xToTime`가 `scrollLeftPx`를 더하므로). 캔버스만 translate한다.
 
-- [ ] **태스크 검증** — 실행: `npm run test:run && npx tsc -b`. 예상: 기존 테스트 영향 없음, tsc 통과. (이 컴포넌트는 Task 5에서 `Timeline`에 배치된 뒤 브라우저 검증한다. 단독 import만으로 타입 통과 확인.)
+- [ ] **태스크 검증** — 실행: `yarn test:run && yarn tsc -b`. 예상: 기존 테스트 영향 없음, tsc 통과. (이 컴포넌트는 Task 5에서 `Timeline`에 배치된 뒤 브라우저 검증한다. 단독 import만으로 타입 통과 확인.)
 
 - [ ] **커밋**:
 
@@ -590,7 +590,7 @@ export function PlayheadOverlay() {
 }
 ```
 
-- [ ] **태스크 검증** — 실행: `npm run test:run && npx tsc -b`. 예상: tsc 통과, 기존 테스트 영향 없음.
+- [ ] **태스크 검증** — 실행: `yarn test:run && yarn tsc -b`. 예상: tsc 통과, 기존 테스트 영향 없음.
 
 - [ ] **커밋**:
 
@@ -695,7 +695,7 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
 
 > 비고: React의 `onWheel`은 passive listener라 `preventDefault`가 경고를 낼 수 있다. 브라우저 검증에서 가로 팬/줌이 페이지 스크롤 없이 동작하는지 확인하고, 막히면 `arrangeRef`에 `addEventListener("wheel", handler, { passive: false })`로 전환한다(이 경우 핸들러를 effect 내부로 이동). 일단 `onWheel`로 시작.
 
-- [ ] **태스크 검증** — 실행: `npm run test:run && npx tsc -b`. 예상: tsc 통과(아직 Editor가 Timeline을 안 쓰므로 미사용 경고 없음 — Task 6에서 연결).
+- [ ] **태스크 검증** — 실행: `yarn test:run && yarn tsc -b`. 예상: tsc 통과(아직 Editor가 Timeline을 안 쓰므로 미사용 경고 없음 — Task 6에서 연결).
 
 - [ ] **커밋**:
 
@@ -796,11 +796,11 @@ import { startPlaySession, endPlaySession } from "../scoring/playSession";
 
   그리고 `mode`는 effect용으로 유지하되, `addMarker`/`tracks` 구독 라인과 `handleLaneClick`을 삭제.
 
-> 비고: 컴파일 에러가 나는 미사용 변수는 `npx tsc -b`(noUnusedLocals 설정 시)가 정확히 짚어주므로, tsc 출력을 보고 해당 라인만 제거한다. 추측으로 더 지우지 말 것.
+> 비고: 컴파일 에러가 나는 미사용 변수는 `yarn tsc -b`(noUnusedLocals 설정 시)가 정확히 짚어주므로, tsc 출력을 보고 해당 라인만 제거한다. 추측으로 더 지우지 말 것.
 
 - [ ] **삭제** — 실행: `git rm src/render/TimelineCanvas.tsx`.
 
-- [ ] **타입/테스트 확인** — 실행: `npm run test:run && npx tsc -b`. 예상: 둘 다 통과. tsc가 미사용 변수를 지적하면 위 (3/3)에 따라 해당 라인만 제거 후 재실행.
+- [ ] **타입/테스트 확인** — 실행: `yarn test:run && yarn tsc -b`. 예상: 둘 다 통과. tsc가 미사용 변수를 지적하면 위 (3/3)에 따라 해당 라인만 제거 후 재실행.
 
 - [ ] **브라우저 검증** — 베이스 파형·플레이헤드·스크롤·줌은 단위테스트로 못 잡으므로 헤드리스 Chrome으로 확인한다.
   - 사전 준비(샘플 wav가 없으면): 실행
@@ -809,8 +809,9 @@ import { startPlaySession, endPlaySession } from "../scoring/playSession";
     ```
   - dev 서버 백그라운드 기동 후 스크린샷:
     ```sh
-    npm run dev &
-    npx --yes wait-on http://localhost:5173 && OUT_DIR=/tmp node /tmp/bof-driver/shot.mjs
+    yarn dev &
+    until curl -sf http://localhost:5173 >/dev/null; do sleep 0.5; done
+    OUT_DIR=/tmp node /tmp/bof-driver/shot.mjs
     ```
     (드라이버에 줌/스크롤 단계가 없으면 `/tmp/bof-driver/shot.mjs`에 다음을 임시로 추가해 검증: 에디터 진입 후
     ```js
@@ -854,4 +855,4 @@ EOF
 - 계약 §1·§10 `TimelineCanvas` 삭제(rm 단계 포함) + Editor 교체 Task 6. ✓
 - 요구 10 코어(공유 가로 스크롤/줌이 베이스 파형·플레이헤드에 동기 적용, 최소줌=폭100%, 더블클릭 리셋, 커서 앵커 줌) 전부 커버. 트랙 마커 동기는 계획 2에서 같은 뷰포트를 구독하므로 자동.
 - 순수 로직(뷰포트 수학·스토어)은 진짜 TDD. 캔버스/스크롤/줌 UI는 브라우저 검증 스텝 + 무인 시 IMPLEMENTATION_NOTES 기록 규약 준수. 플레이스홀더 없음(모든 코드 스텝에 실제 코드).
-- 각 Task 종료에 `npm run test:run && npx tsc -b` 검증 스텝 존재. 커밋 메시지 끝에 Co-Authored-By 포함.
+- 각 Task 종료에 `yarn test:run && yarn tsc -b` 검증 스텝 존재. 커밋 메시지 끝에 Co-Authored-By 포함.

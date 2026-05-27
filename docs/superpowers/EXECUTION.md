@@ -27,7 +27,7 @@
 ## 태스크 진행 규칙
 
 1. 계획에 적힌 bite-sized TDD 스텝(실패 테스트 → 실패 확인 → 구현 → 통과 확인)을 그대로 따른다.
-2. 태스크 종료 시 반드시 `npm run test:run && npx tsc -b`를 실행해 **둘 다 통과**를 확인한다.
+2. 태스크 종료 시 반드시 `yarn test:run && yarn tsc -b`를 실행해 **둘 다 통과**를 확인한다.
 3. 그린이면 계획에 적힌 커밋 메시지로 커밋한다. (커밋 메시지 끝에 `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>` 포함)
 4. 푸시는 각 계획 완료 시점마다 `feat/editor-v2`로 한다.
 
@@ -40,7 +40,7 @@
 ## 브라우저 수동 검증 스텝
 
 - 무인 환경에서는 실제 브라우저 동작(캔버스/SVG 렌더·가로 스크롤/줌·드래그·포커스 애니메이션·소리·키 입력 등)을 **진짜로 확인할 수 없다.**
-- 헤드리스 Chrome 드라이버(`/tmp/bof-driver`, `npm run dev` 후 `chrome --headless --screenshot`)로 가능한 만큼 시각 확인하되, 드래그/소리처럼 스크린샷으로 못 잡는 것은 무리하지 않는다.
+- 헤드리스 Chrome 드라이버(`/tmp/bof-driver`, `yarn dev` 후 `chrome --headless --screenshot`)로 가능한 만큼 시각 확인하되, 드래그/소리처럼 스크린샷으로 못 잡는 것은 무리하지 않는다.
 - 할 수 있는 것(빌드, `tsc`, 단위 테스트, 스크린샷)만 하고, **성공했다고 꾸미지 않는다.**
 - 각 "브라우저 검증" 스텝은 `IMPLEMENTATION_NOTES.md`의 "사람 검증 필요" 목록에 항목으로 남긴다(어느 계획의 어떤 확인 항목인지).
 
@@ -51,4 +51,4 @@
 
 ## 완료 정의
 
-v2 계획 6개가 모두 구현되고, `npm run test:run`과 `npx tsc -b`가 통과하며, 남은 "사람 검증 필요" 항목이 `IMPLEMENTATION_NOTES.md`에 정리되어 `feat/editor-v2`에 푸시되어 있으면 완료.
+v2 계획 6개가 모두 구현되고, `yarn test:run`과 `yarn tsc -b`가 통과하며, 남은 "사람 검증 필요" 항목이 `IMPLEMENTATION_NOTES.md`에 정리되어 `feat/editor-v2`에 푸시되어 있으면 완료.

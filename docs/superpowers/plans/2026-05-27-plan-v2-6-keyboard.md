@@ -32,8 +32,8 @@ export interface Project {
 }
 ```
 
-- [ ] `npx tsc -b`로 타입체크 통과를 확인한다(이 시점에 컴파일 에러가 없어야 함).
-- [ ] `npm run test:run`으로 기존 테스트 회귀가 없는지 확인한다.
+- [ ] `yarn tsc -b`로 타입체크 통과를 확인한다(이 시점에 컴파일 에러가 없어야 함).
+- [ ] `yarn test:run`으로 기존 테스트 회귀가 없는지 확인한다.
 - [ ] 커밋한다.
 
 ```
@@ -108,7 +108,7 @@ describe("setPlayPauseKey", () => {
 });
 ```
 
-- [ ] `npx vitest run src/store/useStore.test.ts`로 RED를 확인한다(`setPlayPauseKey` 미존재로 실패).
+- [ ] `yarn vitest run src/store/useStore.test.ts`로 RED를 확인한다(`setPlayPauseKey` 미존재로 실패).
 - [ ] **GREEN.** `src/store/useStore.ts`의 `StoreState` 인터페이스에 시그니처를 추가한다(계약 §3 정확히 일치).
 
 ```ts
@@ -126,8 +126,8 @@ describe("setPlayPauseKey", () => {
     ),
 ```
 
-- [ ] `npx vitest run src/store/useStore.test.ts`로 GREEN을 확인한다.
-- [ ] `npm run test:run && npx tsc -b` 둘 다 통과를 확인한다.
+- [ ] `yarn vitest run src/store/useStore.test.ts`로 GREEN을 확인한다.
+- [ ] `yarn test:run && yarn tsc -b` 둘 다 통과를 확인한다.
 - [ ] 커밋한다.
 
 ```
@@ -160,7 +160,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
     };
 ```
 
-- [ ] `npm run test:run && npx tsc -b` 둘 다 통과를 확인한다.
+- [ ] `yarn test:run && yarn tsc -b` 둘 다 통과를 확인한다.
 - [ ] 커밋한다.
 
 ```
@@ -283,7 +283,7 @@ describe("decideKeyAction", () => {
 });
 ```
 
-- [ ] `npx vitest run src/input/keyAction.test.ts`로 RED를 확인한다.
+- [ ] `yarn vitest run src/input/keyAction.test.ts`로 RED를 확인한다.
 - [ ] **GREEN.** `src/input/keyAction.ts`를 작성한다. 계약 §9 순서를 그대로 구현한다.
 
 ```ts
@@ -327,8 +327,8 @@ export function decideKeyAction(ctx: KeyContext): KeyAction {
 }
 ```
 
-- [ ] `npx vitest run src/input/keyAction.test.ts`로 GREEN을 확인한다.
-- [ ] `npm run test:run && npx tsc -b` 둘 다 통과를 확인한다.
+- [ ] `yarn vitest run src/input/keyAction.test.ts`로 GREEN을 확인한다.
+- [ ] `yarn test:run && yarn tsc -b` 둘 다 통과를 확인한다.
 - [ ] 커밋한다.
 
 ```
@@ -419,7 +419,7 @@ export function startKeyboard(): () => void {
 ```
 
 - [ ] `runtime.ts`가 `play`/`pause`를 named export하는지 확인한다(이미 export됨: `export async function play`, `export function pause`).
-- [ ] `npm run test:run && npx tsc -b` 둘 다 통과를 확인한다.
+- [ ] `yarn test:run && yarn tsc -b` 둘 다 통과를 확인한다.
 - [ ] **브라우저 검증(또는 무인 시 IMPLEMENTATION_NOTES.md 기록).** 단위테스트로 못 잡는 항목 — 헤드리스 Chrome 드라이버(`/tmp/bof-driver`) 또는 사람이 확인한다. 무인 실행이면 `IMPLEMENTATION_NOTES.md`에 "사람 검증 필요"로 기록하고 성공을 꾸미지 않는다.
   - record 모드에서 write 트랙 키 누르면 마커 추가 + 소리(기존 동작 회귀 없음).
   - play 모드에서 트랙 키 누르면 소리 + 채점(perform) 동작.
@@ -471,7 +471,7 @@ import { KeyCap } from "./KeyCap";
       </span>
 ```
 
-- [ ] `npm run test:run && npx tsc -b` 둘 다 통과를 확인한다.
+- [ ] `yarn test:run && yarn tsc -b` 둘 다 통과를 확인한다.
 - [ ] **브라우저 검증(또는 무인 시 IMPLEMENTATION_NOTES.md 기록).** TransportBar의 KeyCap 클릭 → 키 입력 → 라벨이 `formatKeyCode` 표시로 갱신, 저장 후 Task 5의 재생키 토글이 그 키로 동작. 무인이면 "사람 검증 필요" 기록(성공 꾸미지 말 것).
 - [ ] 커밋한다.
 
@@ -491,6 +491,6 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - [ ] keydown 분기가 순수함수 `decideKeyAction`로 분리되어 모드별 preventDefault·재생키 매칭·트랙키 매칭이 단위테스트됨.
 - [ ] `KeyboardController`가 계약 §9 순서(repeat→입력필드→모드차단→재생키토글→트랙키)를 따르고 기존 record/perform 동작에 회귀 없음.
 - [ ] `TransportBar`에 재생키 `KeyCap`이 `setPlayPauseKey`와 연결됨.
-- [ ] 모든 Task에서 `npm run test:run && npx tsc -b` 그린. any 타입 미사용.
+- [ ] 모든 Task에서 `yarn test:run && yarn tsc -b` 그린. any 타입 미사용.
 </content>
 </invoke>

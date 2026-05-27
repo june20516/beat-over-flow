@@ -103,7 +103,7 @@ describe("useEditorUi", () => {
 
 - [ ] **Step 2: 테스트 실패 확인**
 
-Run: `npx vitest run src/store/editorUi.test.ts`
+Run: `yarn vitest run src/store/editorUi.test.ts`
 Expected: FAIL — `useEditorUi` 미정의.
 
 - [ ] **Step 3: 구현**
@@ -145,7 +145,7 @@ export const useEditorUi = create<EditorUiState>((set) => ({
 
 - [ ] **Step 4: 테스트 통과 확인 & Commit**
 
-Run: `npm run test:run && npx tsc -b`
+Run: `yarn test:run && yarn tsc -b`
 Expected: 모든 테스트 PASS(editorUi 6개 포함), 타입 에러 없음.
 ```bash
 git add src/store/editorUi.ts src/store/editorUi.test.ts
@@ -218,7 +218,7 @@ export function EditorToolbar() {
 
 - [ ] **Step 3: 타입체크 & Commit**
 
-Run: `npx tsc -b`
+Run: `yarn tsc -b`
 Expected: 에러 없음(아직 Editor에서 미사용이어도 단독 컴파일됨).
 ```bash
 git add src/ui/EditorToolbar.tsx src/ui/styles.css
@@ -290,7 +290,7 @@ export function StepSequencerPanel() {
 
 - [ ] **Step 3: 타입체크 & Commit**
 
-Run: `npx tsc -b`
+Run: `yarn tsc -b`
 Expected: `StepSequencerPanel`에 props를 넘기던 `Editor.tsx`가 아직 수정 전이면 타입 에러 발생 — Task 5에서 호출부를 함께 고친다. 본 태스크에서는 패널 단독 변경을 우선 커밋한다(전체 그린은 Task 5 종료 시 확인).
 ```bash
 git add src/ui/StepSequencerPanel.tsx
@@ -370,7 +370,7 @@ import { StepSequencerPanel } from "./StepSequencerPanel";
 
 - [ ] **Step 3: 타입체크 & Commit**
 
-Run: `npx tsc -b`
+Run: `yarn tsc -b`
 Expected: 에러 없음(`StepSequencerPanel`은 Task 3에서 props 없는 시그니처가 됨).
 ```bash
 git add src/ui/TrackRow.tsx src/ui/styles.css
@@ -434,7 +434,7 @@ import { useEditorUi } from "../store/editorUi";
 
 - [ ] **Step 5: 전체 테스트 + 타입체크**
 
-Run: `npm run test:run && npx tsc -b`
+Run: `yarn test:run && yarn tsc -b`
 Expected: 모든 테스트 PASS, 타입 에러 없음. (`StepSequencerPanel`에 props를 넘기는 곳이 더는 없어야 한다.)
 
 - [ ] **Step 6: 브라우저 검증 (시각/정렬)**
@@ -478,5 +478,5 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - **스펙 요구 4 커버리지:** (a) 전역 EditorToolbar 토글이 sequencerOpen 제어 — Task 2. (b) sequencerOpen && 포커스 트랙이면 포커스 TrackRow 바로 아래 자식 렌더 — Task 4. (c) 시퀀서 내부 로직(domain/sequencer) 유지 — Task 3에서 계산/마커 호출 보존. (d) region/stepCount를 UI 상태로 보관 + 포커스 트랙 변경 시 초기화 — Task 1(스토어) + Task 5(useEffect resetForTrack). 추가로 줌 리셋(fitAll)도 툴바에 포함(스펙 §4 EditorToolbar "줌 리셋").
 - **TDD:** editorUi 스토어는 진짜 TDD(실패→구현→통과). 시퀀서 인라인 배치/정렬은 단위테스트 불가 → 브라우저 검증, 무인이면 IMPLEMENTATION_NOTES.md 기록(꾸미지 않음).
 - **타입/any:** any 미사용. `EditorUiRegion` 타입을 export해 StepSequencerPanel/TrackRow가 공유. setStepCount 클램프는 스토어 단일 소스(패널의 중복 `Math.max` 제거).
-- **각 Task 종료:** Task 1·5는 `npm run test:run && npx tsc -b` 그린 확인 스텝 포함. Task 2~4는 중간 상태(호출부 미수정)라 단독 `tsc -b`로 진행 후 Task 5에서 전체 그린 확정(의존 순서상 불가피하며 명시함).
+- **각 Task 종료:** Task 1·5는 `yarn test:run && yarn tsc -b` 그린 확인 스텝 포함. Task 2~4는 중간 상태(호출부 미수정)라 단독 `tsc -b`로 진행 후 Task 5에서 전체 그린 확정(의존 순서상 불가피하며 명시함).
 - **개선 메모:** Task 4의 좌측 gutter 폭은 계획 2의 TrackEditor 컬럼 폭과 **동일 변수**를 공유해야 정렬이 보장된다. 계획 2가 폭 변수를 도입했는지 구현 시점에 확인하고, 없으면 공유 CSS 변수로 도입한다(중복 정의 금지).

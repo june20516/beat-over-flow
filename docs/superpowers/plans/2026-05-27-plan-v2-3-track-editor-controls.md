@@ -104,7 +104,7 @@
     });
   });
   ```
-- [ ] **실패 확인.** `npx vitest run src/domain/formatKeyCode.test.ts` 실행 → 모듈 미존재/함수 미존재로 실패하는 것을 확인한다(레드 단계 증거 확보).
+- [ ] **실패 확인.** `yarn vitest run src/domain/formatKeyCode.test.ts` 실행 → 모듈 미존재/함수 미존재로 실패하는 것을 확인한다(레드 단계 증거 확보).
 - [ ] **구현.** `src/domain/formatKeyCode.ts`를 작성한다.
   ```ts
   const ARROWS: Record<string, string> = {
@@ -130,8 +130,8 @@
     return code;
   }
   ```
-- [ ] **통과 확인.** `npx vitest run src/domain/formatKeyCode.test.ts` → 전체 그린.
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **통과 확인.** `yarn vitest run src/domain/formatKeyCode.test.ts` → 전체 그린.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(domain): formatKeyCode 키코드 표시 변환 (요구 3)
@@ -220,7 +220,7 @@
     });
   });
   ```
-- [ ] **실패 확인.** `npx vitest run src/store/useStore.test.ts` → `clearMarkers`가 `StoreState`에 없어 타입/런타임 실패 확인.
+- [ ] **실패 확인.** `yarn vitest run src/store/useStore.test.ts` → `clearMarkers`가 `StoreState`에 없어 타입/런타임 실패 확인.
 - [ ] **인터페이스에 시그니처 추가.** `src/store/useStore.ts`의 `StoreState` 인터페이스에서 `removeMarker` 줄 다음에 추가한다.
   ```ts
   clearMarkers: (trackId: string) => void;
@@ -230,8 +230,8 @@
   clearMarkers: (trackId) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, markers: [] })))),
   ```
-- [ ] **통과 확인.** `npx vitest run src/store/useStore.test.ts` → 전체 그린.
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **통과 확인.** `yarn vitest run src/store/useStore.test.ts` → 전체 그린.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(store): clearMarkers 액션 추가 (요구 7)
@@ -285,7 +285,7 @@
   }
   ```
 - [ ] **스타일 확인.** `src/ui/styles.css`에 `.keycap` / `.keycap--capturing`이 이미 존재(기존 TrackHeader가 사용)하므로 추가 CSS 없이 재사용한다. 누락 시에만 기존 정의를 복원한다.
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(ui): KeyCap 키 캡처 버튼 (요구 3)
@@ -378,7 +378,7 @@
     background: var(--tone);
   }
   ```
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(ui): StatusGrid 상태 2×2 그리드 (요구 2)
@@ -486,7 +486,7 @@
   }
   ```
   > 주의: 회전 방식은 부모 폭/높이 계산이 까다로울 수 있다. `writing-mode: vertical-lr; direction: rtl;` 방식이 더 깔끔하면 대체하되, `range-fill`의 `--pct` 채움 방향(아래=0, 위=100%)이 시각적으로 맞는지 브라우저 검증 스텝에서 확인한다.
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(ui): VolumeControl 세로 range 팝오버 (요구 1)
@@ -546,7 +546,7 @@
   </button>
   ```
 - [ ] **스타일(선택).** 필요 시 `src/ui/styles.css`에 `.track-editor__clear`를 추가(없어도 `btn--icon` 재사용으로 동작). 아이콘 버튼 톤만 맞추면 충분.
-- [ ] **Task 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **Task 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 - [ ] **커밋.**
   ```
   feat(ui): TrackEditor에 StatusGrid/KeyCap/VolumeControl/마커비우기 통합 (요구 1·2·3·7)
@@ -563,7 +563,7 @@
 **Files:**
 - `IMPLEMENTATION_NOTES.md` (무인 실행 시 신규/추가)
 
-- [ ] **개발 서버 기동.** `npm run dev`로 Vite 서버를 띄운다(백그라운드).
+- [ ] **개발 서버 기동.** `yarn dev`로 Vite 서버를 띄운다(백그라운드).
 - [ ] **헤드리스 Chrome 검증.** `/tmp/bof-driver` 헤드리스 Chrome 드라이버로 Editor를 연다. 트랙을 하나 추가하고 다음을 스크린샷으로 확인한다.
   - StatusGrid: M/L/P/W 4칸이 2×2로 보이고, 현재 상태 칸만 톤 배경으로 강조된다. 각 칸 hover/`title`이 풀라벨(뮤트/리스닝/플레이/라이트).
   - KeyCap: 미설정 시 "Key" 표시. 클릭→"…"→키 입력 후 `formatKeyCode` 결과(예: A, ←, Space) 표시.
@@ -578,7 +578,7 @@
   - 마커 비우기 버튼 동작
   자동(헤드리스) 검증 미수행. 사유: <드라이버 부재/환경 제약 등 실제 사유 기재>
   ```
-- [ ] **최종 검증.** `npm run test:run && npx tsc -b` 둘 다 통과 확인.
+- [ ] **최종 검증.** `yarn test:run && yarn tsc -b` 둘 다 통과 확인.
 
 ---
 
@@ -587,5 +587,5 @@
 - [ ] 요구 1(VolumeControl), 2(StatusGrid), 3(formatKeyCode+KeyCap), 7(clearMarkers+버튼) 전부 구현.
 - [ ] `formatKeyCode`·`clearMarkers`는 진짜 TDD(레드→그린) 커밋 이력으로 증명.
 - [ ] 모든 props 시그니처가 계약 §8과 정확히 일치(any 없음).
-- [ ] 각 Task 종료 시 `npm run test:run && npx tsc -b` 그린.
+- [ ] 각 Task 종료 시 `yarn test:run && yarn tsc -b` 그린.
 - [ ] 시각 요소는 헤드리스 검증 또는 `IMPLEMENTATION_NOTES.md` "사람 검증 필요" 기록.

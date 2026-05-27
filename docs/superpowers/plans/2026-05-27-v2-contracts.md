@@ -5,9 +5,10 @@
 
 ## 0. 규약
 
-- **테스트:** vitest. 테스트는 대상 파일과 **같은 디렉터리**에 `*.test.ts` 공존. 단일 실행 `npx vitest run <path>`, 전체 `npm run test:run`. 환경은 jsdom(`vitest.config.ts`), IndexedDB는 `fake-indexeddb`(`src/test-setup.ts`)로 이미 셋업됨.
-- **타입체크:** `npx tsc -b`. any 지양.
-- **태스크 종료 시:** `npm run test:run && npx tsc -b` 둘 다 통과해야 커밋.
+- **패키지매니저: yarn (classic 1.22.22).** `package.json`의 `packageManager` 필드로 핀됨. **npm/npx를 쓰지 말 것** — 의존성 추가는 `yarn add`, 스크립트는 `yarn <script>`, 락파일은 `yarn.lock`(package-lock.json 없음).
+- **테스트:** vitest. 테스트는 대상 파일과 **같은 디렉터리**에 `*.test.ts` 공존. 단일 실행 `yarn vitest run <path>`, 전체 `yarn test:run`. 환경은 jsdom(`vitest.config.ts`), IndexedDB는 `fake-indexeddb`(`src/test-setup.ts`)로 이미 셋업됨.
+- **타입체크:** `yarn tsc -b`. any 지양.
+- **태스크 종료 시:** `yarn test:run && yarn tsc -b` 둘 다 통과해야 커밋.
 - **커밋 메시지 끝에 반드시:** `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
 - **브라우저 검증:** 캔버스/SVG 렌더·스크롤·드래그 등 단위테스트로 못 잡는 것은 헤드리스 Chrome 드라이버(`/tmp/bof-driver`) 또는 사람 확인. 무인 실행 시 "사람 검증 필요"로 `IMPLEMENTATION_NOTES.md`에 기록하고 **성공을 꾸미지 않는다.**
 - **순수 로직은 React에서 분리**해 단위테스트한다(뷰포트 수학, formatKeyCode, 스토어 액션 등).
@@ -186,7 +187,7 @@ keydown 처리 순서:
 ## 10. dnd-kit (계획 4에서 설치)
 
 ```
-npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+yarn add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 ```
 좌측 TrackEditor 컬럼을 `SortableContext`(verticalListSortingStrategy)로 감싸고, 드롭 시 인덱스로 `reorderTracks(from,to)` 호출. 드래그 핸들은 TrackEditor 내부.
 

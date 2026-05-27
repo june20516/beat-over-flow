@@ -19,12 +19,12 @@
 ### Task 1: dnd-kit 의존성 설치
 
 **Files:**
-- `package.json` (수정 — npm이 갱신)
-- `package-lock.json` (수정 — npm이 갱신)
+- `package.json` (수정 — yarn이 갱신)
+- `yarn.lock` (수정 — yarn이 갱신)
 
 - [ ] 계약 §10에 따라 dnd-kit 3종 패키지를 설치한다:
   ```bash
-  npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+  yarn add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
   ```
 - [ ] `package.json`의 `dependencies`에 `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` 3개가 추가되었는지 확인한다:
   ```bash
@@ -34,7 +34,7 @@
   ```bash
   test -f node_modules/@dnd-kit/sortable/dist/sortable.d.ts && echo "types ok" || ls node_modules/@dnd-kit/sortable/dist/
   ```
-- [ ] 검증: `npm run test:run && npx tsc -b` 둘 다 통과(설치만으로 기존 코드가 깨지지 않는지 확인).
+- [ ] 검증: `yarn test:run && yarn tsc -b` 둘 다 통과(설치만으로 기존 코드가 깨지지 않는지 확인).
 - [ ] 커밋:
   ```
   chore: install @dnd-kit (core/sortable/utilities) for track reorder
@@ -144,7 +144,7 @@
   ```
 - [ ] 검증(RED): 아직 `reorderTracks`가 없으므로 타입체크/테스트가 실패해야 한다. 실패를 확인한다(이 단계에서는 그린이 아님이 정상):
   ```bash
-  npx vitest run src/store/useStore.test.ts
+  yarn vitest run src/store/useStore.test.ts
   ```
   → `reorderTracks is not a function` 또는 tsc 에러로 RED 확인. (커밋하지 않는다.)
 
@@ -186,9 +186,9 @@
   ```
 - [ ] 검증(GREEN): Task 2의 테스트가 전부 통과하는지 확인한다:
   ```bash
-  npx vitest run src/store/useStore.test.ts
+  yarn vitest run src/store/useStore.test.ts
   ```
-- [ ] 검증: `npm run test:run && npx tsc -b` 둘 다 통과.
+- [ ] 검증: `yarn test:run && yarn tsc -b` 둘 다 통과.
 - [ ] 커밋:
   ```
   feat(store): add reorderTracks action with range guards (req 8)
@@ -288,9 +288,9 @@
   ```
 - [ ] 검증: 통합 테스트가 통과하는지 단독 실행으로 확인한다:
   ```bash
-  npx vitest run src/store/reorderTracks.persist.test.ts
+  yarn vitest run src/store/reorderTracks.persist.test.ts
   ```
-- [ ] 검증: `npm run test:run && npx tsc -b` 둘 다 통과.
+- [ ] 검증: `yarn test:run && yarn tsc -b` 둘 다 통과.
 - [ ] 커밋:
   ```
   test(store): reorderTracks autosave persistence integration (req 8)
@@ -373,7 +373,7 @@
     cursor: grabbing;
   }
   ```
-- [ ] 검증: `npm run test:run && npx tsc -b` 둘 다 통과(타입/렌더 회귀 없음 확인).
+- [ ] 검증: `yarn test:run && yarn tsc -b` 둘 다 통과(타입/렌더 회귀 없음 확인).
 - [ ] 커밋:
   ```
   feat(ui): add sortable drag handle to TrackEditor (req 8)
@@ -455,7 +455,7 @@
   ```
   - 주: `selectedTrackId`/`focused` 산출은 계획 2의 기존 방식을 그대로 따른다. dnd-kit 래핑만 추가하고 나머지 props 전달은 변경하지 않는다.
   - TrackRow가 좌측(TrackEditor)·우측(MarkerEditor)을 함께 렌더한다면, `useSortable`은 Task 5의 TrackEditor가 소유하므로 TrackRow는 그대로 두고 SortableContext만 행 목록을 감싸면 된다. 좌측만 별도 컬럼으로 분리된 레이아웃이라면 그 좌측 map을 감싼다(계획 2 레이아웃에 맞춰 1곳만).
-- [ ] 검증: `npm run test:run && npx tsc -b` 둘 다 통과.
+- [ ] 검증: `yarn test:run && yarn tsc -b` 둘 다 통과.
 - [ ] 커밋:
   ```
   feat(ui): wrap track column in DndContext/SortableContext for reorder (req 8)
@@ -480,13 +480,13 @@
   - 자동 검증 완료:
     - `reorderTracks` 단위 동작(범위 가드/이동/단일 전이): `src/store/useStore.test.ts`
     - 순서변경 → autosave 영속(IndexedDB 라운드트립): `src/store/reorderTracks.persist.test.ts`
-    - 타입체크/전체 테스트 그린: `npm run test:run && npx tsc -b`
+    - 타입체크/전체 테스트 그린: `yarn test:run && yarn tsc -b`
   - **사람 검증 필요(무인 자동화로 미검증):**
     - 핸들을 실제 포인터로 드래그해 트랙 행 순서가 바뀌고, 놓는 순간 `reorderTracks`가 호출되어 우측 Marker Editor 레인도 같은 순서로 정렬되는지.
     - 드래그 중 시각 피드백(opacity/transform)과 핸들 외 컨트롤(이름 입력·볼륨·삭제 등)이 드래그로 오작동하지 않는지(PointerSensor distance 8px 가드).
     - 새로고침 후에도 변경된 순서가 유지되는지(autosave 영속 사용자 경로 확인).
   ```
-- [ ] 검증: `npm run test:run && npx tsc -b` 최종 그린 확인.
+- [ ] 검증: `yarn test:run && yarn tsc -b` 최종 그린 확인.
 - [ ] 커밋:
   ```
   docs: record reorder drag manual-verification needs (req 8)
@@ -503,7 +503,7 @@
 - [ ] 순서변경이 autosave로 IndexedDB에 영속됨이 통합 테스트로 검증됨(`listProjects`/`loadProject`).
 - [ ] 좌측 TrackEditor가 `useSortable` 핸들(DotsSixVertical)을 가지고, 부모가 `DndContext`+`SortableContext`(`verticalListSortingStrategy`)로 감싸 `onDragEnd`→`reorderTracks` 호출.
 - [ ] 실제 드래그 제스처는 `IMPLEMENTATION_NOTES.md`에 사람 검증 필요로 기록(성공 미꾸밈).
-- [ ] 모든 Task 종료 시 `npm run test:run && npx tsc -b` 그린.
+- [ ] 모든 Task 종료 시 `yarn test:run && yarn tsc -b` 그린.
 
 ## 다루는 요구사항
 
