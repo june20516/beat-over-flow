@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { xToTime, type Viewport } from "../timeline/viewportMath";
@@ -12,6 +12,7 @@ import { dragToRegion } from "../timeline/laneGesture";
 import { useEditorUi } from "../store/editorUi";
 import type { Track } from "../types";
 import { LanePlayhead } from "./LanePlayhead";
+import { RegionOverlay } from "./RegionOverlay";
 import { resolveTrackBehavior } from "../domain/mode";
 
 interface MarkerEditorProps {
@@ -24,16 +25,19 @@ const OVERVIEW_HEIGHT = 28;
 
 export function MarkerEditor({ track, focused }: MarkerEditorProps) {
   const mode = useStore((s) => s.mode);
+  const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
   const showPlayhead = mode === "play" && resolveTrackBehavior("play", track.status) === "perform";
+  const showRegion = focused && sequencerOpen && resolveTrackBehavior(mode, track.status) === "record";
   return (
     <>
       {focused ? <FocusedMarkerEditor track={track} /> : <OverviewMarkerEditor track={track} />}
+      {showRegion && <RegionOverlay />}
       {showPlayhead && <LanePlayhead />}
     </>
   );
 }
 
-/** 포커스 트랙: 가상화 SVG. 좌클릭 추가 / 우클릭 삭제(레코드 동작에서만) / 드래그=구간 설정. */
+/** 포커스 트랙: 가상화 SVG. 좌클릭 추가 / 우클릭 삭제(레코드 동작에서만) / 드래그=구간(시퀀서 활성 시). */
 function FocusedMarkerEditor({ track }: { track: Track }) {
   const mode = useStore((s) => s.mode);
   const addMarker = useStore((s) => s.addMarker);
@@ -45,28 +49,28 @@ function FocusedMarkerEditor({ track }: { track: Track }) {
   const containerWidthPx = useViewport((s) => s.containerWidthPx);
 
   const setRegion = useEditorUi((s) => s.setRegion);
-  const setSequencerOpen = useEditorUi((s) => s.setSequencerOpen);
+  const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
 
   const vp: Viewport = { pxPerMs, scrollLeftPx, containerWidthPx };
   const editable = isMarkerEditingEnabled(mode, track.status);
+  const sequencerActive = sequencerOpen && editable;
   const visible = visibleMarkers(track.markers, vp, containerWidthPx);
 
-  const [dragPx, setDragPx] = useState<{ a: number; b: number } | null>(null);
-
   const gesture = useLaneGesture({
-    onClick: (x) => { if (editable && pxPerMs > 0) addMarker(track.id, xToTime(x, vp)); },
+    onClick: (x) => {
+      if (editable && pxPerMs > 0) addMarker(track.id, xToTime(x, vp));
+    },
     onContextClick: (x) => {
       if (!editable || pxPerMs <= 0) return;
       const timeMs = xToTime(x, vp);
       const hit = findNearestMarker(track.markers, timeMs, HIT_TOLERANCE_PX / pxPerMs);
       if (hit) removeMarker(track.id, hit.id);
     },
-    onDragMove: (a, b) => setDragPx({ a, b }),
+    onDragMove: (a, b) => {
+      if (sequencerActive && pxPerMs > 0) setRegion(dragToRegion(a, b, vp, durationMs));
+    },
     onDragEnd: (a, b) => {
-      setDragPx(null);
-      if (pxPerMs <= 0) return;
-      setRegion(dragToRegion(a, b, vp, durationMs));
-      setSequencerOpen(true);
+      if (sequencerActive && pxPerMs > 0) setRegion(dragToRegion(a, b, vp, durationMs));
     },
   });
 
@@ -78,16 +82,6 @@ function FocusedMarkerEditor({ track }: { track: Track }) {
       style={{ "--track-color": track.color } as CSSProperties}
       {...gesture}
     >
-      {dragPx && (
-        <rect
-          x={Math.min(dragPx.a, dragPx.b)}
-          y={0}
-          width={Math.abs(dragPx.b - dragPx.a)}
-          height="100%"
-          fill="rgba(168,85,247,0.22)"
-          pointerEvents="none"
-        />
-      )}
       {visible.map(({ marker, x }) => (
         <circle key={marker.id} cx={x} cy="50%" r={5} fill={track.color} />
       ))}
