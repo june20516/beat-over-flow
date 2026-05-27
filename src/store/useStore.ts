@@ -28,6 +28,7 @@ interface StoreState {
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
   removeMarker: (trackId: string, markerId: string) => void;
+  clearMarkers: (trackId: string) => void;
 
   setSelectedTrack: (trackId: string | null) => void;
   toggleMarkerAt: (trackId: string, timeMs: number, toleranceMs: number) => void;
@@ -130,6 +131,9 @@ export const useStore = create<StoreState>((set) => ({
         })),
       ),
     ),
+
+  clearMarkers: (trackId) =>
+    set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, markers: [] })))),
 
   setSelectedTrack: (trackId) => set({ selectedTrackId: trackId }),
 

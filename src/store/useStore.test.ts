@@ -156,3 +156,70 @@ describe("useStore 점수", () => {
     expect(useStore.getState().score.totalJudged).toBe(0);
   });
 });
+
+function makeProject(): Project {
+  return {
+    id: "p1",
+    name: "테스트",
+    createdAt: 1000,
+    updatedAt: 1000,
+    baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 60000 },
+    master: { volume: 1 },
+    tracks: [
+      {
+        id: "t1",
+        name: "트랙 1",
+        status: "write",
+        sound: { kind: "builtin", sampleId: "kick" },
+        keyBinding: null,
+        markers: [
+          { id: "m1", timeMs: 100 },
+          { id: "m2", timeMs: 200 },
+        ],
+        volume: 1,
+        color: "#fff",
+      },
+      {
+        id: "t2",
+        name: "트랙 2",
+        status: "play",
+        sound: { kind: "builtin", sampleId: "snare" },
+        keyBinding: null,
+        markers: [{ id: "m3", timeMs: 300 }],
+        volume: 1,
+        color: "#000",
+      },
+    ],
+  };
+}
+
+describe("clearMarkers", () => {
+  beforeEach(() => {
+    useStore.setState({ project: makeProject() });
+  });
+
+  it("해당 트랙의 markers를 빈 배열로 만든다", () => {
+    useStore.getState().clearMarkers("t1");
+    const t1 = useStore.getState().project!.tracks.find((t) => t.id === "t1")!;
+    expect(t1.markers).toEqual([]);
+  });
+
+  it("다른 트랙의 markers는 그대로 둔다", () => {
+    useStore.getState().clearMarkers("t1");
+    const t2 = useStore.getState().project!.tracks.find((t) => t.id === "t2")!;
+    expect(t2.markers).toHaveLength(1);
+  });
+
+  it("project.updatedAt을 갱신한다", () => {
+    const before = useStore.getState().project!.updatedAt;
+    useStore.getState().clearMarkers("t1");
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(before);
+    expect(useStore.getState().project!.updatedAt).not.toBe(1000);
+  });
+
+  it("project가 null이면 아무 일도 하지 않는다", () => {
+    useStore.setState({ project: null });
+    expect(() => useStore.getState().clearMarkers("t1")).not.toThrow();
+    expect(useStore.getState().project).toBeNull();
+  });
+});
