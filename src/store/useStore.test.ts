@@ -156,3 +156,207 @@ describe("useStore 점수", () => {
     expect(useStore.getState().score.totalJudged).toBe(0);
   });
 });
+
+function makeProject(): Project {
+  return {
+    id: "p1",
+    name: "테스트",
+    createdAt: 1000,
+    updatedAt: 1000,
+    baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 60000 },
+    master: { volume: 1 },
+    tracks: [
+      {
+        id: "t1",
+        name: "트랙 1",
+        status: "write",
+        sound: { kind: "builtin", sampleId: "kick" },
+        keyBinding: null,
+        markers: [
+          { id: "m1", timeMs: 100 },
+          { id: "m2", timeMs: 200 },
+        ],
+        volume: 1,
+        color: "#fff",
+      },
+      {
+        id: "t2",
+        name: "트랙 2",
+        status: "play",
+        sound: { kind: "builtin", sampleId: "snare" },
+        keyBinding: null,
+        markers: [{ id: "m3", timeMs: 300 }],
+        volume: 1,
+        color: "#000",
+      },
+    ],
+  };
+}
+
+describe("clearMarkers", () => {
+  beforeEach(() => {
+    useStore.setState({ project: makeProject() });
+  });
+
+  it("해당 트랙의 markers를 빈 배열로 만든다", () => {
+    useStore.getState().clearMarkers("t1");
+    const t1 = useStore.getState().project!.tracks.find((t) => t.id === "t1")!;
+    expect(t1.markers).toEqual([]);
+  });
+
+  it("다른 트랙의 markers는 그대로 둔다", () => {
+    useStore.getState().clearMarkers("t1");
+    const t2 = useStore.getState().project!.tracks.find((t) => t.id === "t2")!;
+    expect(t2.markers).toHaveLength(1);
+  });
+
+  it("project.updatedAt을 갱신한다", () => {
+    const before = useStore.getState().project!.updatedAt;
+    useStore.getState().clearMarkers("t1");
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(before);
+    expect(useStore.getState().project!.updatedAt).not.toBe(1000);
+  });
+
+  it("project가 null이면 아무 일도 하지 않는다", () => {
+    useStore.setState({ project: null });
+    expect(() => useStore.getState().clearMarkers("t1")).not.toThrow();
+    expect(useStore.getState().project).toBeNull();
+  });
+});
+
+describe("useStore reorderTracks", () => {
+  function projectWith3Tracks(): Project {
+    const base = sampleProject();
+    return {
+      ...base,
+      tracks: ["A", "B", "C"].map((name, i) => ({
+        id: `t${i}`,
+        name,
+        status: "listening" as const,
+        sound: { kind: "builtin" as const, sampleId: "kick" },
+        keyBinding: null,
+        markers: [],
+        volume: 1,
+        color: "#fff",
+      })),
+    };
+  }
+
+  beforeEach(() => {
+    useStore.setState({
+      project: projectWith3Tracks(),
+      playing: false,
+      playheadMs: 0,
+      mode: "listening",
+      selectedTrackId: null,
+      score: emptyScore(),
+    });
+  });
+
+  function names() {
+    return useStore.getState().project!.tracks.map((t) => t.name);
+  }
+
+  it("앞 트랙을 뒤로 이동하면 순서가 바뀐다", () => {
+    useStore.getState().reorderTracks(0, 2);
+    expect(names()).toEqual(["B", "C", "A"]);
+  });
+
+  it("뒤 트랙을 앞으로 이동하면 순서가 바뀐다", () => {
+    useStore.getState().reorderTracks(2, 0);
+    expect(names()).toEqual(["C", "A", "B"]);
+  });
+
+  it("인접 트랙 스왑", () => {
+    useStore.getState().reorderTracks(0, 1);
+    expect(names()).toEqual(["B", "A", "C"]);
+  });
+
+  it("from===to면 순서/참조 모두 변경 없음(전이 없음)", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(1, 1);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("fromIndex가 범위 밖이면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(5, 0);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("toIndex가 범위 밖이면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(0, 9);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("음수 인덱스면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(-1, 1);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("정상 이동 시 updatedAt이 갱신된다(단일 전이)", () => {
+    const t0 = useStore.getState().project!.updatedAt;
+    useStore.getState().reorderTracks(0, 2);
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(t0);
+  });
+
+  it("project가 null이면 안전하게 무시한다", () => {
+    useStore.setState({ project: null });
+    expect(() => useStore.getState().reorderTracks(0, 1)).not.toThrow();
+    expect(useStore.getState().project).toBeNull();
+  });
+});
+
+describe("setPlayPauseKey", () => {
+  function makeTransportProject(overrides: Partial<Project> = {}): Project {
+    return {
+      id: "p1",
+      name: "test",
+      createdAt: 0,
+      updatedAt: 0,
+      baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
+      tracks: [],
+      master: { volume: 1 },
+      ...overrides,
+    };
+  }
+
+  beforeEach(() => {
+    useStore.setState({ project: makeTransportProject() });
+  });
+
+  it("transport가 없던 프로젝트에 playPauseKey를 설정한다", () => {
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project?.transport?.playPauseKey).toBe("KeyP");
+  });
+
+  it("기존 playPauseKey를 다른 키로 교체한다", () => {
+    useStore.setState({ project: makeTransportProject({ transport: { playPauseKey: "KeyP" } }) });
+    useStore.getState().setPlayPauseKey("Space");
+    expect(useStore.getState().project?.transport?.playPauseKey).toBe("Space");
+  });
+
+  it("null로 바인딩을 해제한다", () => {
+    useStore.setState({ project: makeTransportProject({ transport: { playPauseKey: "KeyP" } }) });
+    useStore.getState().setPlayPauseKey(null);
+    expect(useStore.getState().project?.transport?.playPauseKey).toBeNull();
+  });
+
+  it("updatedAt을 갱신한다 (단일 전이)", () => {
+    const before = useStore.getState().project!.updatedAt;
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("project가 null이면 아무 일도 하지 않는다", () => {
+    useStore.setState({ project: null });
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project).toBeNull();
+  });
+});

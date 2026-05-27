@@ -28,6 +28,8 @@ interface StoreState {
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
   removeMarker: (trackId: string, markerId: string) => void;
+  clearMarkers: (trackId: string) => void;
+  reorderTracks: (fromIndex: number, toIndex: number) => void; // 범위 밖/동일이면 무시
 
   setSelectedTrack: (trackId: string | null) => void;
   toggleMarkerAt: (trackId: string, timeMs: number, toleranceMs: number) => void;
@@ -36,6 +38,8 @@ interface StoreState {
 
   setScore: (score: ScoreState) => void;
   resetScore: () => void;
+
+  setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
 }
 
 function clamp01(v: number): number {
@@ -49,6 +53,14 @@ function mutate(
 ): Partial<StoreState> {
   if (!s.project) return s;
   return { project: { ...s.project, tracks: fn(s.project.tracks), updatedAt: Date.now() } };
+}
+
+/** 배열을 복사해 from→to로 한 요소를 이동한다(불변). 인덱스 가정은 호출부에서 보장. */
+function moveItem<T>(arr: T[], fromIndex: number, toIndex: number): T[] {
+  const next = arr.slice();
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
 }
 
 function mapTrack(tracks: Track[], id: string, fn: (t: Track) => Track): Track[] {
@@ -131,6 +143,20 @@ export const useStore = create<StoreState>((set) => ({
       ),
     ),
 
+  clearMarkers: (trackId) =>
+    set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, markers: [] })))),
+
+  reorderTracks: (fromIndex, toIndex) =>
+    set((s) => {
+      if (!s.project) return s;
+      const len = s.project.tracks.length;
+      const inRange = (i: number) => Number.isInteger(i) && i >= 0 && i < len;
+      if (fromIndex === toIndex || !inRange(fromIndex) || !inRange(toIndex)) {
+        return s;
+      }
+      return mutate(s, (tracks) => moveItem(tracks, fromIndex, toIndex));
+    }),
+
   setSelectedTrack: (trackId) => set({ selectedTrackId: trackId }),
 
   toggleMarkerAt: (trackId, timeMs, toleranceMs) =>
@@ -170,4 +196,11 @@ export const useStore = create<StoreState>((set) => ({
 
   setScore: (score) => set({ score }),
   resetScore: () => set({ score: emptyScore() }),
+
+  setPlayPauseKey: (key) =>
+    set((s) =>
+      s.project
+        ? { project: { ...s.project, transport: { playPauseKey: key }, updatedAt: Date.now() } }
+        : s,
+    ),
 }));

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { Repeat } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
+import { useEditorUi } from "../store/editorUi";
 import {
   stepTimes,
   activeStepsToMarkerTimes,
@@ -8,19 +10,11 @@ import {
   type RepeatTarget,
 } from "../domain/sequencer";
 
-interface Region {
-  startMs: number;
-  endMs: number;
-}
-
-interface Props {
-  region: Region;
-  setRegion: (r: Region) => void;
-  stepCount: number;
-  setStepCount: (n: number) => void;
-}
-
-export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount }: Props) {
+export function StepSequencerPanel() {
+  const region = useEditorUi((s) => s.region);
+  const setRegion = useEditorUi((s) => s.setRegion);
+  const stepCount = useEditorUi((s) => s.stepCount);
+  const setStepCount = useEditorUi((s) => s.setStepCount);
   const selectedTrackId = useStore((s) => s.selectedTrackId);
   const tracks = useStore((s) => s.project?.tracks ?? []);
   const durationMs = useStore((s) => s.project?.baseFlow.durationMs ?? 0);
@@ -34,7 +28,7 @@ export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount 
 
   const track = tracks.find((t) => t.id === selectedTrackId) ?? null;
   if (!track) {
-    return <div style={{ padding: 8 }}>트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
+    return <div className="empty-hint panel">트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
   }
 
   const steps = stepTimes(region.startMs, region.endMs, stepCount);
@@ -56,7 +50,6 @@ export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount 
     else if (repeatKind === "until") target = { kind: "until", untilMs };
     else target = { kind: "toEnd", endMs: durationMs };
     const tiled = tilePattern(pattern, region.startMs, regionLen, target);
-    // 첫 구간(원본 패턴)은 이미 존재하므로 그 이후만 추가
     const toAdd = tiled.filter((t) => t >= region.endMs);
     addMarkersBulk(track!.id, toAdd);
   }
@@ -72,70 +65,73 @@ export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount 
   }
 
   return (
-    <div style={{ padding: 8, borderTop: "1px solid #222833" }}>
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-        <strong>스텝 시퀀서 — {track.name}</strong>
-        <label>
+    <div className="seq-panel panel">
+      <div className="seq-panel__head">
+        <h2 className="section-title">스텝 시퀀서 — {track.name}</h2>
+        <label className="field">
           구간 시작(ms)
           <input
             type="number"
             value={Math.round(region.startMs)}
             onChange={(e) => setRegion({ ...region, startMs: Number(e.target.value) })}
-            style={{ width: 80 }}
+            style={{ width: 90 }}
           />
         </label>
-        <label>
+        <label className="field">
           끝(ms)
           <input
             type="number"
             value={Math.round(region.endMs)}
             onChange={(e) => setRegion({ ...region, endMs: Number(e.target.value) })}
-            style={{ width: 80 }}
+            style={{ width: 90 }}
           />
         </label>
-        <label>
+        <label className="field">
           칸수
           <input
             type="number"
             min={1}
             max={64}
             value={stepCount}
-            onChange={(e) => setStepCount(Math.max(1, Number(e.target.value)))}
-            style={{ width: 50 }}
+            onChange={(e) => setStepCount(Number(e.target.value))}
+            style={{ width: 60 }}
           />
         </label>
       </div>
 
-      <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
+      <div className="step-grid">
         {steps.map((t, i) => (
           <button
             key={i}
+            className={
+              "step-cell" +
+              (active[i] ? " step-cell--active" : "") +
+              (i % 4 === 0 ? " step-cell--beat" : "")
+            }
+            style={{ "--cell-color": track.color } as CSSProperties}
             onClick={() => toggleMarkerAt(track.id, t, tolerance)}
-            style={{
-              flex: 1,
-              height: 32,
-              background: active[i] ? track.color : "#1a1f29",
-              border: "1px solid #2a3140",
-            }}
           />
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <span>반복:</span>
+      <div className="seq-controls">
+        <span>반복</span>
         <select value={repeatKind} onChange={(e) => setRepeatKind(e.target.value as typeof repeatKind)}>
           <option value="toEnd">곡 끝까지</option>
           <option value="count">N회</option>
           <option value="until">지정 지점까지</option>
         </select>
         {repeatKind === "count" && (
-          <input type="number" min={1} value={count} onChange={(e) => setCount(Number(e.target.value))} style={{ width: 60 }} />
+          <input type="number" min={1} value={count} onChange={(e) => setCount(Number(e.target.value))} style={{ width: 70 }} />
         )}
         {repeatKind === "until" && (
-          <input type="number" min={0} value={untilMs} onChange={(e) => setUntilMs(Number(e.target.value))} style={{ width: 90 }} />
+          <input type="number" min={0} value={untilMs} onChange={(e) => setUntilMs(Number(e.target.value))} style={{ width: 100 }} />
         )}
-        <button onClick={fill}>⟳ 반복 채우기</button>
-        <button onClick={clearAndRefill}>범위 지우고 다시 채우기</button>
+        <button className="btn--primary" onClick={fill}>
+          <Repeat size={15} weight="bold" />
+          반복 채우기
+        </button>
+        <button className="btn--ghost" onClick={clearAndRefill}>범위 지우고 다시 채우기</button>
       </div>
     </div>
   );

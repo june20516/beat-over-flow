@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
-import { getEngine, loadBaseFlow, seek } from "../audio/runtime";
+import { getEngine, loadBaseFlow } from "../audio/runtime";
 import { getAsset } from "../persistence/assets";
 import { computePeaks } from "../render/waveform";
-import { resolveTrackBehavior } from "../domain/mode";
-import { TimelineCanvas } from "../render/TimelineCanvas";
+import { Timeline } from "./Timeline";
 import { TransportBar } from "./TransportBar";
-import { TrackList } from "./TrackList";
+import { EditorToolbar } from "./EditorToolbar";
 import { ModeSwitcher } from "./ModeSwitcher";
-import { StepSequencerPanel } from "./StepSequencerPanel";
 import { ScoreHud } from "./ScoreHud";
 import { startKeyboard } from "../input/KeyboardController";
 import { startPlaySession, endPlaySession } from "../scoring/playSession";
+import { useEditorUi } from "../store/editorUi";
 
 interface Props {
   onExit: () => void;
@@ -19,12 +18,18 @@ interface Props {
 
 export function Editor({ onExit }: Props) {
   const project = useStore((s) => s.project);
-  const tracks = useStore((s) => s.project?.tracks ?? []);
   const mode = useStore((s) => s.mode);
-  const addMarker = useStore((s) => s.addMarker);
+  const selectedTrackId = useStore((s) => s.selectedTrackId);
+  const setSelectedTrack = useStore((s) => s.setSelectedTrack);
+  const resetForTrack = useEditorUi((s) => s.resetForTrack);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
-  const [region, setRegion] = useState({ startMs: 0, endMs: 4000 });
-  const [stepCount, setStepCount] = useState(8);
+
+  // 트랙 에디터/마커 레인/파형 외의 빈 영역을 클릭하면 포커스 해제
+  function handleMainClick(e: React.MouseEvent<HTMLDivElement>) {
+    const target = e.target as HTMLElement;
+    if (target.closest(".track-row-wrap, .base-flow-lane, .timeline__head")) return;
+    if (selectedTrackId) setSelectedTrack(null);
+  }
 
   useEffect(() => {
     const stop = startKeyboard();
@@ -35,6 +40,10 @@ export function Editor({ onExit }: Props) {
     if (mode === "play") startPlaySession();
     else endPlaySession();
   }, [mode]);
+
+  useEffect(() => {
+    resetForTrack();
+  }, [selectedTrackId, resetForTrack]);
 
   useEffect(() => {
     if (!project) return;
@@ -54,44 +63,25 @@ export function Editor({ onExit }: Props) {
 
   if (!project) return null;
 
-  function handleLaneClick(trackId: string, timeMs: number) {
-    // 레코드 모드 + write 트랙에서만 클릭으로 마커 추가
-    const track = tracks.find((t) => t.id === trackId);
-    if (!track) return;
-    if (resolveTrackBehavior(mode, track.status) === "record") {
-      addMarker(trackId, timeMs);
-    }
-  }
-
   return (
-    <div>
+    <div className="app-shell">
       <ScoreHud />
-      <div style={{ display: "flex", justifyContent: "space-between", padding: 8 }}>
-        <strong>{project.name}</strong>
+      <header className="top-bar">
+        <span className="top-bar__name">{project.name}</span>
+        <span className="top-bar__spacer" />
         <ModeSwitcher />
-        <button onClick={onExit}>← 목록</button>
-      </div>
+        <span className="top-bar__spacer" />
+        <button className="btn--ghost" onClick={onExit}>
+          ← 목록
+        </button>
+      </header>
       <TransportBar />
-      <div style={{ display: "flex" }}>
-        <TrackList />
-        <div style={{ flex: 1 }}>
-          <TimelineCanvas
-            peaks={peaks}
-            durationMs={project.baseFlow.durationMs}
-            tracks={tracks}
-            region={region}
-            stepCount={stepCount}
-            onSeek={seek}
-            onLaneClick={handleLaneClick}
-          />
+      <EditorToolbar />
+      <div className="editor-main" onClick={handleMainClick}>
+        <div className="editor-main__timeline">
+          <Timeline peaks={peaks} durationMs={project.baseFlow.durationMs} />
         </div>
       </div>
-      <StepSequencerPanel
-        region={region}
-        setRegion={setRegion}
-        stepCount={stepCount}
-        setStepCount={setStepCount}
-      />
     </div>
   );
 }

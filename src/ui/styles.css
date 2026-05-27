@@ -1,0 +1,1038 @@
+/* ==========================================================================
+   BeatOverflow — 디자인 시스템
+   비비드/플레이풀: 깊은 인디고-블랙 배경 + 보라→핑크 그라데이션 + 네온 액센트
+   ========================================================================== */
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url("https://fonts.googleapis.com/css2?family=Jua&family=DM+Mono:wght@400;500&display=swap");
+
+:root {
+  /* 배경 레이어 */
+  --bg: #0c0a18;
+  --bg-elev: #161031;
+  --bg-elev-2: #1f1742;
+  --bg-inset: #100c24;
+
+  /* 텍스트 */
+  --text: #f3eefc;
+  --text-dim: #b3a7d6;
+  --text-faint: #7c719e;
+
+  /* 보더 / 라인 */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  /* 액센트 */
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #22d3ee;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --orange: #fb923c;
+
+  --grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  --grad-soft: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(236, 72, 153, 0.18));
+
+  /* 라운드 */
+  --r-sm: 9px;
+  --r: 14px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+
+  /* 그림자 / 글로우 */
+  --shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --glow-purple: 0 0 0 1px rgba(168, 85, 247, 0.5), 0 6px 22px -6px rgba(168, 85, 247, 0.6);
+
+  --font-body: "Pretendard", system-ui, sans-serif;
+  --font-display: "Jua", "Pretendard", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+}
+
+/* --- reset / base ------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(168, 85, 247, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(236, 72, 153, 0.18), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(236, 72, 153, 0.35);
+}
+
+/* 얇은 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: var(--r-pill);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --- 타이포 ------------------------------------------------------------- */
+.brand {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  color: var(--text);
+  margin: 0;
+}
+
+/* --- 컨트롤: 버튼 ------------------------------------------------------- */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+/* 아이콘 SVG는 줄어들지 않게 */
+button svg {
+  flex: none;
+}
+button:hover {
+  background: #271d52;
+  border-color: var(--line-strong);
+}
+button:active {
+  transform: translateY(1px);
+}
+button:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: var(--grad);
+  border: none;
+  color: #fff;
+  box-shadow: var(--glow-purple);
+}
+.btn--primary:hover {
+  background: var(--grad);
+  filter: brightness(1.08);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+}
+.btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn--icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 16px;
+  border-radius: var(--r-pill);
+}
+
+.btn--danger {
+  padding: 6px 10px;
+  color: var(--text-dim);
+}
+.btn--danger:hover {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.5);
+  color: #fecaca;
+}
+
+/* --- 컨트롤: 인풋 / 셀렉트 --------------------------------------------- */
+input[type="text"],
+input[type="number"],
+input:not([type]),
+select {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 7px 9px;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.22);
+}
+select {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 52%, calc(100% - 9px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+option {
+  background: var(--bg-elev-2);
+  color: var(--text);
+}
+
+/* --- 컨트롤: 레인지 슬라이더 ------------------------------------------- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg-inset);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-pill);
+  background: var(--grad);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+input[type="range"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 지나간 구간을 primary 그라데이션으로 채우는 슬라이더 (--pct: 0~100%) */
+input[type="range"].range-fill {
+  background:
+    linear-gradient(var(--bg-inset), var(--bg-inset)) no-repeat right center,
+    linear-gradient(90deg, var(--purple), var(--pink)) no-repeat left center;
+  background-size: calc(100% - var(--pct, 0%)) 100%, 100% 100%;
+}
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.3);
+}
+
+/* ==========================================================================
+   레이아웃 — Editor
+   ========================================================================== */
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: rgba(12, 10, 24, 0.72);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.top-bar__name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.top-bar__name::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  background: var(--grad);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.9);
+}
+.top-bar__spacer {
+  flex: 1;
+}
+
+.panel {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 20px 0;
+  padding: 12px 16px;
+}
+.transport__time {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.transport__seek {
+  flex: 1;
+}
+.transport__vol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+}
+.transport__vol input[type="range"] {
+  width: 90px;
+}
+
+.editor-main {
+  display: flex;
+  gap: 0;
+  margin: 16px 20px 0;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+.editor-main__timeline {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-inset);
+  overflow: hidden;
+}
+
+/* --- v2 Timeline 레이아웃: 헤더 행 + 트랙 행들 ---------------------------- */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+/* 헤더 행: 좌측 고정 컬럼 | 우측 arrange(베이스 파형) */
+.timeline__header-row {
+  display: flex;
+  align-items: stretch;
+  flex: none;
+}
+.timeline__fixed-col {
+  width: 384px;
+  flex: none;
+  border-right: 1px solid var(--line);
+}
+.timeline__head {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.timeline__head .section-title {
+  font-size: 16px;
+}
+.timeline__head button {
+  margin-left: auto;
+}
+/* 트랙 행 목록: 세로 스크롤 */
+.timeline__rows {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* 키 바인딩 키캡 */
+.keycap {
+  flex: none;
+  min-width: 30px;
+  padding: 5px 7px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+  background: var(--bg-inset);
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 3px;
+  border-radius: 7px;
+  color: var(--text);
+}
+.keycap--capturing {
+  border-color: var(--pink);
+  color: var(--pink);
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ==========================================================================
+   모드 스위처 — 세그먼트 컨트롤
+   ========================================================================== */
+.seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+.seg__btn {
+  border: none;
+  background: transparent;
+  border-radius: var(--r-pill);
+  padding: 7px 16px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.seg__btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+.seg__btn--active {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 4px 14px -4px rgba(236, 72, 153, 0.7);
+}
+.seg__btn--active:hover {
+  background: var(--grad);
+  color: #fff;
+}
+
+/* ==========================================================================
+   스텝 시퀀서
+   ========================================================================== */
+.seq-panel {
+  margin: 16px 20px 24px;
+  padding: 16px;
+}
+.seq-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+.seq-panel__head .section-title {
+  font-size: 15px;
+  margin-right: 4px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field input {
+  text-transform: none;
+}
+
+.step-grid {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+.step-cell {
+  flex: 1;
+  height: 40px;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  transition: transform 0.1s ease, box-shadow 0.18s ease, background 0.12s ease;
+}
+.step-cell:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+.step-cell--active {
+  background: var(--cell-color, var(--purple));
+  border-color: transparent;
+  box-shadow: 0 0 14px -2px var(--cell-color, var(--purple)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.step-cell--beat {
+  border-color: var(--line-strong);
+}
+
+.seq-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   스코어 HUD — 게임 점수 강조
+   ========================================================================== */
+.score-hud {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  min-width: 168px;
+  padding: 14px 18px;
+  background: rgba(22, 16, 49, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  text-align: right;
+}
+.score-hud__label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.score-hud__value {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1.05;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.score-hud__combo {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 2px;
+}
+.score-hud__combo b {
+  color: var(--cyan);
+}
+.score-hud__acc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.score-hud__judge {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.score-hud__judge .p {
+  color: var(--green);
+}
+.score-hud__judge .g {
+  color: var(--yellow);
+}
+.score-hud__judge .m {
+  color: var(--pink);
+}
+
+.empty-hint {
+  padding: 28px 20px;
+  margin: 16px 20px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   프로젝트 목록 (랜딩)
+   ========================================================================== */
+.landing {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 72px 24px 64px;
+}
+.landing__hero {
+  text-align: center;
+  margin-bottom: 44px;
+}
+.landing__title {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 9vw, 84px);
+  line-height: 1;
+  margin: 0 0 14px;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+}
+.landing__tagline {
+  color: var(--text-dim);
+  font-size: 16px;
+  margin: 0 0 28px;
+}
+.landing__cta {
+  font-size: 15px;
+  padding: 14px 26px;
+  border-radius: var(--r-pill);
+}
+
+.project-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  text-align: left;
+}
+.project-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.project-card__open {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-card__open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r);
+}
+.project-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.project-card .btn--danger {
+  position: relative;
+  z-index: 1;
+}
+.landing__empty {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 32px;
+}
+
+/* ==========================================================================
+   라우팅 화면 — Home / Play 준비중 / 404 / 로딩 (전체화면 중앙 정렬)
+   ========================================================================== */
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.screen__title {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 9vw, 84px);
+  line-height: 1;
+  margin: 0;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+}
+.screen__title--sm {
+  font-size: clamp(32px, 6vw, 52px);
+}
+.screen__lead {
+  color: var(--text-dim);
+  font-size: 16px;
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.5;
+}
+.screen__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.screen__cta {
+  font-size: 15px;
+  padding: 14px 26px;
+  border-radius: var(--r-pill);
+}
+.screen__code {
+  font-family: var(--font-display);
+  font-size: clamp(96px, 22vw, 200px);
+  line-height: 0.85;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.screen__badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pink);
+  background: var(--grad-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+}
+.screen__spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  border: 3px solid var(--line-strong);
+  border-top-color: var(--pink);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- v2 행 분해: TrackRow = TrackEditor | MarkerEditor --------------------- */
+.track-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  height: 40px; /* 언포커스 기본 높이 */
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  overflow: hidden;
+  transition: height 0.18s ease, background 0.15s ease;
+}
+.track-row--even {
+  background: #130d33;
+}
+.track-row--odd {
+  background: #171041;
+}
+.track-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.track-row--focused {
+  height: 88px; /* 포커스 확장 */
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.track-row__editor {
+  width: 384px;
+  flex: none;
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+}
+.track-row__lane {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.track-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px 0 8px;
+  border-left: 4px solid var(--track-color, var(--purple));
+}
+.track-editor__name {
+  width: 52px;
+  flex: none;
+  padding: 5px 6px;
+  font-size: 12px;
+}
+.track-editor select {
+  flex: none;
+  width: 58px;
+  font-size: 11px;
+  padding: 5px 18px 5px 6px;
+}
+.track-editor input[type="range"] {
+  width: 40px;
+  flex: none;
+}
+
+.marker-editor {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.marker-editor--editable {
+  cursor: crosshair;
+}
+.marker-editor--overview {
+  opacity: 0.7;
+}
+
+/* 상태 2×2 그리드 (요구 2) */
+.status-grid {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.status-grid__cell {
+  width: 18px;
+  height: 16px;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid var(--tone);
+  border-radius: 4px;
+  color: var(--tone);
+  background: transparent;
+  cursor: pointer;
+}
+.status-grid__cell--on {
+  color: #0a0a0a;
+  background: var(--tone);
+}
+
+/* 볼륨 팝오버 (요구 1) */
+.volume-control {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+/* 위치는 body 포털에서 인라인(position:fixed)으로 지정한다(클리핑 방지). 여기선 외형만. */
+.volume-control__popover {
+  padding: 14px 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+/* 세로 range: 가로 슬라이더를 회전해 세로로 배치 */
+.volume-control__pct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 24px;
+  text-align: center;
+}
+/* 세로 볼륨 슬라이더: 아래=0, 위=100%. 아래에서 위로 그라데이션 채움.
+   전역 input[type=range](특이도 0,1,1)를 이기려고 input. 접두사로 특이도 상향. */
+input.volume-control__range {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 120px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  background:
+    linear-gradient(var(--bg-inset), var(--bg-inset)) no-repeat top center,
+    linear-gradient(0deg, var(--purple), var(--pink)) no-repeat bottom center;
+  background-size:
+    100% calc(100% - var(--pct, 0%)),
+    100% 100%;
+}
+input.volume-control__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  border: 2px solid var(--purple);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+input.volume-control__range:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+/* 트랙 드래그 핸들 (요구 8) */
+.track-editor__drag-handle {
+  cursor: grab;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  touch-action: none;
+}
+.track-editor__drag-handle:active {
+  cursor: grabbing;
+}
+
+/* 전역 에디터 툴바 (요구 4) */
+.editor-toolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid #222833;
+}
+.editor-toolbar .btn--ghost.is-active {
+  background: #2a3550;
+  color: #fff;
+}
+
+/* 인라인 시퀀서: 포커스 행 바로 아래, 좌측 gutter = TrackEditor 컬럼 폭(384px) */
+.track-row__sequencer {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.track-row__sequencer-gutter {
+  flex: 0 0 384px; /* .track-row__editor / .timeline__fixed-col 폭과 동일 */
+}
+.track-row__sequencer-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.editor-toolbar__sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
+
+/* 트랙 드래그 고스트 (폴리싱 #5) */
+.track-drag-overlay {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border-left: 4px solid var(--track-color, var(--purple));
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow);
+  cursor: grabbing;
+}
+
+/* 언포커스 상태 한 글자 (폴리싱 #2) */
+.status-grid--compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--tone);
+  border-radius: 6px;
+  color: var(--tone);
+}
+.status-grid__letter {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 트랙 행 펄스(키 입력 피드백, 폴리싱 #9) */
+.track-row--pulse { animation: track-pulse 0.32s ease; }
+@keyframes track-pulse {
+  0% { background: rgba(168, 85, 247, 0.45); }
+  100% { background: transparent; }
+}
+
+/* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */
+.track-row { position: relative; }
+.track-row__delete {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  z-index: 6;
+  pointer-events: none;
+}
+.track-row__delete-handle {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 10px;
+  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.25));
+  pointer-events: auto;
+  cursor: pointer;
+}
+.track-row__delete-btn {
+  width: 26px; height: 26px; padding: 0;
+  border-radius: var(--r-pill);
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+}
+.track-row__delete:hover .track-row__delete-btn {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+/* 버튼 자체 hover 시 전역 button:hover(보라)가 덮지 않도록 빨강 유지(진하게) */
+.track-row__delete-btn:hover {
+  background: #dc2626;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+}
+
+/* 시퀀서 선택 구간 지속 표시 밴드 (폴리싱 #7·#4) */
+.region-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(168, 85, 247, 0.18);
+  border-left: 2px solid var(--purple);
+  border-right: 2px solid var(--purple);
+  pointer-events: none;
+  z-index: 3;
+}

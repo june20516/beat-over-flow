@@ -44,3 +44,215 @@ EXECUTION.md 프로토콜에 따라 `docs/superpowers/plans`의 계획 1→4를 
 
 - 계획 1 Task 15 수동 검증(브라우저): 오디오 업로드→파형 표시, ▶ 재생/플레이헤드 이동,
   캔버스/슬라이더 탐색, 볼륨 변화, 새로고침 후 프로젝트 유지. (Web Audio·Canvas는 jsdom 미지원)
+
+---
+
+# Editor v2 재편 (무인 자율 실행 2회차)
+
+`docs/superpowers/EXECUTION.md` v2 프로토콜. v2 계획 6개를 1→6 순차 구현.
+v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
+
+## 계획 v2-1 (뷰포트/타임라인)
+
+### Task 1: viewportMath 순수함수 — ✅ 완료
+- 커밋 `d27efd9`. viewportMath.ts + test (16 테스트). 전체 87 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+- 리뷰 Minor(미반영, 사유): `xToTime` `pxPerMs===0` 시 Infinity/NaN → 계약 §4 순수 공식
+  유지 우선 + 호출부 가드. 테스트 분리/centeredScrollLeftPx(Task7)는 계획대로 둠.
+
+### Task 2: useViewport 스토어 — ✅ 완료
+- 커밋 `dfc4303`. viewport.ts + test (7 테스트). 전체 94 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+- 리뷰 메모(Task 7에서 챙길 것): followPlayhead/setFollowPlayhead/followTo 추가 +
+  `panByPx`에 `followPlayhead:false` + 테스트 `reset()`에 `followPlayhead:true` 동기화.
+
+### Task 3: BaseFlowLane — ✅ 완료
+- 커밋 `a5b16ca`. BaseFlowLane.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 4: PlayheadOverlay — ✅ 완료
+- 커밋 `0f91dca`. PlayheadOverlay.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 5: Timeline 컨테이너 — ✅ 완료
+- 커밋 `f2957d1`. Timeline.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 6: Editor 연결 + TimelineCanvas 삭제 — ✅ 완료
+- 커밋 `f9d6b3d`. Editor가 Timeline 사용, render/TimelineCanvas.tsx 삭제, 잔존 참조 0.
+  전체 94 통과, tsc OK. 스펙+품질 리뷰 ✅ Approved.
+- 브라우저 검증(헤드리스 Chrome, `/tmp/bof-driver/v2-1-shot.mjs`): 홈→편집→새 프로젝트
+  업로드→에디터. `.timeline__arrange`/`.base-flow-lane`/canvas 렌더 확인,
+  `.playhead-overlay__line` 존재 확인. shift+wheel 줌 시 캔버스가 더 조밀한 막대로 재렌더됨
+  (샘플 3초라 줌 배율 폭은 minPxPerMs↔MAX로 좁음). 스크린샷: `/tmp/bof-v2-{editor,play,zoom,pan}.png`.
+- 추가 수정 커밋 `9100df9`: 브라우저 검증에서 "Unable to preventDefault inside passive event
+  listener" 경고 확인 → 계획 Task5 비고대로 Timeline wheel을 `addEventListener(...,{passive:false})`
+  네이티브 리스너로 전환. 재검증 시 경고 사라짐(남은 콘솔 에러는 favicon 404뿐, 무해).
+
+### Task 7: 재생 중 auto-follow — ✅ 완료
+- 커밋 `c2e9adf`. centeredScrollLeftPx + followPlayhead/setFollowPlayhead/followTo,
+  panByPx가 follow 해제, runtime(play/seek/RAF) 연동. 전체 101 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+  - 리뷰 Minor(미반영): seek가 `source.currentTimeMs()`를 (스토어 경유) 2회 읽음 → 계획이 명시한
+    `followTo(useStore.getState().playheadMs)` 형태이고 setPlayheadMs가 동기라 동작 정확. 계획 준수 유지.
+    `setFollowPlayhead(b)` 파라미터명, zoomAt가 follow 유지(계약 §5 의도)도 그대로 둠.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/follow.mjs`): **auto-follow 확인됨.**
+  arrangeWidth=1016(중앙≈508). 최대 줌인 후 재생 시 플레이헤드 x: 176→355(초반, scroll0)→
+  508→508→505(중반, **중앙 고정**)→588(종반, scroll 최대 클램프로 우측 이동). 의도한 추종 동작.
+  콘솔 에러 favicon 404 외 없음. 수동팬 해제/재생 재활성은 단위테스트로 검증(시각 느낌은 사람 확인 권장).
+
+## 계획 v2-1 결과 요약
+- 7개 태스크 전부 완료. 커밋 d27efd9 / dfc4303 / a5b16ca / 0f91dca / f2957d1 / f9d6b3d / 9100df9(passive fix) / c2e9adf.
+- 최종 `yarn test:run` 101 통과, `yarn tsc -b` 통과.
+
+## 계획 v2-2 (행 분해 + 마커 에디터 + 포커스)
+
+### Task 1~5 — ✅ 완료
+- Task1 markerMath 순수함수: 커밋 `18e2114`(9 테스트). 스펙+품질 ✅.
+- Task2 TrackEditor: 커밋 `55f8e74`. 결합 리뷰 ✅.
+- Task3 MarkerEditor(포커스 SVG/언포커스 캔버스): 커밋 `53a0287`. 결합 리뷰 ✅.
+- Task4 TrackRow: 커밋 `77b30d9`. 결합 리뷰 ✅.
+- Task5 styles.css v2 행 분해 블록(append): 커밋 `f649c3b`. v1 보존 확인.
+- 전체 110 통과, tsc OK 유지.
+
+### Task 6 — ✅ 완료 (아키텍처 통합, 컨트롤러 직접 구현)
+- 커밋 `7c083d0`. 스펙+품질 리뷰 ✅ Approved.
+- **계획↔계약 불일치 해소(중요):** 계획 v2-2 파일목록엔 Timeline.tsx 수정이 없으나, 설계 §4와
+  계약 §1이 `TrackRow[]`를 Timeline 하위(헤더 행 아래)로 규정. 프로토콜의 "계약 우선" 원칙에 따라
+  Timeline.tsx를 헤더 행(좌 고정 컬럼: 트랙 헤더+추가버튼 | 우 arrange: BaseFlowLane+PlayheadOverlay)
+  + `.timeline__rows`(TrackRow[])로 재구성. Timeline이 store에서 tracks/selectedTrackId/addTrack 구독.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-2-shot.mjs`) — **모두 확인됨:**
+  - 트랙 행 2컬럼(editor|lane) 렌더, **컬럼 정렬 정확**(arrangeLeft==laneLeft==404, alignDiff=0).
+  - 포커스 확장: collapsed 40px → focused 88px(트랜지션, 요구 9).
+  - 하이브리드: 포커스 트랙=SVG 1개 / 언포커스=캔버스 오버뷰 1개(요구 11).
+  - 마커 편집(레코드+라이트+포커스): 좌클릭 0→2 추가, 우클릭 2→1 삭제(요구 5). 게이팅 동작.
+  - 콘솔 에러 favicon 404뿐. 스크린샷: `/tmp/bof-v22-{editor,markers}.png`.
+
+### Task 7 — ✅ 완료 (브라우저 검증)
+- 위 Task 6 검증으로 요구 5·9·11 시각 동작 모두 헤드리스 확인됨(사람 미검증 항목 없음).
+- 가시영역 가상화(스크롤/줌 시 [0,width]만): markerMath 단위테스트로 검증, 시각은 v2-1 줌 검증과 동일 뷰포트.
+
+## 계획 v2-2 결과 요약
+- 7개 태스크 전부 완료. 전체 110 통과, tsc 통과.
+- 알려진 향후 개선(결함 아님): wheel 팬/줌 리스너가 헤더 arrange에만 등록됨(공유 뷰포트라 모든 레인에
+  반영되나, 트랙 레인 위에서 직접 휠 시도는 페이지 스크롤). 필요 시 후속 계획에서 컨테이너로 확장 가능.
+
+## 계획 v2-3 (트랙에디터 컨트롤 고도화) — ✅ 완료
+- Task1 formatKeyCode(TDD, 16테스트): 커밋 `4770a2b`. 스펙+품질 ✅.
+- Task2 clearMarkers 액션(TDD, append): 커밋 `2f7a574`. 스펙+품질 ✅.
+- Task3 KeyCap: 커밋 `9973c2a`. 결합 리뷰 ✅.
+- Task4 StatusGrid(+CSS): 커밋 `255f1fc`. 결합 리뷰 ✅.
+- Task5 VolumeControl(+CSS): 커밋 `14d981a`. 결합 리뷰 ✅.
+- Task6 TrackEditor 통합: 커밋 `5a5d061`. 스펙+품질 ✅.
+- 전체 130 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-3-shot.mjs`) — **모두 확인됨:**
+  - StatusGrid 4칸[M,L,P,W], 선택 1개, 라이트 클릭 시 선택 이동(요구 2).
+  - KeyCap: "Key" → A키 입력 → "A"(formatKeyCode, 요구 3).
+  - VolumeControl: 스피커 클릭→팝오버(세로 range) 표시 → Escape로 닫힘(요구 1).
+  - 마커 비우기 버튼: 마커 2 → 0(요구 7).
+  - 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v23-controls.png`.
+
+## 계획 v2-4 (드래그 순서변경, 요구 8) — ✅ 완료
+- Task1 dnd-kit 설치(core/sortable/utilities): 커밋 `810712d`.
+- Task2+3 reorderTracks(TDD, RED→GREEN, 9테스트): 커밋 `e56fa1f`. 범위가드/단일전이. 스펙+품질 ✅.
+- Task4 영속 통합테스트(autosave→IndexedDB 라운드트립): 커밋 `c742a65`. 결합 리뷰 ✅(실제 영속 검증).
+- Task5 TrackEditor 드래그핸들(useSortable+DotsSixVertical): 커밋 `e057d54`. 결합 리뷰 ✅.
+- Task6 Timeline DndContext/SortableContext 래핑: 커밋 `e7c5692`. 결합 리뷰 ✅.
+- 전체 141 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-4-shot.mjs`) — **드래그 재정렬 종단 확인됨:**
+  - 트랙마다 드래그 핸들(⠿ DotsSixVertical) 렌더(handles=3).
+  - **실제 포인터 드래그**(핸들을 단계적 mouse.move로): ["트랙1","트랙2","트랙3"] → 트랙1을 3행 아래로
+    → ["트랙2","트랙3","트랙1"]. reorderTracks(0,2) 종단 동작 확인(reordered=true). 우측 레인은 같은 행이라 자동 동기.
+  - 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v24-{handles,afterdrag}.png`.
+  - 영속(새로고침 후 순서 유지)은 autosave 통합테스트(Task4)로 검증됨.
+- 사람 검증 권장(무인 확정 어려움): 드래그 중 시각 피드백(opacity/transform) 느낌, 핸들 외 컨트롤이
+  드래그와 충돌하지 않는 실사용 감(8px distance 가드는 적용됨, 헤드리스 클릭/입력은 정상 동작 확인).
+
+## 계획 v2-5 (전역 툴바 + 인라인 시퀀서, 요구 4) — ✅ 완료
+- Task1 useEditorUi(TDD, 6테스트): 커밋 `2a258fd`. 스펙+품질 ✅.
+- Task2 EditorToolbar(+CSS): 커밋 `2b27638`. (요구4 통합 리뷰에 포함 ✅)
+- Task3-5 통합(시퀀서 인라인화): 커밋 `e65ccd2`. StepSequencerPanel props제거→useEditorUi,
+  TrackRow 자식 렌더, Editor 재배선. 스펙+품질 ✅.
+  - **프로토콜 결정:** 계획은 Task 3/4/5를 분리했으나 중간 단계에서 tsc가 깨져(Editor가 props 없는
+    패널에 props 전달) "태스크 종료 시 그린" 규약 위반 → 세 변경을 한 그린 커밋으로 통합.
+- 전체 147 통과, tsc OK.
+- Task6 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-5-shot.mjs`) — **모두 확인됨:**
+  - 툴바 버튼 [시퀀서, 줌 리셋] 렌더, 시퀀서 토글 active 강조.
+  - 포커스 없으면 토글해도 시퀀서 안 보임 / 포커스 트랙 아래 인라인 표시(요구 4 게이팅).
+  - **시퀀서 body 좌측 = MarkerEditor lane 좌측(alignDiff=0, gutter 384px 정렬).**
+  - 포커스 변경(트랙1→2): 시퀀서가 새 행으로 이동 + 칸수 16→8 초기화 + 열림 유지(resetForTrack).
+  - 토글 off 시 시퀀서 노드 사라짐. 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v25-seq.png`.
+  - 줌 리셋 버튼: 존재+fitAll 결선 확인(시각 fitAll 동작은 v2-1에서 검증). 시퀀서 칸 토글/반복채우기는 v1 기능 보존.
+
+## 계획 v2-6 (키보드 레이어, 요구 6·12) — ✅ 완료
+- Task1-3 transport 모델/액션/기본값: 커밋 `ad0f2da`/`0bb6947`/`37fdd80`. setPlayPauseKey TDD(5테스트). 스펙+품질 ✅.
+- Task4 decideKeyAction(TDD, 12테스트): 커밋 `d507dd4`. 계약 §9 순서(repeat→입력필드→모드차단→재생키→트랙키). 스펙+품질 ✅.
+- Task5 KeyboardController 재구성: 커밋 `697d520`. decideKeyAction 기반 + 모드차단 + 재생토글, record/perform 회귀 없음. 스펙+품질 ✅.
+- Task6 TransportBar 재생키 KeyCap: 커밋 `35250fa`. setPlayPauseKey 연결. 스펙+품질 ✅.
+- 전체 164 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-6-{shot,toggle}.mjs`) — **핵심 동작 확인됨:**
+  - 재생키 바인딩: TransportBar KeyCap "Key"→"P"(formatKeyCode, 요구 12).
+  - **재생키(P)로 토글**: seek 0→704→1403ms 전진(재생) → pause 후 정지. record 모드에서도 1408→2203 전진
+    → 모든 모드에서 토글(요구 12) 확인. 콘솔 에러 0.
+  - 레코드 모드 트랙키(J) → 마커 0→1 추가(요구 6 경로, record 동작 회귀 없음).
+  - preventDefault(play/record 모드 기본동작 차단, 요구 6): decideKeyAction 단위테스트 + 컨트롤러 e.preventDefault() 결선으로 검증.
+- 사람 검증 권장(헤드리스 한계): play/record 모드에서 Space 등으로 페이지 스크롤/버튼클릭이 실제로 안 일어나는
+  시각 확인, perform 모드 소리·채점의 청취 확인(Web Audio 출력은 헤드리스로 청취 불가).
+
+# 🎉 Editor v2 — 6개 계획 전부 완료
+- v2-1(뷰포트/타임라인) · v2-2(행 분해/마커) · v2-3(트랙에디터 컨트롤) · v2-4(DnD 정렬) ·
+  v2-5(툴바/인라인 시퀀서) · v2-6(키보드) 모두 구현·검증·푸시 완료.
+- 최종: `yarn test:run` 164 통과, `yarn tsc -b` 통과. 브랜치 `feat/editor-v2`.
+
+## Editor v2 — 사람 검증 필요 항목
+- (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
+  좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
+  더 긴 오디오로 사람이 shift+wheel 줌/가로 팬 시 커서 기준 확대·페이지 스크롤 없음 확인 권장.
+- (계획 v2-1) auto-follow의 "수동 팬 시 추종 해제 → 재생 누르면 재활성"의 실제 사용 느낌(단위테스트는 통과).
+
+---
+
+# Editor v2 폴리싱 (설계: 2026-05-27-editor-v2-polish-design.md)
+
+데모 베이스플로우 `public/samples/moodmode-demo.mp3`(2:16, no-copyright) 추가. 헤드리스 검증에 사용.
+
+## 계획 P1 (줌/휠 + 제스처 + 구간드래그, #3·#6·#7) — ✅ 완료
+- 순수 TDD: zoomByAtCenter(`f87a005`), resolveWheelIntent(`35cb26a`), laneGesture(`7a62f22`). 결합 리뷰 ✅.
+- useLaneGesture 훅(`a8a710f`), Timeline 휠 전체영역+dominant(`adf0374`), 툴바 +/-/맞춤+더블클릭 제거(`931ba0c`),
+  BaseFlowLane 제스처(`adacebf`), MarkerEditor 제스처(`5b2c86b`). UI 통합 결합 리뷰 ✅.
+- 전체 178 통과, tsc OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p1-shot.mjs`, 데모 mp3 2:16) — **모두 확인:**
+  - **#3 줌 버그 수정 확정:** 캔버스폭 1016→2497(Shift+deltaY)→6138(**Shift+deltaX=macOS 케이스도 줌됨**).
+    축소/맞춤 버튼 동작, **트랙 레인 위에서도 줌**(laneZoomWorks). 더블클릭=fitAll 제거(클릭 seek 선점 해소).
+  - **#6:** 마커는 클릭(up)에서만 추가(0→1), 드래그는 마커 안 찍힘.
+  - **#7:** 드래그가 시퀀서 region 설정+자동 열기.
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p1-{zoom,marker}.png`.
+
+## 계획 P2 (포털/오버레이/compact/삭제/펄스, #1·#2·#5·#8·#9) — ✅ 완료
+- usePulse(`881790f`), VolumeControl 포털(`bfe726d`), DragOverlay(`55b4e2f`), StatusGrid compact+TrackEditor(`ca32ce4`), TrackRow 삭제+펄스(`968206c`). 결합 리뷰 ✅. 전체 181 통과, tsc OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p2*.mjs`, 데모 mp3):
+  - **#1:** 볼륨 팝오버가 document.body 포털(position:fixed)로 렌더 → overflow 클리핑 없음(inBody=true). Esc/바깥클릭 닫힘.
+  - **#2:** 포커스 트랙=2×2 그리드(4셀), 언포커스=compact 한 글자(.status-grid--compact).
+  - **#5:** 트랙 드래그 중 body에 .track-drag-overlay 고스트(클리핑 없음).
+  - **#8:** 마커비우기·삭제 인라인 X 제거 → 포커스 행 우측 핸들 hover 시 빨간 원형 삭제 버튼 opacity 0→1 페이드인.
+  - **#9:** 레코드/플레이 키 입력 시 마커 추가 + .track-row--pulse 클래스 ~320ms 하이라이트(120ms 존재, 520ms 제거).
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p2-volume.png`.
+
+## 계획 P3 (레인 플레이헤드 + 채점 게이트, #4·#10) — ✅ 완료
+- pressTrack 채점 게이트(`e112302`, TDD 3테스트 — RED가 미재생 채점/마커소진 버그 확인), LanePlayhead(`f9a863b`). 결합 리뷰 ✅. 전체 184 통과, tsc OK, build OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p3-shot.mjs`, 데모 mp3):
+  - **#4:** listening 모드=레인 플레이헤드 0개 / 플레이 모드=play 상태 트랙만 1개(다른 상태 트랙 없음). 재생 중 x 404→410.7 이동.
+  - **#10:** 채점은 playing일 때만(단위테스트 3개). perform 소리는 KeyboardController에서 무조건 재생(미리듣기) — audio 출력은 헤드리스 청취 불가(사람 확인 권장).
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p3-playhead.png`.
+
+# 🎉 Editor v2 폴리싱 — 10항목 전부 완료
+- P1(#3·#6·#7) · P2(#1·#2·#5·#8·#9) · P3(#4·#10) 구현·검증·푸시.
+- 최종: `yarn test:run` 184 통과, `yarn tsc -b` 통과, `yarn build` 통과. 브랜치 `feat/editor-v2`(PR #1).
+- 사람 검증 권장(헤드리스 한계): perform 모드 미리듣기/채점 소리 청취, 줌/드래그/페이드인의 실제 사용 감.
+
+## 폴리싱 2차 (시퀀서 상호작용 정리) — ✅ 완료
+요청: 시퀀서는 W트랙+레코드 모드에서만 / 마커도 레코드에서만(확인) / 드래그 구간선택은 시퀀서 열렸을 때만(자동열기 X) / 시퀀서 열린 동안 선택 구간 지속 표시.
+- 공유 추상화: `useSequencerActive`(토글ON+포커스트랙 레코드동작) + `RegionOverlay`(editorUi.region 지속 밴드). 커밋 `d77d22f`.
+- TrackRow 시퀀서 게이팅(`98355fa`), BaseFlowLane/MarkerEditor 드래그 게이팅+자동열기 제거+지속 오버레이(`283979b`), 죽은 .region-drag-overlay CSS 제거(`aa94dd8`). 결합 리뷰 ✅. 전체 184 통과, tsc/build OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/polish2.mjs`, 데모 mp3):
+  - 시퀀서 패널: listening(또는 W지만 비레코드)=0, record+W+포커스+토글ON=1.
+  - RegionOverlay: 활성 시 2개(베이스 파형 + 포커스 마커 레인) 지속 표시.
+  - 드래그: 활성 시 region 실시간 갱신(0~4000→33472~80334), 토글 OFF 시 드래그 무효(overlay 0), 자동 열기 없음.
+  - 마커: 레코드에서 클릭=추가(0→1). 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-polish2-active.png`.

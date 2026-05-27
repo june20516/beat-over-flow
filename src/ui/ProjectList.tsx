@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Plus } from "@phosphor-icons/react";
 import { listProjects, saveProject, deleteProject } from "../persistence/projects";
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
@@ -35,6 +36,7 @@ export function ProjectList({ onOpen }: Props) {
       baseFlow: { kind: "audioFile", assetId, durationMs: buffer.duration * 1000 },
       tracks: [],
       master: { volume: 1 },
+      transport: { playPauseKey: null },
     };
     await saveProject(project);
     setProject(project);
@@ -42,38 +44,54 @@ export function ProjectList({ onOpen }: Props) {
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1>BeatOverflow</h1>
-      <button onClick={() => fileRef.current?.click()}>＋ 새 프로젝트 (오디오 업로드)</button>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="audio/*"
-        style={{ display: "none" }}
-        onChange={handleFile}
-      />
-      <ul>
-        {projects.map((p) => (
-          <li key={p.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button
-              onClick={() => {
-                setProject(p);
-                onOpen(p);
-              }}
-            >
-              {p.name}
-            </button>
-            <button
-              onClick={async () => {
-                await deleteProject(p.id);
-                await refresh();
-              }}
-            >
-              삭제
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="landing">
+      <header className="landing__hero">
+        <h1 className="landing__title">BeatOverflow</h1>
+        <p className="landing__tagline">오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
+        <button className="btn--primary landing__cta" onClick={() => fileRef.current?.click()}>
+          <Plus size={18} weight="bold" />
+          새 프로젝트 (오디오 업로드)
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="audio/*"
+          style={{ display: "none" }}
+          onChange={handleFile}
+        />
+      </header>
+
+      {projects.length === 0 ? (
+        <p className="landing__empty">아직 프로젝트가 없어요. 오디오를 업로드해 시작하세요.</p>
+      ) : (
+        <ul className="project-grid">
+          {projects.map((p) => (
+            <li key={p.id} className="project-card panel">
+              <button
+                className="project-card__open"
+                onClick={() => {
+                  setProject(p);
+                  onOpen(p);
+                }}
+              >
+                {p.name}
+              </button>
+              <div className="project-card__footer">
+                <span>{p.tracks.length}개 트랙</span>
+                <button
+                  className="btn--danger"
+                  onClick={async () => {
+                    await deleteProject(p.id);
+                    await refresh();
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { AudioFileSource } from "./AudioFileSource";
 import type { BaseFlowSource } from "./BaseFlowSource";
 import { getAsset } from "../persistence/assets";
 import { useStore } from "../store/useStore";
+import { useViewport } from "../store/viewport";
 import { SampleLibrary } from "./SampleLibrary";
 import { playSample } from "./SamplePlayer";
 import { markersInWindow, ctxTimeForMarker } from "./Scheduler";
@@ -57,6 +58,7 @@ export async function play(): Promise<void> {
   await preloadTrackSounds();
   source.play();
   useStore.getState().setPlaying(true);
+  useViewport.getState().setFollowPlayhead(true);
   if (useStore.getState().mode === "play") {
     startPlaySession();
   }
@@ -80,6 +82,7 @@ export function seek(ms: number): void {
   source.seek(ms);
   lastScheduledMs = source.currentTimeMs();
   useStore.getState().setPlayheadMs(source.currentTimeMs());
+  useViewport.getState().followTo(useStore.getState().playheadMs);
 }
 
 function startScheduler(): void {
@@ -123,6 +126,7 @@ function startRaf(): void {
     if (!source) return;
     const st = useStore.getState();
     st.setPlayheadMs(source.currentTimeMs());
+    useViewport.getState().followTo(source.currentTimeMs());
     if (st.mode === "play") {
       updatePlay(source.currentTimeMs());
     }
