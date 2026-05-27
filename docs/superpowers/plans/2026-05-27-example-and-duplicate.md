@@ -503,12 +503,12 @@ export interface ExampleBlueprint {
 }
 
 const SAMPLE_DEFS: { id: string; name: string; key: string }[] = [
-  { id: "kick", name: "킥", key: "KeyA" },
-  { id: "snare", name: "스네어", key: "KeyS" },
-  { id: "hat", name: "하이햇", key: "KeyD" },
-  { id: "clap", name: "클랩", key: "KeyF" },
-  { id: "tom", name: "톰", key: "KeyG" },
-  { id: "perc", name: "퍼커션", key: "KeyH" },
+  { id: "kick", name: "킥", key: "KeyS" },
+  { id: "snare", name: "스네어", key: "KeyD" },
+  { id: "hat", name: "하이햇", key: "KeyF" },
+  { id: "clap", name: "클랩", key: "KeyJ" },
+  { id: "tom", name: "톰", key: "KeyK" },
+  { id: "perc", name: "퍼커션", key: "KeyL" },
 ];
 
 export const EXAMPLE_BLUEPRINT: ExampleBlueprint = {
