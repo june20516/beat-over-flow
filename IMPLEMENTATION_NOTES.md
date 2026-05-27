@@ -181,6 +181,26 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
   - 토글 off 시 시퀀서 노드 사라짐. 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v25-seq.png`.
   - 줌 리셋 버튼: 존재+fitAll 결선 확인(시각 fitAll 동작은 v2-1에서 검증). 시퀀서 칸 토글/반복채우기는 v1 기능 보존.
 
+## 계획 v2-6 (키보드 레이어, 요구 6·12) — ✅ 완료
+- Task1-3 transport 모델/액션/기본값: 커밋 `ad0f2da`/`0bb6947`/`37fdd80`. setPlayPauseKey TDD(5테스트). 스펙+품질 ✅.
+- Task4 decideKeyAction(TDD, 12테스트): 커밋 `d507dd4`. 계약 §9 순서(repeat→입력필드→모드차단→재생키→트랙키). 스펙+품질 ✅.
+- Task5 KeyboardController 재구성: 커밋 `697d520`. decideKeyAction 기반 + 모드차단 + 재생토글, record/perform 회귀 없음. 스펙+품질 ✅.
+- Task6 TransportBar 재생키 KeyCap: 커밋 `35250fa`. setPlayPauseKey 연결. 스펙+품질 ✅.
+- 전체 164 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-6-{shot,toggle}.mjs`) — **핵심 동작 확인됨:**
+  - 재생키 바인딩: TransportBar KeyCap "Key"→"P"(formatKeyCode, 요구 12).
+  - **재생키(P)로 토글**: seek 0→704→1403ms 전진(재생) → pause 후 정지. record 모드에서도 1408→2203 전진
+    → 모든 모드에서 토글(요구 12) 확인. 콘솔 에러 0.
+  - 레코드 모드 트랙키(J) → 마커 0→1 추가(요구 6 경로, record 동작 회귀 없음).
+  - preventDefault(play/record 모드 기본동작 차단, 요구 6): decideKeyAction 단위테스트 + 컨트롤러 e.preventDefault() 결선으로 검증.
+- 사람 검증 권장(헤드리스 한계): play/record 모드에서 Space 등으로 페이지 스크롤/버튼클릭이 실제로 안 일어나는
+  시각 확인, perform 모드 소리·채점의 청취 확인(Web Audio 출력은 헤드리스로 청취 불가).
+
+# 🎉 Editor v2 — 6개 계획 전부 완료
+- v2-1(뷰포트/타임라인) · v2-2(행 분해/마커) · v2-3(트랙에디터 컨트롤) · v2-4(DnD 정렬) ·
+  v2-5(툴바/인라인 시퀀서) · v2-6(키보드) 모두 구현·검증·푸시 완료.
+- 최종: `yarn test:run` 164 통과, `yarn tsc -b` 통과. 브랜치 `feat/editor-v2`.
+
 ## Editor v2 — 사람 검증 필요 항목
 - (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
   좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
