@@ -224,3 +224,13 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
   - **#6:** 마커는 클릭(up)에서만 추가(0→1), 드래그는 마커 안 찍힘.
   - **#7:** 드래그가 시퀀서 region 설정+자동 열기.
   - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p1-{zoom,marker}.png`.
+
+## 계획 P2 (포털/오버레이/compact/삭제/펄스, #1·#2·#5·#8·#9) — ✅ 완료
+- usePulse(`881790f`), VolumeControl 포털(`bfe726d`), DragOverlay(`55b4e2f`), StatusGrid compact+TrackEditor(`ca32ce4`), TrackRow 삭제+펄스(`968206c`). 결합 리뷰 ✅. 전체 181 통과, tsc OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p2*.mjs`, 데모 mp3):
+  - **#1:** 볼륨 팝오버가 document.body 포털(position:fixed)로 렌더 → overflow 클리핑 없음(inBody=true). Esc/바깥클릭 닫힘.
+  - **#2:** 포커스 트랙=2×2 그리드(4셀), 언포커스=compact 한 글자(.status-grid--compact).
+  - **#5:** 트랙 드래그 중 body에 .track-drag-overlay 고스트(클리핑 없음).
+  - **#8:** 마커비우기·삭제 인라인 X 제거 → 포커스 행 우측 핸들 hover 시 빨간 원형 삭제 버튼 opacity 0→1 페이드인.
+  - **#9:** 레코드/플레이 키 입력 시 마커 추가 + .track-row--pulse 클래스 ~320ms 하이라이트(120ms 존재, 520ms 제거).
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p2-volume.png`.
