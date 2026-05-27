@@ -36,6 +36,7 @@ export function ProjectList({ onOpen }: Props) {
       baseFlow: { kind: "audioFile", assetId, durationMs: buffer.duration * 1000 },
       tracks: [],
       master: { volume: 1 },
+      transport: { playPauseKey: null },
     };
     await saveProject(project);
     setProject(project);
