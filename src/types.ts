@@ -31,4 +31,5 @@ export interface Project {
   baseFlow: BaseFlowRef;
   tracks: Track[];
   master: { volume: number }; // 0..1
+  transport?: { playPauseKey: string | null }; // 신규(영속). 기존 저장본엔 없을 수 있어 optional. 읽을 때 ?? null.
 }
