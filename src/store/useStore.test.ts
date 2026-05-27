@@ -223,3 +223,92 @@ describe("clearMarkers", () => {
     expect(useStore.getState().project).toBeNull();
   });
 });
+
+describe("useStore reorderTracks", () => {
+  function projectWith3Tracks(): Project {
+    const base = sampleProject();
+    return {
+      ...base,
+      tracks: ["A", "B", "C"].map((name, i) => ({
+        id: `t${i}`,
+        name,
+        status: "listening" as const,
+        sound: { kind: "builtin" as const, sampleId: "kick" },
+        keyBinding: null,
+        markers: [],
+        volume: 1,
+        color: "#fff",
+      })),
+    };
+  }
+
+  beforeEach(() => {
+    useStore.setState({
+      project: projectWith3Tracks(),
+      playing: false,
+      playheadMs: 0,
+      mode: "listening",
+      selectedTrackId: null,
+      score: emptyScore(),
+    });
+  });
+
+  function names() {
+    return useStore.getState().project!.tracks.map((t) => t.name);
+  }
+
+  it("앞 트랙을 뒤로 이동하면 순서가 바뀐다", () => {
+    useStore.getState().reorderTracks(0, 2);
+    expect(names()).toEqual(["B", "C", "A"]);
+  });
+
+  it("뒤 트랙을 앞으로 이동하면 순서가 바뀐다", () => {
+    useStore.getState().reorderTracks(2, 0);
+    expect(names()).toEqual(["C", "A", "B"]);
+  });
+
+  it("인접 트랙 스왑", () => {
+    useStore.getState().reorderTracks(0, 1);
+    expect(names()).toEqual(["B", "A", "C"]);
+  });
+
+  it("from===to면 순서/참조 모두 변경 없음(전이 없음)", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(1, 1);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("fromIndex가 범위 밖이면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(5, 0);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("toIndex가 범위 밖이면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(0, 9);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("음수 인덱스면 변경 없음", () => {
+    const before = useStore.getState().project!;
+    useStore.getState().reorderTracks(-1, 1);
+    expect(useStore.getState().project).toBe(before);
+    expect(names()).toEqual(["A", "B", "C"]);
+  });
+
+  it("정상 이동 시 updatedAt이 갱신된다(단일 전이)", () => {
+    const t0 = useStore.getState().project!.updatedAt;
+    useStore.getState().reorderTracks(0, 2);
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(t0);
+  });
+
+  it("project가 null이면 안전하게 무시한다", () => {
+    useStore.setState({ project: null });
+    expect(() => useStore.getState().reorderTracks(0, 1)).not.toThrow();
+    expect(useStore.getState().project).toBeNull();
+  });
+});
