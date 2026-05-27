@@ -14,7 +14,16 @@ const BANDS = {
   high: { loHz: 4000, hiHz: 16000 },
 };
 const MIN_GAP_MS = 90;      // 트랙당 최소 마커 간격
-const MAX_PER_TRACK = 240;  // 과밀 방지 상한
+const MAX_PER_TRACK = 160;  // 과밀 방지 상한
+
+/** arr가 max를 넘으면 전 구간에 걸쳐 균등하게 max개만 남긴다(머리 편향 방지). */
+function thinUniform(arr, max) {
+  if (arr.length <= max) return arr;
+  const out = [];
+  const step = arr.length / max;
+  for (let i = 0; i < max; i++) out.push(arr[Math.floor(i * step)]);
+  return out;
+}
 
 const dec = new MPEGDecoder();
 await dec.ready;
@@ -39,7 +48,7 @@ for (const [band, { loHz, hiHz }] of Object.entries(BANDS)) {
   const { env, hopSec } = spectralFluxEnvelope(mono, sampleRate, { fftSize: 1024, hop: 512, loHz, hiHz });
   if (band === "mid") { bpmEnv = env; bpmHop = hopSec; }
   const minGapFrames = Math.max(1, Math.round(MIN_GAP_MS / 1000 / hopSec));
-  const idx = peakPick(env, { window: 16, multiplier: 1.4, minGap: minGapFrames });
+  const idx = peakPick(env, { window: 16, multiplier: 1.6, minGap: minGapFrames });
   bandPeaks[band] = idx.map((i) => i * hopSec * 1000);
 }
 
@@ -56,7 +65,7 @@ for (const band of Object.keys(bandPeaks)) {
 // 6트랙 라우팅 + 밀도 상한
 const routed = routeOnsets(bandPeaks, beatMs, phaseMs);
 for (const k of SAMPLES) {
-  routed[k] = dedupeSorted(routed[k], MIN_GAP_MS).slice(0, MAX_PER_TRACK).map((t) => Math.round(t));
+  routed[k] = thinUniform(dedupeSorted(routed[k], MIN_GAP_MS), MAX_PER_TRACK).map((t) => Math.round(t));
 }
 
 // 생성 파일 작성
@@ -72,4 +81,9 @@ ${lines}
 mkdirSync("src/example", { recursive: true });
 writeFileSync("src/example/exampleData.generated.ts", body);
 console.log(`bpm=${bpm} durationMs=${durationMs}`);
-for (const k of SAMPLES) console.log(`  ${k}: ${routed[k].length} markers`);
+for (const k of SAMPLES) {
+  const a = routed[k];
+  const first = a.length ? a[0] : "-";
+  const last = a.length ? a[a.length - 1] : "-";
+  console.log(`  ${k}: ${a.length} markers, range ${first}..${last}ms`);
+}
