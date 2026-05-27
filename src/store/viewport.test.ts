@@ -95,4 +95,26 @@ describe("useViewport", () => {
     useViewport.getState().panByPx(100);
     expect(useViewport.getState().followPlayhead).toBe(false);
   });
+
+  it("zoomByAtCenter는 가시영역 중앙을 앵커로 확대한다", () => {
+    const s = useViewport.getState();
+    s.setDuration(100000);
+    s.setContainerWidth(1000);
+    s.fitAll();
+    useViewport.setState({ pxPerMs: 0.02, scrollLeftPx: 0 });
+    const centerTimeBefore = (500 + useViewport.getState().scrollLeftPx) / 0.02;
+    useViewport.getState().zoomByAtCenter(2);
+    const v = useViewport.getState();
+    expect(v.pxPerMs).toBeCloseTo(0.04);
+    expect((500 + v.scrollLeftPx) / v.pxPerMs).toBeCloseTo(centerTimeBefore, 0);
+  });
+
+  it("zoomByAtCenter는 MAX/min을 넘지 않는다", () => {
+    const s = useViewport.getState();
+    s.setDuration(100000);
+    s.setContainerWidth(1000);
+    useViewport.setState({ pxPerMs: 0.4 });
+    s.zoomByAtCenter(100);
+    expect(useViewport.getState().pxPerMs).toBe(0.5);
+  });
 });

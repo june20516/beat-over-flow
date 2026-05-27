@@ -19,6 +19,7 @@ interface ViewportState {
   fitAll: () => void;
   panByPx: (dx: number) => void;
   zoomAt: (factor: number, anchorX: number) => void;
+  zoomByAtCenter: (factor: number) => void;
   setFollowPlayhead: (b: boolean) => void;
   followTo: (timeMs: number) => void;
 }
@@ -72,6 +73,12 @@ export const useViewport = create<ViewportState>((set) => ({
   zoomAt: (factor, anchorX) =>
     set((s) => {
       const z = zoomedViewport(toVp(s), s.durationMs, factor, anchorX);
+      return { pxPerMs: z.pxPerMs, scrollLeftPx: z.scrollLeftPx };
+    }),
+
+  zoomByAtCenter: (factor) =>
+    set((s) => {
+      const z = zoomedViewport(toVp(s), s.durationMs, factor, s.containerWidthPx / 2);
       return { pxPerMs: z.pxPerMs, scrollLeftPx: z.scrollLeftPx };
     }),
 
