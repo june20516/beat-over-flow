@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../store/useStore";
 import { getEngine, loadBaseFlow } from "../audio/runtime";
 import { getAsset } from "../persistence/assets";
@@ -23,6 +23,10 @@ export function Editor({ onExit }: Props) {
   const setSelectedTrack = useStore((s) => s.setSelectedTrack);
   const resetForTrack = useEditorUi((s) => s.resetForTrack);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
+  const renameProject = useStore((s) => s.renameProject);
+  const [editingName, setEditingName] = useState(false);
+  const [draft, setDraft] = useState("");
+  const cancelNameRef = useRef(false);
 
   // 트랙 에디터/마커 레인/파형 외의 빈 영역을 클릭하면 포커스 해제
   function handleMainClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -67,7 +71,41 @@ export function Editor({ onExit }: Props) {
     <div className="app-shell">
       <ScoreHud />
       <header className="top-bar">
-        <span className="top-bar__name">{project.name}</span>
+        {editingName ? (
+          <input
+            className="top-bar__name-input"
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => {
+              setEditingName(false);
+              if (cancelNameRef.current) {
+                cancelNameRef.current = false;
+                return;
+              }
+              const name = draft.trim();
+              if (name) renameProject(name);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+              if (e.key === "Escape") {
+                cancelNameRef.current = true;
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+          />
+        ) : (
+          <button
+            className="top-bar__name"
+            title="이름 수정"
+            onClick={() => {
+              setDraft(project.name);
+              setEditingName(true);
+            }}
+          >
+            {project.name}
+          </button>
+        )}
         <span className="top-bar__spacer" />
         <ModeSwitcher />
         <span className="top-bar__spacer" />

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus } from "@phosphor-icons/react";
-import { listProjects, saveProject, deleteProject } from "../persistence/projects";
+import { Plus, Sparkle, Copy, PencilSimple } from "@phosphor-icons/react";
+import { listProjects, saveProject, deleteProject, duplicateProject } from "../persistence/projects";
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
 import { useStore } from "../store/useStore";
 import { newId } from "../domain/ids";
+import { buildProjectFromBlueprint, EXAMPLE_BLUEPRINT } from "../example/exampleProject";
 import type { Project } from "../types";
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
 
 export function ProjectList({ onOpen }: Props) {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+  const cancelRenameRef = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const setProject = useStore((s) => s.setProject);
 
@@ -43,15 +47,62 @@ export function ProjectList({ onOpen }: Props) {
     onOpen(project);
   }
 
+  async function createExample() {
+    const res = await fetch("/samples/moodmode-demo.mp3");
+    const blob = await res.blob();
+    const assetId = await putAsset(blob, "moodmode-demo.mp3");
+    const buffer = await getEngine().decode(blob);
+    const project = buildProjectFromBlueprint(
+      EXAMPLE_BLUEPRINT,
+      assetId,
+      Math.round(buffer.duration * 1000),
+    );
+    await saveProject(project);
+    setProject(project);
+    onOpen(project);
+  }
+
+  async function handleDuplicate(p: Project) {
+    await duplicateProject(p);
+    await refresh();
+  }
+
+  function startRename(p: Project) {
+    setEditingId(p.id);
+    setDraftName(p.name);
+  }
+
+  async function commitRename(p: Project) {
+    const name = draftName.trim();
+    if (!name || name === p.name) return;
+    await saveProject({ ...p, name, updatedAt: Date.now() });
+    await refresh();
+  }
+
+  function handleRenameBlur(p: Project) {
+    setEditingId(null);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    void commitRename(p);
+  }
+
   return (
     <div className="landing">
       <header className="landing__hero">
         <h1 className="landing__title">BeatOverflow</h1>
         <p className="landing__tagline">오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
-        <button className="btn--primary landing__cta" onClick={() => fileRef.current?.click()}>
-          <Plus size={18} weight="bold" />
-          새 프로젝트 (오디오 업로드)
-        </button>
+        <div className="landing__cta-row">
+          <button className="btn--primary landing__cta" onClick={() => fileRef.current?.click()}>
+            <Plus size={18} weight="bold" />
+            새 프로젝트 (오디오 업로드)
+          </button>
+          <button className="btn--ghost landing__cta-secondary" onClick={createExample}>
+            <Sparkle size={18} weight="bold" />
+            예제 프로젝트
+          </button>
+        </div>
         <input
           ref={fileRef}
           type="file"
@@ -62,31 +113,66 @@ export function ProjectList({ onOpen }: Props) {
       </header>
 
       {projects.length === 0 ? (
-        <p className="landing__empty">아직 프로젝트가 없어요. 오디오를 업로드해 시작하세요.</p>
+        <p className="landing__empty">아직 프로젝트가 없어요. 오디오를 업로드하거나 예제로 시작하세요.</p>
       ) : (
         <ul className="project-grid">
           {projects.map((p) => (
             <li key={p.id} className="project-card panel">
-              <button
-                className="project-card__open"
-                onClick={() => {
-                  setProject(p);
-                  onOpen(p);
-                }}
-              >
-                {p.name}
-              </button>
+              {editingId === p.id ? (
+                <input
+                  className="project-card__rename"
+                  autoFocus
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  onBlur={() => handleRenameBlur(p)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                    if (e.key === "Escape") {
+                      cancelRenameRef.current = true;
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                />
+              ) : (
+                <div className="project-card__title">
+                  <button
+                    className="project-card__open"
+                    onClick={() => {
+                      setProject(p);
+                      onOpen(p);
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                  <button
+                    className="btn--ghost btn--icon project-card__edit"
+                    title="이름 수정"
+                    onClick={() => startRename(p)}
+                  >
+                    <PencilSimple size={15} weight="bold" />
+                  </button>
+                </div>
+              )}
               <div className="project-card__footer">
                 <span>{p.tracks.length}개 트랙</span>
-                <button
-                  className="btn--danger"
-                  onClick={async () => {
-                    await deleteProject(p.id);
-                    await refresh();
-                  }}
-                >
-                  삭제
-                </button>
+                <div className="project-card__actions">
+                  <button
+                    className="btn--ghost btn--icon"
+                    title="복사"
+                    onClick={() => handleDuplicate(p)}
+                  >
+                    <Copy size={15} weight="bold" />
+                  </button>
+                  <button
+                    className="btn--danger"
+                    onClick={async () => {
+                      await deleteProject(p.id);
+                      await refresh();
+                    }}
+                  >
+                    삭제
+                  </button>
+                </div>
               </div>
             </li>
           ))}

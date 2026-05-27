@@ -15,6 +15,14 @@
   16-bit PCM WAV 내용을 `.ogg` 파일명으로 저장 — `decodeAudioData`가 내용으로 판별하므로 재생됨.
 - **autosave 테스트는 `runAllTimersAsync()` 사용**: `advanceTimersByTimeAsync(0)`는
   fake-indexeddb의 setImmediate 큐를 플러시하지 못해 타임아웃. 저장 동작은 동일.
+- **예제 프로젝트 마커는 오프라인 분석으로 굽는다** (`scripts/analyze-demo.mjs`): wasm 디코더
+  (`mpg123-decoder`, devDep)로 PCM을 얻어 스펙트럴 플럭스 온셋 검출→16분 그리드 양자화→대역
+  라우팅→트랙당 전 구간 균등 솎기(`thinUniform`, 머리 편향 방지)로 `src/example/
+  exampleData.generated.ts`를 생성. 런타임/일반 빌드는 디코더 비의존(생성물만 커밋). 순수 DSP는
+  `scripts/analysisCore.mjs`로 분리해 vitest로 단위 검증. 추정 BPM·마커 음악성은 사람 청취 검증 권장.
+- **인라인 이름 수정의 Escape 취소**: input을 언마운트하면 `onBlur`가 뒤늦게 발화해 저장돼 버리므로,
+  Escape는 `cancelRef`를 세팅하고 blur만 호출 → 단일 커밋 경로(onBlur)가 ref를 보고 저장을 건너뛴다
+  (ProjectList 카드 · Editor 상단 동일 패턴).
 
 ## Editor v2 — 계약 우선 원칙으로 인한 계획 이탈
 

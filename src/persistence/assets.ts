@@ -12,3 +12,9 @@ export async function getAsset(id: string): Promise<StoredAsset | null> {
   const db = await getDb();
   return (await db.get("assets", id)) ?? null;
 }
+
+export async function copyAsset(id: string): Promise<string> {
+  const asset = await getAsset(id);
+  if (!asset) throw new Error("asset not found: " + id);
+  return putAsset(asset.blob, asset.name);
+}
