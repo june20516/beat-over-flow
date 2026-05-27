@@ -16,6 +16,7 @@ export function ProjectList({ onOpen }: Props) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
+  const cancelRenameRef = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const setProject = useStore((s) => s.setProject);
 
@@ -73,10 +74,18 @@ export function ProjectList({ onOpen }: Props) {
 
   async function commitRename(p: Project) {
     const name = draftName.trim();
-    setEditingId(null);
     if (!name || name === p.name) return;
     await saveProject({ ...p, name, updatedAt: Date.now() });
     await refresh();
+  }
+
+  function handleRenameBlur(p: Project) {
+    setEditingId(null);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    void commitRename(p);
   }
 
   return (
@@ -115,10 +124,13 @@ export function ProjectList({ onOpen }: Props) {
                   autoFocus
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
-                  onBlur={() => commitRename(p)}
+                  onBlur={() => handleRenameBlur(p)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") commitRename(p);
-                    if (e.key === "Escape") setEditingId(null);
+                    if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                    if (e.key === "Escape") {
+                      cancelRenameRef.current = true;
+                      (e.target as HTMLInputElement).blur();
+                    }
                   }}
                 />
               ) : (
