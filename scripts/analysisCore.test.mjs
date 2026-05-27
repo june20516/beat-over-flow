@@ -81,17 +81,22 @@ describe("spectralFluxEnvelope", () => {
 });
 
 describe("routeOnsets", () => {
-  it("대역 온셋을 6개 트랙으로 분배한다", () => {
-    const beatMs = 500, phaseMs = 0;
+  it("대역 온셋을 6개 트랙으로 규칙에 맞게 분배한다", () => {
+    const beatMs = 500, phaseMs = 0; // 16분 = 125ms
     const peaks = {
-      low: [0, 250, 1000, 1250],
-      mid: [500, 1000],
+      // 저역: beatPos 0/2 → kick, 1/3 → tom
+      low: [0, 125, 250, 375],
+      // 중역: 홀수 beatIdx → snare, 짝수 → clap
+      mid: [0, 500, 1000, 1500],
+      // 고역: beatPos 짝수 → hat, 홀수 → perc
       high: [0, 125, 250, 375],
     };
     const out = routeOnsets(peaks, beatMs, phaseMs);
-    expect(Object.keys(out).sort()).toEqual(["clap", "hat", "kick", "perc", "snare", "tom"]);
-    expect(out.kick.length + out.tom.length).toBe(4);
-    expect(out.snare.length + out.clap.length).toBe(2);
-    expect(out.hat.length + out.perc.length).toBe(4);
+    expect(out.kick).toEqual([0, 250]);
+    expect(out.tom).toEqual([125, 375]);
+    expect(out.clap).toEqual([0, 1000]);
+    expect(out.snare).toEqual([500, 1500]);
+    expect(out.hat).toEqual([0, 250]);
+    expect(out.perc).toEqual([125, 375]);
   });
 });
