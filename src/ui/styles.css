@@ -843,3 +843,28 @@ input[type="range"]:focus::-webkit-slider-thumb {
   color: #0a0a0a;
   background: var(--tone);
 }
+
+/* 볼륨 팝오버 (요구 1) */
+.volume-control {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+.volume-control__popover {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 14px 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+/* 세로 range: 가로 슬라이더를 회전해 세로로 배치 */
+.volume-control__range {
+  width: 96px;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
