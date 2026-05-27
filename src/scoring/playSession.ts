@@ -27,6 +27,7 @@ export function endPlaySession(): void {
 
 /** perform 트랙 키 입력 채점. 판정(또는 고스트 null) 반환. */
 export function pressTrack(trackId: string, inputMs: number): Judgment | null {
+  if (!useStore.getState().playing) return null; // 재생 중에만 채점 (폴리싱 #10)
   if (!engine) return null;
   const j = engine.registerPress(trackId, inputMs);
   if (j) useStore.getState().setScore(engine.scoreState);
