@@ -883,3 +883,16 @@ input[type="range"]:focus::-webkit-slider-thumb {
 .track-editor__drag-handle:active {
   cursor: grabbing;
 }
+
+/* 전역 에디터 툴바 (요구 4) */
+.editor-toolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid #222833;
+}
+.editor-toolbar .btn--ghost.is-active {
+  background: #2a3550;
+  color: #fff;
+}
