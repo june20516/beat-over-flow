@@ -13,3 +13,9 @@
 
 추후 실제 Ogg Vorbis(또는 다른 CC0 샘플 라이브러리)로 교체해도 무방하다.
 재생성: `node scripts/gen-samples.mjs`
+
+## 데모 베이스플로우
+
+`moodmode-demo.mp3`는 데모/개발 검증용 베이스플로우 트랙이다. 출처: MoodMode의
+**저작권 없는(no-copyright / royalty-free) 음원**. 에디터(가로 스크롤/줌, 플레이헤드,
+시퀀서 등)를 충분히 긴 트랙으로 검증하기 위해 포함한다.
