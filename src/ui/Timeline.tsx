@@ -1,5 +1,19 @@
 import { useEffect, useRef } from "react";
 import { Plus } from "@phosphor-icons/react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { BaseFlowLane } from "./BaseFlowLane";
@@ -23,6 +37,22 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
   const tracks = useStore((s) => s.project?.tracks ?? []);
   const selectedTrackId = useStore((s) => s.selectedTrackId);
   const addTrack = useStore((s) => s.addTrack);
+  const reorderTracks = useStore((s) => s.reorderTracks);
+
+  const sensors = useSensors(
+    // 작은 이동(8px)부터 드래그로 인식 → 핸들 클릭과 드래그 구분, 오작동 방지
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = tracks.findIndex((t) => t.id === active.id);
+    const to = tracks.findIndex((t) => t.id === over.id);
+    if (from === -1 || to === -1) return;
+    reorderTracks(from, to);
+  }
 
   // 프로젝트 길이 반영
   useEffect(() => {
@@ -53,11 +83,9 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
       if (e.shiftKey) {
         const rect = el.getBoundingClientRect();
         const anchorX = e.clientX - rect.left;
-        // 위로 스크롤(deltaY<0)=확대(factor>1)
         const factor = Math.pow(ZOOM_IN_FACTOR, -e.deltaY);
         zoomAt(factor, anchorX);
       } else {
-        // 가로 휠(deltaX) 우선, 없으면 deltaY로 가로 팬
         const dx = e.deltaX !== 0 ? e.deltaX : e.deltaY;
         panByPx(dx);
       }
@@ -89,17 +117,28 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
         </div>
       </div>
 
-      {/* 트랙 행들: 좌측 TrackEditor | 우측 MarkerEditor가 한 행 안에서 세로 정렬 */}
-      <div className="timeline__rows">
-        {tracks.map((t, index) => (
-          <TrackRow
-            key={t.id}
-            track={t}
-            index={index}
-            focused={selectedTrackId === t.id}
-          />
-        ))}
-      </div>
+      {/* 트랙 행들: 드래그 정렬(좌측 핸들) + 좌/우 2컬럼 세로 정렬 */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={tracks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="timeline__rows">
+            {tracks.map((t, index) => (
+              <TrackRow
+                key={t.id}
+                track={t}
+                index={index}
+                focused={selectedTrackId === t.id}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
