@@ -6,16 +6,16 @@ function notify(): void {
   for (const l of listeners) l();
 }
 
+window.addEventListener("popstate", notify);
+
 export function getPathname(): string {
   return window.location.pathname;
 }
 
 export function subscribe(cb: () => void): () => void {
   listeners.add(cb);
-  window.addEventListener("popstate", cb);
   return () => {
     listeners.delete(cb);
-    window.removeEventListener("popstate", cb);
   };
 }
 
