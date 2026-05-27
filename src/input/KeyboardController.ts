@@ -1,4 +1,5 @@
 import { useStore } from "../store/useStore";
+import { usePulse } from "../store/pulse";
 import { resolveTrackBehavior } from "../domain/mode";
 import { getEngine, getLibrary, play, pause } from "../audio/runtime";
 import { playSample } from "../audio/SamplePlayer";
@@ -8,6 +9,7 @@ import type { Track } from "../types";
 
 /** 한 트랙에 대해 현재 모드의 record/perform 동작을 실행한다(기존 동작 유지). */
 function triggerTrack(track: Track): void {
+  usePulse.getState().pulse(track.id);
   const state = useStore.getState();
   const behavior = resolveTrackBehavior(state.mode, track.status);
   if (behavior === "record") {
