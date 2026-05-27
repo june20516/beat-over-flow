@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { putAsset, getAsset } from "./assets";
+import { putAsset, getAsset, copyAsset } from "./assets";
 import { resetDbCache } from "./db";
 
 describe("AssetRepository", () => {
@@ -19,5 +19,17 @@ describe("AssetRepository", () => {
 
   it("없는 id는 null을 반환한다", async () => {
     expect(await getAsset("nope")).toBeNull();
+  });
+
+  it("copyAsset은 새 id로 같은 내용을 복제하고 원본을 보존한다", async () => {
+    const id = await putAsset(new Blob(["audio-bytes"], { type: "audio/mp3" }), "demo.mp3");
+    const copyId = await copyAsset(id);
+    expect(copyId).not.toBe(id);
+    expect(await (await getAsset(copyId))!.blob.text()).toBe("audio-bytes");
+    expect(await (await getAsset(id))!.blob.text()).toBe("audio-bytes"); // 원본 유지
+  });
+
+  it("copyAsset은 없는 id면 throw 한다", async () => {
+    await expect(copyAsset("nope")).rejects.toThrow();
   });
 });
