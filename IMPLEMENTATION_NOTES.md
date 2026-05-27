@@ -102,6 +102,38 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
 - 7개 태스크 전부 완료. 커밋 d27efd9 / dfc4303 / a5b16ca / 0f91dca / f2957d1 / f9d6b3d / 9100df9(passive fix) / c2e9adf.
 - 최종 `yarn test:run` 101 통과, `yarn tsc -b` 통과.
 
+## 계획 v2-2 (행 분해 + 마커 에디터 + 포커스)
+
+### Task 1~5 — ✅ 완료
+- Task1 markerMath 순수함수: 커밋 `18e2114`(9 테스트). 스펙+품질 ✅.
+- Task2 TrackEditor: 커밋 `55f8e74`. 결합 리뷰 ✅.
+- Task3 MarkerEditor(포커스 SVG/언포커스 캔버스): 커밋 `53a0287`. 결합 리뷰 ✅.
+- Task4 TrackRow: 커밋 `77b30d9`. 결합 리뷰 ✅.
+- Task5 styles.css v2 행 분해 블록(append): 커밋 `f649c3b`. v1 보존 확인.
+- 전체 110 통과, tsc OK 유지.
+
+### Task 6 — ✅ 완료 (아키텍처 통합, 컨트롤러 직접 구현)
+- 커밋 `7c083d0`. 스펙+품질 리뷰 ✅ Approved.
+- **계획↔계약 불일치 해소(중요):** 계획 v2-2 파일목록엔 Timeline.tsx 수정이 없으나, 설계 §4와
+  계약 §1이 `TrackRow[]`를 Timeline 하위(헤더 행 아래)로 규정. 프로토콜의 "계약 우선" 원칙에 따라
+  Timeline.tsx를 헤더 행(좌 고정 컬럼: 트랙 헤더+추가버튼 | 우 arrange: BaseFlowLane+PlayheadOverlay)
+  + `.timeline__rows`(TrackRow[])로 재구성. Timeline이 store에서 tracks/selectedTrackId/addTrack 구독.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-2-shot.mjs`) — **모두 확인됨:**
+  - 트랙 행 2컬럼(editor|lane) 렌더, **컬럼 정렬 정확**(arrangeLeft==laneLeft==404, alignDiff=0).
+  - 포커스 확장: collapsed 40px → focused 88px(트랜지션, 요구 9).
+  - 하이브리드: 포커스 트랙=SVG 1개 / 언포커스=캔버스 오버뷰 1개(요구 11).
+  - 마커 편집(레코드+라이트+포커스): 좌클릭 0→2 추가, 우클릭 2→1 삭제(요구 5). 게이팅 동작.
+  - 콘솔 에러 favicon 404뿐. 스크린샷: `/tmp/bof-v22-{editor,markers}.png`.
+
+### Task 7 — ✅ 완료 (브라우저 검증)
+- 위 Task 6 검증으로 요구 5·9·11 시각 동작 모두 헤드리스 확인됨(사람 미검증 항목 없음).
+- 가시영역 가상화(스크롤/줌 시 [0,width]만): markerMath 단위테스트로 검증, 시각은 v2-1 줌 검증과 동일 뷰포트.
+
+## 계획 v2-2 결과 요약
+- 7개 태스크 전부 완료. 전체 110 통과, tsc 통과.
+- 알려진 향후 개선(결함 아님): wheel 팬/줌 리스너가 헤더 arrange에만 등록됨(공유 뷰포트라 모든 레인에
+  반영되나, 트랙 레인 위에서 직접 휠 시도는 페이지 스크롤). 필요 시 후속 계획에서 컨테이너로 확장 가능.
+
 ## Editor v2 — 사람 검증 필요 항목
 - (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
   좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
