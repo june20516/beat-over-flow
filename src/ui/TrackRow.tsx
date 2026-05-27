@@ -3,6 +3,7 @@ import { X } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
 import { useEditorUi } from "../store/editorUi";
 import { usePulse } from "../store/pulse";
+import { resolveTrackBehavior } from "../domain/mode";
 import { TrackEditor } from "./TrackEditor";
 import { MarkerEditor } from "./MarkerEditor";
 import { StepSequencerPanel } from "./StepSequencerPanel";
@@ -19,7 +20,9 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
   const removeTrack = useStore((s) => s.removeTrack);
   const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
   const pulseNonce = usePulse((s) => s.nonce[track.id] ?? 0);
-  const showSequencer = focused && sequencerOpen;
+  const mode = useStore((s) => s.mode);
+  const showSequencer =
+    focused && sequencerOpen && resolveTrackBehavior(mode, track.status) === "record";
 
   const [pulsing, setPulsing] = useState(false);
   useEffect(() => {
