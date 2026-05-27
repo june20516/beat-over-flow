@@ -38,6 +38,8 @@ interface StoreState {
 
   setScore: (score: ScoreState) => void;
   resetScore: () => void;
+
+  setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
 }
 
 function clamp01(v: number): number {
@@ -194,4 +196,11 @@ export const useStore = create<StoreState>((set) => ({
 
   setScore: (score) => set({ score }),
   resetScore: () => set({ score: emptyScore() }),
+
+  setPlayPauseKey: (key) =>
+    set((s) =>
+      s.project
+        ? { project: { ...s.project, transport: { playPauseKey: key }, updatedAt: Date.now() } }
+        : s,
+    ),
 }));

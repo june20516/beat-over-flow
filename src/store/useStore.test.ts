@@ -312,3 +312,51 @@ describe("useStore reorderTracks", () => {
     expect(useStore.getState().project).toBeNull();
   });
 });
+
+describe("setPlayPauseKey", () => {
+  function makeTransportProject(overrides: Partial<Project> = {}): Project {
+    return {
+      id: "p1",
+      name: "test",
+      createdAt: 0,
+      updatedAt: 0,
+      baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
+      tracks: [],
+      master: { volume: 1 },
+      ...overrides,
+    };
+  }
+
+  beforeEach(() => {
+    useStore.setState({ project: makeTransportProject() });
+  });
+
+  it("transport가 없던 프로젝트에 playPauseKey를 설정한다", () => {
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project?.transport?.playPauseKey).toBe("KeyP");
+  });
+
+  it("기존 playPauseKey를 다른 키로 교체한다", () => {
+    useStore.setState({ project: makeTransportProject({ transport: { playPauseKey: "KeyP" } }) });
+    useStore.getState().setPlayPauseKey("Space");
+    expect(useStore.getState().project?.transport?.playPauseKey).toBe("Space");
+  });
+
+  it("null로 바인딩을 해제한다", () => {
+    useStore.setState({ project: makeTransportProject({ transport: { playPauseKey: "KeyP" } }) });
+    useStore.getState().setPlayPauseKey(null);
+    expect(useStore.getState().project?.transport?.playPauseKey).toBeNull();
+  });
+
+  it("updatedAt을 갱신한다 (단일 전이)", () => {
+    const before = useStore.getState().project!.updatedAt;
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project!.updatedAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("project가 null이면 아무 일도 하지 않는다", () => {
+    useStore.setState({ project: null });
+    useStore.getState().setPlayPauseKey("KeyP");
+    expect(useStore.getState().project).toBeNull();
+  });
+});
