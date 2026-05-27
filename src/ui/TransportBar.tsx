@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { Play, Pause, SpeakerHigh } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
 import { play, pause, seek } from "../audio/runtime";
+import { KeyCap } from "./KeyCap";
 
 function fmt(ms: number): string {
   const s = Math.floor(ms / 1000);
@@ -14,6 +15,8 @@ export function TransportBar() {
   const playheadMs = useStore((s) => s.playheadMs);
   const project = useStore((s) => s.project);
   const setMasterVolume = useStore((s) => s.setMasterVolume);
+  const setPlayPauseKey = useStore((s) => s.setPlayPauseKey);
+  const playPauseKey = project?.transport?.playPauseKey ?? null;
   const durationMs = project?.baseFlow.durationMs ?? 0;
   const playedPct = durationMs > 0 ? (playheadMs / durationMs) * 100 : 0;
 
@@ -22,6 +25,7 @@ export function TransportBar() {
       <button className="btn--icon btn--primary" onClick={() => (playing ? pause() : void play())}>
         {playing ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}
       </button>
+      <KeyCap code={playPauseKey} onCapture={(code) => setPlayPauseKey(code)} />
       <span className="transport__time">
         {fmt(playheadMs)} / {fmt(durationMs)}
       </span>
