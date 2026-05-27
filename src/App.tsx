@@ -10,14 +10,13 @@ import { loadProject } from "./persistence/projects";
 import { startAutosave } from "./store/autosave";
 
 function EditorRoute({ projectId }: { projectId: string }) {
-  const project = useStore((s) => s.project);
   const setProject = useStore((s) => s.setProject);
   const [status, setStatus] = useState<"loading" | "ready" | "notfound">(
-    project?.id === projectId ? "ready" : "loading",
+    useStore.getState().project?.id === projectId ? "ready" : "loading",
   );
 
   useEffect(() => {
-    if (project?.id === projectId) {
+    if (useStore.getState().project?.id === projectId) {
       setStatus("ready");
       return;
     }
@@ -36,9 +35,9 @@ function EditorRoute({ projectId }: { projectId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [projectId, project?.id, setProject]);
+  }, [projectId, setProject]);
 
-  if (status === "loading") return null;
+  if (status === "loading") return <div style={{ padding: 16 }}>불러오는 중...</div>;
   if (status === "notfound") return <NotFound />;
   return <Editor onExit={() => navigate("/edit")} />;
 }
@@ -58,7 +57,7 @@ export function App() {
     case "projectList":
       return <ProjectList onOpen={(project) => navigate(`/edit/${project.id}`)} />;
     case "editor":
-      return <EditorRoute projectId={route.projectId} />;
+      return <EditorRoute key={route.projectId} projectId={route.projectId} />;
     case "play":
       return <PlayPlaceholder />;
     case "notFound":
