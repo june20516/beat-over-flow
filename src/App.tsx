@@ -37,7 +37,13 @@ function EditorRoute({ projectId }: { projectId: string }) {
     };
   }, [projectId, setProject]);
 
-  if (status === "loading") return <div style={{ padding: 16 }}>불러오는 중...</div>;
+  if (status === "loading")
+    return (
+      <div className="screen">
+        <div className="screen__spinner" />
+        <p className="screen__lead">불러오는 중…</p>
+      </div>
+    );
   if (status === "notfound") return <NotFound />;
   return <Editor onExit={() => navigate("/edit")} />;
 }

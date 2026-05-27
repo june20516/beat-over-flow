@@ -1,12 +1,20 @@
+import { PencilSimple, Play } from "@phosphor-icons/react";
 import { navigate } from "../router/router";
 
 export function Home() {
   return (
-    <div style={{ padding: 16 }}>
-      <h1>BeatOverflow</h1>
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={() => navigate("/edit")}>편집</button>
-        <button onClick={() => navigate("/play")}>플레이</button>
+    <div className="screen">
+      <h1 className="screen__title">BeatOverflow</h1>
+      <p className="screen__lead">오디오 위에 비트를 쌓아 만들고, 리듬게임처럼 연주하세요.</p>
+      <div className="screen__actions">
+        <button className="btn--primary screen__cta" onClick={() => navigate("/edit")}>
+          <PencilSimple size={18} weight="bold" />
+          편집
+        </button>
+        <button className="btn--ghost screen__cta" onClick={() => navigate("/play")}>
+          <Play size={18} weight="fill" />
+          플레이
+        </button>
       </div>
     </div>
   );
