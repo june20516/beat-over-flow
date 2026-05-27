@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { xToTime, type Viewport } from "../timeline/viewportMath";
@@ -7,6 +7,9 @@ import {
   visibleMarkers,
   findNearestMarker,
 } from "../timeline/markerMath";
+import { useLaneGesture } from "../input/useLaneGesture";
+import { dragToRegion } from "../timeline/laneGesture";
+import { useEditorUi } from "../store/editorUi";
 import type { Track } from "../types";
 
 interface MarkerEditorProps {
@@ -22,52 +25,61 @@ export function MarkerEditor({ track, focused }: MarkerEditorProps) {
   return <OverviewMarkerEditor track={track} />;
 }
 
-/** 포커스 트랙: 가상화 SVG. 좌클릭 추가 / 우클릭 삭제(레코드 동작에서만). */
+/** 포커스 트랙: 가상화 SVG. 좌클릭 추가 / 우클릭 삭제(레코드 동작에서만) / 드래그=구간 설정. */
 function FocusedMarkerEditor({ track }: { track: Track }) {
   const mode = useStore((s) => s.mode);
   const addMarker = useStore((s) => s.addMarker);
   const removeMarker = useStore((s) => s.removeMarker);
+  const durationMs = useStore((s) => s.project?.baseFlow.durationMs ?? 0);
 
   const pxPerMs = useViewport((s) => s.pxPerMs);
   const scrollLeftPx = useViewport((s) => s.scrollLeftPx);
   const containerWidthPx = useViewport((s) => s.containerWidthPx);
 
+  const setRegion = useEditorUi((s) => s.setRegion);
+  const setSequencerOpen = useEditorUi((s) => s.setSequencerOpen);
+
   const vp: Viewport = { pxPerMs, scrollLeftPx, containerWidthPx };
   const editable = isMarkerEditingEnabled(mode, track.status);
   const visible = visibleMarkers(track.markers, vp, containerWidthPx);
 
-  const ref = useRef<SVGSVGElement>(null);
+  const [dragPx, setDragPx] = useState<{ a: number; b: number } | null>(null);
 
-  function localX(clientX: number): number {
-    const rect = ref.current?.getBoundingClientRect();
-    return rect ? clientX - rect.left : 0;
-  }
-
-  function onClick(e: React.MouseEvent<SVGSVGElement>) {
-    if (!editable || pxPerMs <= 0) return;
-    const timeMs = xToTime(localX(e.clientX), vp);
-    addMarker(track.id, timeMs);
-  }
-
-  function onContextMenu(e: React.MouseEvent<SVGSVGElement>) {
-    e.preventDefault();
-    if (!editable || pxPerMs <= 0) return;
-    const timeMs = xToTime(localX(e.clientX), vp);
-    const toleranceMs = HIT_TOLERANCE_PX / pxPerMs;
-    const hit = findNearestMarker(track.markers, timeMs, toleranceMs);
-    if (hit) removeMarker(track.id, hit.id);
-  }
+  const gesture = useLaneGesture({
+    onClick: (x) => { if (editable && pxPerMs > 0) addMarker(track.id, xToTime(x, vp)); },
+    onContextClick: (x) => {
+      if (!editable || pxPerMs <= 0) return;
+      const timeMs = xToTime(x, vp);
+      const hit = findNearestMarker(track.markers, timeMs, HIT_TOLERANCE_PX / pxPerMs);
+      if (hit) removeMarker(track.id, hit.id);
+    },
+    onDragMove: (a, b) => setDragPx({ a, b }),
+    onDragEnd: (a, b) => {
+      setDragPx(null);
+      if (pxPerMs <= 0) return;
+      setRegion(dragToRegion(a, b, vp, durationMs));
+      setSequencerOpen(true);
+    },
+  });
 
   return (
     <svg
-      ref={ref}
       className={editable ? "marker-editor marker-editor--editable" : "marker-editor"}
       width={containerWidthPx}
       height="100%"
-      onClick={onClick}
-      onContextMenu={onContextMenu}
       style={{ "--track-color": track.color } as CSSProperties}
+      {...gesture}
     >
+      {dragPx && (
+        <rect
+          x={Math.min(dragPx.a, dragPx.b)}
+          y={0}
+          width={Math.abs(dragPx.b - dragPx.a)}
+          height="100%"
+          fill="rgba(168,85,247,0.22)"
+          pointerEvents="none"
+        />
+      )}
       {visible.map(({ marker, x }) => (
         <circle key={marker.id} cx={x} cy="50%" r={5} fill={track.color} />
       ))}
