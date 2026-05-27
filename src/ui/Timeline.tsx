@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
+import { resolveWheelIntent } from "../timeline/wheelIntent";
 import { BaseFlowLane } from "./BaseFlowLane";
 import { PlayheadOverlay } from "./PlayheadOverlay";
 import { TrackRow } from "./TrackRow";
@@ -28,6 +29,7 @@ interface TimelineProps {
 const ZOOM_IN_FACTOR = 1.0015; // wheel 1deltaY당 줌 배율(부드럽게)
 
 export function Timeline({ peaks, durationMs }: TimelineProps) {
+  const timelineRef = useRef<HTMLDivElement>(null);
   const arrangeRef = useRef<HTMLDivElement>(null);
   const setContainerWidth = useViewport((s) => s.setContainerWidth);
   const setDuration = useViewport((s) => s.setDuration);
@@ -75,27 +77,32 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
 
   // wheel은 non-passive로 등록해야 preventDefault로 페이지 스크롤을 막을 수 있다
   // (React onWheel은 passive라 preventDefault가 무시됨).
+  // 타임라인 전체 영역에서 휠을 받되, 좌측 고정 컬럼(헤더/에디터)은 제외.
   useEffect(() => {
-    const el = arrangeRef.current;
-    if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      const targetEl = e.target as HTMLElement | null;
+      if (targetEl && targetEl.closest(".timeline__fixed-col, .track-row__editor")) return;
+      const arrange = arrangeRef.current;
+      if (!arrange) return;
+      const intent = resolveWheelIntent(e);
+      if (intent.kind === "none") return;
       e.preventDefault();
-      if (e.shiftKey) {
-        const rect = el.getBoundingClientRect();
-        const anchorX = e.clientX - rect.left;
-        const factor = Math.pow(ZOOM_IN_FACTOR, -e.deltaY);
-        zoomAt(factor, anchorX);
+      const rect = arrange.getBoundingClientRect();
+      const anchorX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+      if (intent.kind === "zoom") {
+        zoomAt(Math.pow(ZOOM_IN_FACTOR, -intent.amount), anchorX);
       } else {
-        const dx = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-        panByPx(dx);
+        panByPx(intent.amount);
       }
     };
+    const el = timelineRef.current;
+    if (!el) return;
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [panByPx, zoomAt]);
 
   return (
-    <div className="timeline">
+    <div ref={timelineRef} className="timeline">
       {/* 헤더 행: 좌측 고정 컬럼(트랙 헤더) | 우측 arrange(베이스 파형 + 플레이헤드) */}
       <div className="timeline__header-row">
         <div className="timeline__fixed-col">
