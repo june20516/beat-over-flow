@@ -1,6 +1,8 @@
 import { useStore } from "../store/useStore";
+import { useEditorUi } from "../store/editorUi";
 import { TrackEditor } from "./TrackEditor";
 import { MarkerEditor } from "./MarkerEditor";
+import { StepSequencerPanel } from "./StepSequencerPanel";
 import type { Track } from "../types";
 
 interface TrackRowProps {
@@ -11,6 +13,8 @@ interface TrackRowProps {
 
 export function TrackRow({ track, index, focused }: TrackRowProps) {
   const setSelectedTrack = useStore((s) => s.setSelectedTrack);
+  const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
+  const showSequencer = focused && sequencerOpen;
 
   const rowClass = [
     "track-row",
@@ -19,13 +23,23 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
   ].join(" ");
 
   return (
-    <div className={rowClass} onClick={() => setSelectedTrack(track.id)}>
-      <div className="track-row__editor">
-        <TrackEditor track={track} focused={focused} />
+    <div className="track-row-wrap">
+      <div className={rowClass} onClick={() => setSelectedTrack(track.id)}>
+        <div className="track-row__editor">
+          <TrackEditor track={track} focused={focused} />
+        </div>
+        <div className="track-row__lane">
+          <MarkerEditor track={track} focused={focused} />
+        </div>
       </div>
-      <div className="track-row__lane">
-        <MarkerEditor track={track} focused={focused} />
-      </div>
+      {showSequencer && (
+        <div className="track-row__sequencer">
+          <div className="track-row__sequencer-gutter" aria-hidden="true" />
+          <div className="track-row__sequencer-body">
+            <StepSequencerPanel />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Repeat } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
+import { useEditorUi } from "../store/editorUi";
 import {
   stepTimes,
   activeStepsToMarkerTimes,
@@ -9,19 +10,11 @@ import {
   type RepeatTarget,
 } from "../domain/sequencer";
 
-interface Region {
-  startMs: number;
-  endMs: number;
-}
-
-interface Props {
-  region: Region;
-  setRegion: (r: Region) => void;
-  stepCount: number;
-  setStepCount: (n: number) => void;
-}
-
-export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount }: Props) {
+export function StepSequencerPanel() {
+  const region = useEditorUi((s) => s.region);
+  const setRegion = useEditorUi((s) => s.setRegion);
+  const stepCount = useEditorUi((s) => s.stepCount);
+  const setStepCount = useEditorUi((s) => s.setStepCount);
   const selectedTrackId = useStore((s) => s.selectedTrackId);
   const tracks = useStore((s) => s.project?.tracks ?? []);
   const durationMs = useStore((s) => s.project?.baseFlow.durationMs ?? 0);
@@ -57,7 +50,6 @@ export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount 
     else if (repeatKind === "until") target = { kind: "until", untilMs };
     else target = { kind: "toEnd", endMs: durationMs };
     const tiled = tilePattern(pattern, region.startMs, regionLen, target);
-    // 첫 구간(원본 패턴)은 이미 존재하므로 그 이후만 추가
     const toAdd = tiled.filter((t) => t >= region.endMs);
     addMarkersBulk(track!.id, toAdd);
   }
@@ -101,7 +93,7 @@ export function StepSequencerPanel({ region, setRegion, stepCount, setStepCount 
             min={1}
             max={64}
             value={stepCount}
-            onChange={(e) => setStepCount(Math.max(1, Number(e.target.value)))}
+            onChange={(e) => setStepCount(Number(e.target.value))}
             style={{ width: 60 }}
           />
         </label>

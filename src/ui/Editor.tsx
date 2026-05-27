@@ -5,11 +5,12 @@ import { getAsset } from "../persistence/assets";
 import { computePeaks } from "../render/waveform";
 import { Timeline } from "./Timeline";
 import { TransportBar } from "./TransportBar";
+import { EditorToolbar } from "./EditorToolbar";
 import { ModeSwitcher } from "./ModeSwitcher";
-import { StepSequencerPanel } from "./StepSequencerPanel";
 import { ScoreHud } from "./ScoreHud";
 import { startKeyboard } from "../input/KeyboardController";
 import { startPlaySession, endPlaySession } from "../scoring/playSession";
+import { useEditorUi } from "../store/editorUi";
 
 interface Props {
   onExit: () => void;
@@ -18,9 +19,9 @@ interface Props {
 export function Editor({ onExit }: Props) {
   const project = useStore((s) => s.project);
   const mode = useStore((s) => s.mode);
+  const selectedTrackId = useStore((s) => s.selectedTrackId);
+  const resetForTrack = useEditorUi((s) => s.resetForTrack);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
-  const [region, setRegion] = useState({ startMs: 0, endMs: 4000 });
-  const [stepCount, setStepCount] = useState(8);
 
   useEffect(() => {
     const stop = startKeyboard();
@@ -31,6 +32,10 @@ export function Editor({ onExit }: Props) {
     if (mode === "play") startPlaySession();
     else endPlaySession();
   }, [mode]);
+
+  useEffect(() => {
+    resetForTrack();
+  }, [selectedTrackId, resetForTrack]);
 
   useEffect(() => {
     if (!project) return;
@@ -63,17 +68,12 @@ export function Editor({ onExit }: Props) {
         </button>
       </header>
       <TransportBar />
+      <EditorToolbar />
       <div className="editor-main">
         <div className="editor-main__timeline">
           <Timeline peaks={peaks} durationMs={project.baseFlow.durationMs} />
         </div>
       </div>
-      <StepSequencerPanel
-        region={region}
-        setRegion={setRegion}
-        stepCount={stepCount}
-        setStepCount={setStepCount}
-      />
     </div>
   );
 }
