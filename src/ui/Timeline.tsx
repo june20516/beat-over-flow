@@ -36,20 +36,28 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
     return () => ro.disconnect();
   }, [setContainerWidth]);
 
-  function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
-    e.preventDefault();
-    if (e.shiftKey) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const anchorX = e.clientX - rect.left;
-      // 위로 스크롤(deltaY<0)=확대(factor>1)
-      const factor = Math.pow(ZOOM_IN_FACTOR, -e.deltaY);
-      zoomAt(factor, anchorX);
-    } else {
-      // 가로 휠(deltaX) 우선, 없으면 deltaY로 가로 팬
-      const dx = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-      panByPx(dx);
-    }
-  }
+  // wheel은 non-passive로 등록해야 preventDefault로 페이지 스크롤을 막을 수 있다
+  // (React onWheel은 passive라 preventDefault가 무시됨).
+  useEffect(() => {
+    const el = arrangeRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.shiftKey) {
+        const rect = el.getBoundingClientRect();
+        const anchorX = e.clientX - rect.left;
+        // 위로 스크롤(deltaY<0)=확대(factor>1)
+        const factor = Math.pow(ZOOM_IN_FACTOR, -e.deltaY);
+        zoomAt(factor, anchorX);
+      } else {
+        // 가로 휠(deltaX) 우선, 없으면 deltaY로 가로 팬
+        const dx = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+        panByPx(dx);
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [panByPx, zoomAt]);
 
   return (
     <div className="timeline">
@@ -59,7 +67,6 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
       <div
         ref={arrangeRef}
         className="timeline__arrange"
-        onWheel={handleWheel}
         style={{ position: "relative", flex: 1, overflow: "hidden" }}
       >
         <BaseFlowLane peaks={peaks} durationMs={durationMs} />
