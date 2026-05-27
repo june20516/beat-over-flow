@@ -1089,3 +1089,24 @@ input.volume-control__range:active::-webkit-slider-thumb {
   background: var(--bg-inset);
   color: var(--text);
 }
+
+/* --- 에디터 상단 프로젝트 이름 인라인 수정 ----------------------------- */
+button.top-bar__name {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text);
+}
+button.top-bar__name:hover {
+  opacity: 0.85;
+}
+.top-bar__name-input {
+  font-family: var(--font-display);
+  font-size: 18px;
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-inset);
+  color: var(--text);
+}
