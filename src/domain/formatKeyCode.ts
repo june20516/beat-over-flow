@@ -7,7 +7,7 @@ const ARROWS: Record<string, string> = {
 
 /**
  * 키보드 e.code를 사람이 읽을 표시 문자열로 변환한다 (순수함수).
- * 규칙은 v2-contracts.md §7 참조.
+ * KeyA→"A", Digit1/Numpad1→"1", 화살표→기호, Space/Esc/Enter는 그대로, null→"Key".
  */
 export function formatKeyCode(code: string | null): string {
   if (!code) return "Key";
