@@ -44,3 +44,66 @@ EXECUTION.md 프로토콜에 따라 `docs/superpowers/plans`의 계획 1→4를 
 
 - 계획 1 Task 15 수동 검증(브라우저): 오디오 업로드→파형 표시, ▶ 재생/플레이헤드 이동,
   캔버스/슬라이더 탐색, 볼륨 변화, 새로고침 후 프로젝트 유지. (Web Audio·Canvas는 jsdom 미지원)
+
+---
+
+# Editor v2 재편 (무인 자율 실행 2회차)
+
+`docs/superpowers/EXECUTION.md` v2 프로토콜. v2 계획 6개를 1→6 순차 구현.
+v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
+
+## 계획 v2-1 (뷰포트/타임라인)
+
+### Task 1: viewportMath 순수함수 — ✅ 완료
+- 커밋 `d27efd9`. viewportMath.ts + test (16 테스트). 전체 87 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+- 리뷰 Minor(미반영, 사유): `xToTime` `pxPerMs===0` 시 Infinity/NaN → 계약 §4 순수 공식
+  유지 우선 + 호출부 가드. 테스트 분리/centeredScrollLeftPx(Task7)는 계획대로 둠.
+
+### Task 2: useViewport 스토어 — ✅ 완료
+- 커밋 `dfc4303`. viewport.ts + test (7 테스트). 전체 94 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+- 리뷰 메모(Task 7에서 챙길 것): followPlayhead/setFollowPlayhead/followTo 추가 +
+  `panByPx`에 `followPlayhead:false` + 테스트 `reset()`에 `followPlayhead:true` 동기화.
+
+### Task 3: BaseFlowLane — ✅ 완료
+- 커밋 `a5b16ca`. BaseFlowLane.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 4: PlayheadOverlay — ✅ 완료
+- 커밋 `0f91dca`. PlayheadOverlay.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 5: Timeline 컨테이너 — ✅ 완료
+- 커밋 `f2957d1`. Timeline.tsx. 전체 94 통과, tsc OK. 결합 리뷰 ✅ Approved.
+
+### Task 6: Editor 연결 + TimelineCanvas 삭제 — ✅ 완료
+- 커밋 `f9d6b3d`. Editor가 Timeline 사용, render/TimelineCanvas.tsx 삭제, 잔존 참조 0.
+  전체 94 통과, tsc OK. 스펙+품질 리뷰 ✅ Approved.
+- 브라우저 검증(헤드리스 Chrome, `/tmp/bof-driver/v2-1-shot.mjs`): 홈→편집→새 프로젝트
+  업로드→에디터. `.timeline__arrange`/`.base-flow-lane`/canvas 렌더 확인,
+  `.playhead-overlay__line` 존재 확인. shift+wheel 줌 시 캔버스가 더 조밀한 막대로 재렌더됨
+  (샘플 3초라 줌 배율 폭은 minPxPerMs↔MAX로 좁음). 스크린샷: `/tmp/bof-v2-{editor,play,zoom,pan}.png`.
+- 추가 수정 커밋 `9100df9`: 브라우저 검증에서 "Unable to preventDefault inside passive event
+  listener" 경고 확인 → 계획 Task5 비고대로 Timeline wheel을 `addEventListener(...,{passive:false})`
+  네이티브 리스너로 전환. 재검증 시 경고 사라짐(남은 콘솔 에러는 favicon 404뿐, 무해).
+
+### Task 7: 재생 중 auto-follow — ✅ 완료
+- 커밋 `c2e9adf`. centeredScrollLeftPx + followPlayhead/setFollowPlayhead/followTo,
+  panByPx가 follow 해제, runtime(play/seek/RAF) 연동. 전체 101 통과, tsc OK.
+- 스펙 리뷰 ✅ / 코드품질 리뷰 ✅ Approved.
+  - 리뷰 Minor(미반영): seek가 `source.currentTimeMs()`를 (스토어 경유) 2회 읽음 → 계획이 명시한
+    `followTo(useStore.getState().playheadMs)` 형태이고 setPlayheadMs가 동기라 동작 정확. 계획 준수 유지.
+    `setFollowPlayhead(b)` 파라미터명, zoomAt가 follow 유지(계약 §5 의도)도 그대로 둠.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/follow.mjs`): **auto-follow 확인됨.**
+  arrangeWidth=1016(중앙≈508). 최대 줌인 후 재생 시 플레이헤드 x: 176→355(초반, scroll0)→
+  508→508→505(중반, **중앙 고정**)→588(종반, scroll 최대 클램프로 우측 이동). 의도한 추종 동작.
+  콘솔 에러 favicon 404 외 없음. 수동팬 해제/재생 재활성은 단위테스트로 검증(시각 느낌은 사람 확인 권장).
+
+## 계획 v2-1 결과 요약
+- 7개 태스크 전부 완료. 커밋 d27efd9 / dfc4303 / a5b16ca / 0f91dca / f2957d1 / f9d6b3d / 9100df9(passive fix) / c2e9adf.
+- 최종 `yarn test:run` 101 통과, `yarn tsc -b` 통과.
+
+## Editor v2 — 사람 검증 필요 항목
+- (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
+  좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
+  더 긴 오디오로 사람이 shift+wheel 줌/가로 팬 시 커서 기준 확대·페이지 스크롤 없음 확인 권장.
+- (계획 v2-1) auto-follow의 "수동 팬 시 추종 해제 → 재생 누르면 재활성"의 실제 사용 느낌(단위테스트는 통과).
