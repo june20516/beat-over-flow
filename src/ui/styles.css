@@ -996,3 +996,15 @@ input[type="range"]:focus::-webkit-slider-thumb {
   transform: translateX(0);
   pointer-events: auto;
 }
+
+/* 시퀀서 선택 구간 지속 표시 밴드 (폴리싱 #7·#4) */
+.region-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(168, 85, 247, 0.18);
+  border-left: 2px solid var(--purple);
+  border-right: 2px solid var(--purple);
+  pointer-events: none;
+  z-index: 3;
+}
