@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Plus } from "@phosphor-icons/react";
 import {
   DndContext,
@@ -7,7 +7,9 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
+  DragOverlay,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -41,6 +43,8 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
   const addTrack = useStore((s) => s.addTrack);
   const reorderTracks = useStore((s) => s.reorderTracks);
 
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   const sensors = useSensors(
     // 작은 이동(8px)부터 드래그로 인식 → 핸들 클릭과 드래그 구분, 오작동 방지
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -49,11 +53,18 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) {
+      setActiveId(null);
+      return;
+    }
     const from = tracks.findIndex((t) => t.id === active.id);
     const to = tracks.findIndex((t) => t.id === over.id);
-    if (from === -1 || to === -1) return;
+    if (from === -1 || to === -1) {
+      setActiveId(null);
+      return;
+    }
     reorderTracks(from, to);
+    setActiveId(null);
   }
 
   // 프로젝트 길이 반영
@@ -128,7 +139,9 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={(e: DragStartEvent) => setActiveId(String(e.active.id))}
         onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
       >
         <SortableContext
           items={tracks.map((t) => t.id)}
@@ -145,6 +158,18 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
             ))}
           </div>
         </SortableContext>
+        <DragOverlay>
+          {activeId
+            ? (() => {
+                const t = tracks.find((x) => x.id === activeId);
+                return t ? (
+                  <div className="track-drag-overlay" style={{ "--track-color": t.color } as CSSProperties}>
+                    {t.name}
+                  </div>
+                ) : null;
+              })()
+            : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );

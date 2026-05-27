@@ -923,3 +923,18 @@ input[type="range"]:focus::-webkit-slider-thumb {
   pointer-events: none;
   z-index: 5;
 }
+
+/* 트랙 드래그 고스트 (폴리싱 #5) */
+.track-drag-overlay {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border-left: 4px solid var(--track-color, var(--purple));
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow);
+  cursor: grabbing;
+}
