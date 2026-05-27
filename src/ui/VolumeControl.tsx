@@ -77,8 +77,9 @@ export function VolumeControl({ value, onChange }: VolumeControlProps) {
             }
             onClick={(e) => e.stopPropagation()}
           >
+            <span className="volume-control__pct">{Math.round(value * 100)}</span>
             <input
-              className="range-fill volume-control__range"
+              className="volume-control__range"
               style={{ "--pct": `${value * 100}%` } as CSSProperties}
               type="range"
               min={0}

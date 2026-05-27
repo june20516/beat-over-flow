@@ -327,12 +327,13 @@ input[type="range"]:focus::-webkit-slider-thumb {
   gap: 0;
   margin: 16px 20px 0;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 .editor-main__timeline {
   flex: 1;
   min-width: 0;
   background: var(--bg-inset);
-  border-radius: var(--r);
   overflow: hidden;
 }
 
@@ -859,10 +860,43 @@ input[type="range"]:focus::-webkit-slider-thumb {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 /* 세로 range: 가로 슬라이더를 회전해 세로로 배치 */
-.volume-control__range {
-  width: 96px;
-  transform: rotate(-90deg);
-  transform-origin: center;
+.volume-control__pct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 24px;
+  text-align: center;
+}
+/* 세로 볼륨 슬라이더: 아래=0, 위=100%. 아래에서 위로 그라데이션 채움.
+   전역 input[type=range](특이도 0,1,1)를 이기려고 input. 접두사로 특이도 상향. */
+input.volume-control__range {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 120px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  background:
+    linear-gradient(var(--bg-inset), var(--bg-inset)) no-repeat top center,
+    linear-gradient(0deg, var(--purple), var(--pink)) no-repeat bottom center;
+  background-size:
+    100% calc(100% - var(--pct, 0%)),
+    100% 100%;
+}
+input.volume-control__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  border: 2px solid var(--purple);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+input.volume-control__range:active::-webkit-slider-thumb {
+  cursor: grabbing;
 }
 
 /* 트랙 드래그 핸들 (요구 8) */
@@ -983,6 +1017,12 @@ input[type="range"]:focus::-webkit-slider-thumb {
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
+}
+/* 버튼 자체 hover 시 전역 button:hover(보라)가 덮지 않도록 빨강 유지(진하게) */
+.track-row__delete-btn:hover {
+  background: #dc2626;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
 }
 
 /* 시퀀서 선택 구간 지속 표시 밴드 (폴리싱 #7·#4) */

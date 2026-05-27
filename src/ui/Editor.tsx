@@ -20,8 +20,16 @@ export function Editor({ onExit }: Props) {
   const project = useStore((s) => s.project);
   const mode = useStore((s) => s.mode);
   const selectedTrackId = useStore((s) => s.selectedTrackId);
+  const setSelectedTrack = useStore((s) => s.setSelectedTrack);
   const resetForTrack = useEditorUi((s) => s.resetForTrack);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
+
+  // 트랙 에디터/마커 레인/파형 외의 빈 영역을 클릭하면 포커스 해제
+  function handleMainClick(e: React.MouseEvent<HTMLDivElement>) {
+    const target = e.target as HTMLElement;
+    if (target.closest(".track-row-wrap, .base-flow-lane, .timeline__head")) return;
+    if (selectedTrackId) setSelectedTrack(null);
+  }
 
   useEffect(() => {
     const stop = startKeyboard();
@@ -69,7 +77,7 @@ export function Editor({ onExit }: Props) {
       </header>
       <TransportBar />
       <EditorToolbar />
-      <div className="editor-main">
+      <div className="editor-main" onClick={handleMainClick}>
         <div className="editor-main__timeline">
           <Timeline peaks={peaks} durationMs={project.baseFlow.durationMs} />
         </div>
