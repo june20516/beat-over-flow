@@ -850,12 +850,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   flex: none;
   display: inline-flex;
 }
+/* 위치는 body 포털에서 인라인(position:fixed)으로 지정한다(클리핑 방지). 여기선 외형만. */
 .volume-control__popover {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
   padding: 14px 10px;
   background: var(--bg-elev-2);
   border: 1px solid var(--line-strong);
