@@ -1,16 +1,11 @@
-import { useState, type CSSProperties } from "react";
-import { X } from "@phosphor-icons/react";
+import { type CSSProperties } from "react";
+import { X, Trash } from "@phosphor-icons/react";
 import { useStore } from "../store/useStore";
 import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
-import type { Track, TrackStatus } from "../types";
-
-const STATUSES: TrackStatus[] = ["mute", "listening", "play", "write"];
-const STATUS_LABEL: Record<TrackStatus, string> = {
-  mute: "뮤트",
-  listening: "리스닝",
-  play: "플레이",
-  write: "라이트",
-};
+import { StatusGrid } from "./StatusGrid";
+import { VolumeControl } from "./VolumeControl";
+import { KeyCap } from "./KeyCap";
+import type { Track } from "../types";
 
 interface TrackEditorProps {
   track: Track;
@@ -23,14 +18,8 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   const setTrackVolume = useStore((s) => s.setTrackVolume);
   const setTrackSound = useStore((s) => s.setTrackSound);
   const setTrackKeyBinding = useStore((s) => s.setTrackKeyBinding);
+  const clearMarkers = useStore((s) => s.clearMarkers);
   const removeTrack = useStore((s) => s.removeTrack);
-  const [capturing, setCapturing] = useState(false);
-
-  function onKeyCapture(e: React.KeyboardEvent) {
-    e.preventDefault();
-    setTrackKeyBinding(track.id, e.code);
-    setCapturing(false);
-  }
 
   return (
     <div
@@ -43,17 +32,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackName(track.id, e.target.value)}
       />
-      <select
-        value={track.status}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => setTrackStatus(track.id, e.target.value as TrackStatus)}
-      >
-        {STATUSES.map((s) => (
-          <option key={s} value={s}>
-            {STATUS_LABEL[s]}
-          </option>
-        ))}
-      </select>
+      <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} />
       <select
         value={track.sound.kind === "builtin" ? track.sound.sampleId : ""}
         onClick={(e) => e.stopPropagation()}
@@ -65,28 +44,19 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
           </option>
         ))}
       </select>
+      <KeyCap code={track.keyBinding} onCapture={(code) => setTrackKeyBinding(track.id, code)} />
+      <VolumeControl value={track.volume} onChange={(v) => setTrackVolume(track.id, v)} />
       <button
-        className={capturing ? "keycap keycap--capturing" : "keycap"}
-        onKeyDown={capturing ? onKeyCapture : undefined}
+        type="button"
+        className="btn--icon track-editor__clear"
+        title="마커 전체 비우기"
         onClick={(e) => {
           e.stopPropagation();
-          setCapturing(true);
+          clearMarkers(track.id);
         }}
-        title="클릭 후 키를 누르세요"
       >
-        {capturing ? "입력…" : track.keyBinding ?? "키 없음"}
+        <Trash size={14} />
       </button>
-      <input
-        className="range-fill"
-        style={{ "--pct": `${track.volume * 100}%` } as CSSProperties}
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={track.volume}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => setTrackVolume(track.id, Number(e.target.value))}
-      />
       <button
         className="btn--danger"
         onClick={(e) => {
