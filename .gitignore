@@ -13,6 +13,7 @@ build/
 *.log
 .vite/
 .cache/
+.wrangler/
 
 # 환경
 .env
