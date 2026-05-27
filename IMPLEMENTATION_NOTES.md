@@ -149,6 +149,22 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
   - 마커 비우기 버튼: 마커 2 → 0(요구 7).
   - 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v23-controls.png`.
 
+## 계획 v2-4 (드래그 순서변경, 요구 8) — ✅ 완료
+- Task1 dnd-kit 설치(core/sortable/utilities): 커밋 `810712d`.
+- Task2+3 reorderTracks(TDD, RED→GREEN, 9테스트): 커밋 `e56fa1f`. 범위가드/단일전이. 스펙+품질 ✅.
+- Task4 영속 통합테스트(autosave→IndexedDB 라운드트립): 커밋 `c742a65`. 결합 리뷰 ✅(실제 영속 검증).
+- Task5 TrackEditor 드래그핸들(useSortable+DotsSixVertical): 커밋 `e057d54`. 결합 리뷰 ✅.
+- Task6 Timeline DndContext/SortableContext 래핑: 커밋 `e7c5692`. 결합 리뷰 ✅.
+- 전체 141 통과, tsc OK.
+- Task7 브라우저 검증(헤드리스, `/tmp/bof-driver/v2-4-shot.mjs`) — **드래그 재정렬 종단 확인됨:**
+  - 트랙마다 드래그 핸들(⠿ DotsSixVertical) 렌더(handles=3).
+  - **실제 포인터 드래그**(핸들을 단계적 mouse.move로): ["트랙1","트랙2","트랙3"] → 트랙1을 3행 아래로
+    → ["트랙2","트랙3","트랙1"]. reorderTracks(0,2) 종단 동작 확인(reordered=true). 우측 레인은 같은 행이라 자동 동기.
+  - 콘솔 에러 favicon 404뿐. 스크린샷 `/tmp/bof-v24-{handles,afterdrag}.png`.
+  - 영속(새로고침 후 순서 유지)은 autosave 통합테스트(Task4)로 검증됨.
+- 사람 검증 권장(무인 확정 어려움): 드래그 중 시각 피드백(opacity/transform) 느낌, 핸들 외 컨트롤이
+  드래그와 충돌하지 않는 실사용 감(8px distance 가드는 적용됨, 헤드리스 클릭/입력은 정상 동작 확인).
+
 ## Editor v2 — 사람 검증 필요 항목
 - (계획 v2-1) 휠 팬/줌의 정밀한 커서 앵커 정확도·부드러움: 샘플이 3초로 짧아 줌 배율 폭이
   좁아 헤드리스로는 앵커 정확도까지 단정 불가(순수함수 zoomedViewport 단위테스트로 수학은 검증됨).
