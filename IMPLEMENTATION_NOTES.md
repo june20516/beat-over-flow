@@ -234,3 +234,15 @@ v2 시작 베이스라인: `736596c`, 테스트 71 통과, `tsc -b` 통과.
   - **#8:** 마커비우기·삭제 인라인 X 제거 → 포커스 행 우측 핸들 hover 시 빨간 원형 삭제 버튼 opacity 0→1 페이드인.
   - **#9:** 레코드/플레이 키 입력 시 마커 추가 + .track-row--pulse 클래스 ~320ms 하이라이트(120ms 존재, 520ms 제거).
   - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p2-volume.png`.
+
+## 계획 P3 (레인 플레이헤드 + 채점 게이트, #4·#10) — ✅ 완료
+- pressTrack 채점 게이트(`e112302`, TDD 3테스트 — RED가 미재생 채점/마커소진 버그 확인), LanePlayhead(`f9a863b`). 결합 리뷰 ✅. 전체 184 통과, tsc OK, build OK.
+- 브라우저 검증(헤드리스, `/tmp/bof-driver/p3-shot.mjs`, 데모 mp3):
+  - **#4:** listening 모드=레인 플레이헤드 0개 / 플레이 모드=play 상태 트랙만 1개(다른 상태 트랙 없음). 재생 중 x 404→410.7 이동.
+  - **#10:** 채점은 playing일 때만(단위테스트 3개). perform 소리는 KeyboardController에서 무조건 재생(미리듣기) — audio 출력은 헤드리스 청취 불가(사람 확인 권장).
+  - 콘솔 에러 favicon뿐. 스크린샷 `/tmp/bof-p3-playhead.png`.
+
+# 🎉 Editor v2 폴리싱 — 10항목 전부 완료
+- P1(#3·#6·#7) · P2(#1·#2·#5·#8·#9) · P3(#4·#10) 구현·검증·푸시.
+- 최종: `yarn test:run` 184 통과, `yarn tsc -b` 통과, `yarn build` 통과. 브랜치 `feat/editor-v2`(PR #1).
+- 사람 검증 권장(헤드리스 한계): perform 모드 미리듣기/채점 소리 청취, 줌/드래그/페이드인의 실제 사용 감.
