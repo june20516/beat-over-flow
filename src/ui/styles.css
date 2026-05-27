@@ -955,3 +955,48 @@ input[type="range"]:focus::-webkit-slider-thumb {
   font-weight: 800;
   line-height: 1;
 }
+
+/* 트랙 행 펄스(키 입력 피드백, 폴리싱 #9) */
+.track-row--pulse { animation: track-pulse 0.32s ease; }
+@keyframes track-pulse {
+  0% { background: rgba(168, 85, 247, 0.45); }
+  100% { background: transparent; }
+}
+
+/* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */
+.track-row { position: relative; }
+.track-row__delete {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  z-index: 6;
+  pointer-events: none;
+}
+.track-row__delete-handle {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 10px;
+  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.25));
+  pointer-events: auto;
+  cursor: pointer;
+}
+.track-row__delete-btn {
+  width: 26px; height: 26px; padding: 0;
+  border-radius: var(--r-pill);
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+}
+.track-row__delete:hover .track-row__delete-btn {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
