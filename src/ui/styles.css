@@ -54,74 +54,7 @@
 
 /* seg rules moved to ModeSwitcher.module.css */
 
-/* ==========================================================================
-   스텝 시퀀서
-   ========================================================================== */
-.seq-panel {
-  margin: 16px 20px 24px;
-  padding: 16px;
-}
-.seq-panel__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: flex-end;
-  margin-bottom: 14px;
-}
-.seq-panel__head .section-title {
-  font-size: 15px;
-  margin-right: 4px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.field input {
-  text-transform: none;
-}
-
-.step-grid {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 16px;
-}
-.step-cell {
-  flex: 1;
-  height: 40px;
-  padding: 0;
-  border-radius: 8px;
-  background: var(--bg-inset);
-  border: 1px solid var(--line);
-  transition: transform 0.1s ease, box-shadow 0.18s ease, background 0.12s ease;
-}
-.step-cell:hover {
-  border-color: var(--line-strong);
-  transform: translateY(-2px);
-}
-.step-cell--active {
-  background: var(--cell-color, var(--purple));
-  border-color: transparent;
-  box-shadow: 0 0 14px -2px var(--cell-color, var(--purple)),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-}
-.step-cell--beat {
-  border-color: var(--line-strong);
-}
-
-.seq-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  color: var(--text-dim);
-  font-size: 13px;
-}
+/* seq-panel, field, step-grid, step-cell, seq-controls rules moved to StepSequencerPanel.module.css */
 
 /* ==========================================================================
    스코어 HUD — 게임 점수 강조
@@ -185,13 +118,7 @@
   color: var(--pink);
 }
 
-.empty-hint {
-  padding: 28px 20px;
-  margin: 16px 20px;
-  text-align: center;
-  color: var(--text-faint);
-  font-size: 14px;
-}
+/* empty-hint moved to StepSequencerPanel.module.css */
 
 /* ==========================================================================
    프로젝트 목록 (랜딩)
