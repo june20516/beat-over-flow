@@ -1,5 +1,9 @@
 import { useState, type CSSProperties } from "react";
 import { Repeat } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
+import styles from "./StepSequencerPanel.module.css";
+import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { useEditorUi } from "../store/editorUi";
 import {
@@ -28,7 +32,7 @@ export function StepSequencerPanel() {
 
   const track = tracks.find((t) => t.id === selectedTrackId) ?? null;
   if (!track) {
-    return <div className="empty-hint panel">트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
+    return <div className={cx(styles.emptyHint, primitives.panel)}>트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
   }
 
   const steps = stepTimes(region.startMs, region.endMs, stepCount);
@@ -65,30 +69,33 @@ export function StepSequencerPanel() {
   }
 
   return (
-    <div className="seq-panel panel">
-      <div className="seq-panel__head">
-        <h2 className="section-title">스텝 시퀀서 — {track.name}</h2>
-        <label className="field">
+    <div className={cx(styles.seqPanel, primitives.panel)}>
+      <div className={styles.head}>
+        <h2 className={cx(primitives.sectionTitle, styles.headTitle)}>스텝 시퀀서 — {track.name}</h2>
+        <label className={styles.field}>
           구간 시작(ms)
           <input
+            className={controls.input}
             type="number"
             value={Math.round(region.startMs)}
             onChange={(e) => setRegion({ ...region, startMs: Number(e.target.value) })}
             style={{ width: 90 }}
           />
         </label>
-        <label className="field">
+        <label className={styles.field}>
           끝(ms)
           <input
+            className={controls.input}
             type="number"
             value={Math.round(region.endMs)}
             onChange={(e) => setRegion({ ...region, endMs: Number(e.target.value) })}
             style={{ width: 90 }}
           />
         </label>
-        <label className="field">
+        <label className={styles.field}>
           칸수
           <input
+            className={controls.input}
             type="number"
             min={1}
             max={64}
@@ -99,39 +106,35 @@ export function StepSequencerPanel() {
         </label>
       </div>
 
-      <div className="step-grid">
+      <div className={styles.stepGrid}>
         {steps.map((t, i) => (
           <button
             key={i}
-            className={
-              "step-cell" +
-              (active[i] ? " step-cell--active" : "") +
-              (i % 4 === 0 ? " step-cell--beat" : "")
-            }
+            className={cx(styles.stepCell, active[i] && styles.stepCellActive, i % 4 === 0 && styles.stepCellBeat)}
             style={{ "--cell-color": track.color } as CSSProperties}
             onClick={() => toggleMarkerAt(track.id, t, tolerance)}
           />
         ))}
       </div>
 
-      <div className="seq-controls">
+      <div className={styles.seqControls}>
         <span>반복</span>
-        <select value={repeatKind} onChange={(e) => setRepeatKind(e.target.value as typeof repeatKind)}>
+        <select className={controls.select} value={repeatKind} onChange={(e) => setRepeatKind(e.target.value as typeof repeatKind)}>
           <option value="toEnd">곡 끝까지</option>
           <option value="count">N회</option>
           <option value="until">지정 지점까지</option>
         </select>
         {repeatKind === "count" && (
-          <input type="number" min={1} value={count} onChange={(e) => setCount(Number(e.target.value))} style={{ width: 70 }} />
+          <input className={controls.input} type="number" min={1} value={count} onChange={(e) => setCount(Number(e.target.value))} style={{ width: 70 }} />
         )}
         {repeatKind === "until" && (
-          <input type="number" min={0} value={untilMs} onChange={(e) => setUntilMs(Number(e.target.value))} style={{ width: 100 }} />
+          <input className={controls.input} type="number" min={0} value={untilMs} onChange={(e) => setUntilMs(Number(e.target.value))} style={{ width: 100 }} />
         )}
-        <button className="btn--primary" onClick={fill}>
+        <button className={cx(controls.btn, controls.btnPrimary)} onClick={fill}>
           <Repeat size={15} weight="bold" />
           반복 채우기
         </button>
-        <button className="btn--ghost" onClick={clearAndRefill}>범위 지우고 다시 채우기</button>
+        <button className={cx(controls.btn, controls.btnGhost)} onClick={clearAndRefill}>범위 지우고 다시 채우기</button>
       </div>
     </div>
   );

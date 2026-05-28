@@ -1,0 +1,54 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+/* 헤더 행: 좌측 고정 컬럼 | 우측 arrange(베이스 파형) */
+.headerRow {
+  display: flex;
+  align-items: stretch;
+  flex: none;
+}
+.fixedCol {
+  width: 384px;
+  flex: none;
+  border-right: 1px solid var(--line);
+}
+.head {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.headTitle {
+  font-size: 16px;
+}
+.head button {
+  margin-left: auto;
+}
+/* 트랙 행 목록: 세로 스크롤 */
+.rows {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* 트랙 드래그 고스트 (폴리싱 #5) */
+.trackDragOverlay {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border-left: 4px solid var(--track-color, var(--purple));
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow);
+  cursor: grabbing;
+}

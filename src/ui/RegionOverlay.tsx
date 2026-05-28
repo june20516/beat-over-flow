@@ -1,3 +1,4 @@
+import styles from "./RegionOverlay.module.css";
 import { useEditorUi } from "../store/editorUi";
 import { useViewport } from "../store/viewport";
 import { timeToX } from "../timeline/viewportMath";
@@ -16,5 +17,5 @@ export function RegionOverlay() {
   const right = Math.min(containerWidthPx, Math.max(x1, x2));
   if (right <= 0 || left >= containerWidthPx || right <= left) return null;
 
-  return <div className="region-overlay" style={{ left, width: right - left }} />;
+  return <div className={styles.regionOverlay} style={{ left, width: right - left }} />;
 }

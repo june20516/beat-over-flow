@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Sparkle, Copy, PencilSimple } from "@phosphor-icons/react";
+import styles from "./ProjectList.module.css";
+import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
+import { cx } from "./cx";
 import { listProjects, saveProject, deleteProject, duplicateProject } from "../persistence/projects";
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
@@ -89,16 +93,16 @@ export function ProjectList({ onOpen }: Props) {
   }
 
   return (
-    <div className="landing">
-      <header className="landing__hero">
-        <h1 className="landing__title">BeatOverflow</h1>
-        <p className="landing__tagline">오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
-        <div className="landing__cta-row">
-          <button className="btn--primary landing__cta" onClick={() => fileRef.current?.click()}>
+    <div className={styles.landing}>
+      <header className={styles.hero}>
+        <h1 className={styles.title}>BeatOverflow</h1>
+        <p className={styles.tagline}>오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
+        <div className={styles.ctaRow}>
+          <button className={cx(controls.btn, controls.btnPrimary, styles.cta)} onClick={() => fileRef.current?.click()}>
             <Plus size={18} weight="bold" />
             새 프로젝트 (오디오 업로드)
           </button>
-          <button className="btn--ghost landing__cta-secondary" onClick={createExample}>
+          <button className={cx(controls.btn, controls.btnGhost, styles.ctaSecondary)} onClick={createExample}>
             <Sparkle size={18} weight="bold" />
             예제 프로젝트
           </button>
@@ -113,14 +117,14 @@ export function ProjectList({ onOpen }: Props) {
       </header>
 
       {projects.length === 0 ? (
-        <p className="landing__empty">아직 프로젝트가 없어요. 오디오를 업로드하거나 예제로 시작하세요.</p>
+        <p className={styles.empty}>아직 프로젝트가 없어요. 오디오를 업로드하거나 예제로 시작하세요.</p>
       ) : (
-        <ul className="project-grid">
+        <ul className={styles.grid}>
           {projects.map((p) => (
-            <li key={p.id} className="project-card panel">
+            <li key={p.id} className={cx(styles.card, primitives.panel)}>
               {editingId === p.id ? (
                 <input
-                  className="project-card__rename"
+                  className={cx(controls.input, styles.rename)}
                   autoFocus
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
@@ -134,9 +138,9 @@ export function ProjectList({ onOpen }: Props) {
                   }}
                 />
               ) : (
-                <div className="project-card__title">
+                <div className={styles.cardTitle}>
                   <button
-                    className="project-card__open"
+                    className={styles.open}
                     onClick={() => {
                       setProject(p);
                       onOpen(p);
@@ -145,7 +149,7 @@ export function ProjectList({ onOpen }: Props) {
                     {p.name}
                   </button>
                   <button
-                    className="btn--ghost btn--icon project-card__edit"
+                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.edit)}
                     title="이름 수정"
                     onClick={() => startRename(p)}
                   >
@@ -153,18 +157,18 @@ export function ProjectList({ onOpen }: Props) {
                   </button>
                 </div>
               )}
-              <div className="project-card__footer">
+              <div className={styles.footer}>
                 <span>{p.tracks.length}개 트랙</span>
-                <div className="project-card__actions">
+                <div className={styles.actions}>
                   <button
-                    className="btn--ghost btn--icon"
+                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.actionSlot)}
                     title="복사"
                     onClick={() => handleDuplicate(p)}
                   >
                     <Copy size={15} weight="bold" />
                   </button>
                   <button
-                    className="btn--danger"
+                    className={cx(controls.btn, controls.btnDanger, styles.dangerSlot)}
                     onClick={async () => {
                       await deleteProject(p.id);
                       await refresh();

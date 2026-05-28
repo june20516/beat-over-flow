@@ -1,0 +1,103 @@
+/* --- TrackRow CSS Module --- */
+
+.trackRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  height: 40px; /* 언포커스 기본 높이 */
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  overflow: hidden;
+  transition: height 0.18s ease, background 0.15s ease;
+  position: relative;
+}
+.even {
+  background: #130d33;
+}
+.odd {
+  background: #171041;
+}
+.trackRow:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.focused {
+  height: 88px; /* 포커스 확장 */
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.editor {
+  width: 384px;
+  flex: none;
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+}
+.lane {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 인라인 시퀀서 */
+.sequencer {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.sequencerGutter {
+  flex: 0 0 384px; /* .track-row__editor / .timeline__fixed-col 폭과 동일 */
+}
+.sequencerBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 트랙 행 펄스(키 입력 피드백, 폴리싱 #9) */
+.pulse { animation: track-pulse 0.32s ease; }
+@keyframes track-pulse {
+  0% { background: rgba(168, 85, 247, 0.45); }
+  100% { background: transparent; }
+}
+
+/* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */
+.delete {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  z-index: 6;
+  pointer-events: none;
+}
+.deleteHandle {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 10px;
+  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.25));
+  pointer-events: auto;
+  cursor: pointer;
+}
+.deleteBtn {
+  width: 26px; height: 26px; padding: 0;
+  border-radius: var(--r-pill);
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+}
+.delete:hover .deleteBtn {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+/* deleteBtn hover: 빨강 명시 — controls.btn:hover 기본 override */
+.deleteBtn:hover {
+  background: #dc2626;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+}

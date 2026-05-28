@@ -14,7 +14,6 @@ export function LanePlayhead() {
 
   return (
     <div
-      className="lane-playhead"
       style={{
         position: "absolute",
         top: 0,

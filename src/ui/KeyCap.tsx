@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { formatKeyCode } from "../domain/formatKeyCode";
+import { cx } from "./cx";
+import styles from "./KeyCap.module.css";
 
 interface KeyCapProps {
   code: string | null;
@@ -19,7 +21,7 @@ export function KeyCap({ code, onCapture }: KeyCapProps) {
   return (
     <button
       type="button"
-      className={capturing ? "keycap keycap--capturing" : "keycap"}
+      className={cx(styles.keycap, capturing && styles.capturing)}
       onKeyDown={capturing ? handleKeyDown : undefined}
       onClick={(e) => {
         e.stopPropagation();

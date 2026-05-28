@@ -25,3 +25,6 @@ build/
 
 # Claude Code 로컬 설정 (머신별, 비공유)
 .claude/settings.local.json
+
+# 비주얼 스냅샷 (로컬 전용)
+snapshots/

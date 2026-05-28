@@ -1,0 +1,41 @@
+/* 상태 2×2 그리드 (요구 2) */
+.statusGrid {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.cell {
+  width: 18px;
+  height: 16px;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid var(--tone);
+  border-radius: 4px;
+  color: var(--tone);
+  background: transparent;
+  cursor: pointer;
+}
+.cellOn {
+  color: #0a0a0a;
+  background: var(--tone);
+}
+
+/* 언포커스 상태 한 글자 (폴리싱 #2) */
+.compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--tone);
+  border-radius: 6px;
+  color: var(--tone);
+}
+.letter {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}

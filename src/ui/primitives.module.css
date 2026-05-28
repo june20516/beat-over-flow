@@ -1,0 +1,13 @@
+/* 공유 프리미티브 — panel, sectionTitle */
+
+.sectionTitle {
+  font-family: var(--font-display);
+  color: var(--text);
+  margin: 0;
+}
+
+.panel {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}

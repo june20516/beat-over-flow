@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import screen from "./ui/screen.module.css";
 import { ProjectList } from "./ui/ProjectList";
 import { Editor } from "./ui/Editor";
 import { Home } from "./ui/Home";
@@ -39,9 +40,9 @@ function EditorRoute({ projectId }: { projectId: string }) {
 
   if (status === "loading")
     return (
-      <div className="screen">
-        <div className="screen__spinner" />
-        <p className="screen__lead">불러오는 중…</p>
+      <div className={screen.screen}>
+        <div className={screen.screenSpinner} />
+        <p className={screen.screenLead}>불러오는 중…</p>
       </div>
     );
   if (status === "notfound") return <NotFound />;

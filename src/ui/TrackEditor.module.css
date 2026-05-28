@@ -1,0 +1,33 @@
+.trackEditor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px 0 8px;
+  border-left: 4px solid var(--track-color, var(--purple));
+}
+.name {
+  width: 52px;
+  flex: none;
+  padding: 5px 6px;
+  font-size: 12px;
+}
+.selectSlot {
+  flex: none;
+  width: 58px;
+  font-size: 11px;
+  padding: 5px 18px 5px 6px;
+}
+.dragHandle {
+  cursor: grab;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  touch-action: none;
+}
+.dragHandle:active {
+  cursor: grabbing;
+}

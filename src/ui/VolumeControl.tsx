@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { SpeakerHigh } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import styles from "./VolumeControl.module.css";
+import { cx } from "./cx";
 
 interface VolumeControlProps {
   value: number;
@@ -45,11 +48,11 @@ export function VolumeControl({ value, onChange }: VolumeControlProps) {
   }, [open]);
 
   return (
-    <div className="volume-control">
+    <div className={styles.volumeControl}>
       <button
         ref={triggerRef}
         type="button"
-        className="btn--icon volume-control__trigger"
+        className={cx(controls.btn, controls.btnIcon)}
         title={`볼륨 ${Math.round(value * 100)}%`}
         aria-label="볼륨"
         onClick={(e) => {
@@ -65,7 +68,7 @@ export function VolumeControl({ value, onChange }: VolumeControlProps) {
         createPortal(
           <div
             ref={popoverRef}
-            className="volume-control__popover"
+            className={styles.popover}
             style={
               {
                 position: "fixed",
@@ -77,9 +80,9 @@ export function VolumeControl({ value, onChange }: VolumeControlProps) {
             }
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="volume-control__pct">{Math.round(value * 100)}</span>
+            <span className={styles.pct}>{Math.round(value * 100)}</span>
             <input
-              className="volume-control__range"
+              className={cx(controls.range, styles.range)}
               style={{ "--pct": `${value * 100}%` } as CSSProperties}
               type="range"
               min={0}
