@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Plus } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
 import primitives from "./primitives.module.css";
+import styles from "./Timeline.module.css";
 import { cx } from "./cx";
 import {
   DndContext,
@@ -116,12 +117,12 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
   }, [panByPx, zoomAt]);
 
   return (
-    <div ref={timelineRef} className="timeline">
+    <div ref={timelineRef} className={styles.timeline}>
       {/* 헤더 행: 좌측 고정 컬럼(트랙 헤더) | 우측 arrange(베이스 파형 + 플레이헤드) */}
-      <div className="timeline__header-row">
-        <div className="timeline__fixed-col">
-          <div className="timeline__head">
-            <h2 className={primitives.sectionTitle}>트랙</h2>
+      <div className={styles.headerRow}>
+        <div className={styles.fixedCol}>
+          <div className={styles.head}>
+            <h2 className={cx(primitives.sectionTitle, styles.headTitle)}>트랙</h2>
             <button className={cx(controls.btn, controls.btnPrimary)} onClick={addTrack}>
               <Plus size={15} weight="bold" />
               트랙
@@ -130,7 +131,6 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
         </div>
         <div
           ref={arrangeRef}
-          className="timeline__arrange"
           style={{ position: "relative", flex: 1, overflow: "hidden" }}
         >
           <BaseFlowLane peaks={peaks} durationMs={durationMs} />
@@ -150,7 +150,7 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
           items={tracks.map((t) => t.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="timeline__rows">
+          <div className={styles.rows}>
             {tracks.map((t, index) => (
               <TrackRow
                 key={t.id}
@@ -166,7 +166,7 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
             ? (() => {
                 const t = tracks.find((x) => x.id === activeId);
                 return t ? (
-                  <div className="track-drag-overlay" style={{ "--track-color": t.color } as CSSProperties}>
+                  <div className={styles.trackDragOverlay} style={{ "--track-color": t.color } as CSSProperties}>
                     {t.name}
                   </div>
                 ) : null;

@@ -27,48 +27,6 @@
   width: 90px;
 }
 
-/* --- v2 Timeline 레이아웃: 헤더 행 + 트랙 행들 ---------------------------- */
-.timeline {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-}
-/* 헤더 행: 좌측 고정 컬럼 | 우측 arrange(베이스 파형) */
-.timeline__header-row {
-  display: flex;
-  align-items: stretch;
-  flex: none;
-}
-.timeline__fixed-col {
-  width: 384px;
-  flex: none;
-  border-right: 1px solid var(--line);
-}
-.timeline__head {
-  display: flex;
-  align-items: center;
-  height: 80px;
-  padding: 0 14px;
-  border-bottom: 1px solid var(--line);
-}
-.timeline__head .section-title {
-  font-size: 16px;
-}
-.timeline__head button {
-  margin-left: auto;
-}
-/* 트랙 행 목록: 세로 스크롤 */
-.timeline__rows {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
 /* 키 바인딩 키캡 */
 .keycap {
   flex: none;
@@ -537,21 +495,6 @@ input.volume-control__range:active::-webkit-slider-thumb {
   flex: 1 1 auto;
   min-width: 0;
 }
-/* 트랙 드래그 고스트 (폴리싱 #5) */
-.track-drag-overlay {
-  display: flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 14px;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--bg-elev-2);
-  border-left: 4px solid var(--track-color, var(--purple));
-  border-radius: var(--r-sm);
-  box-shadow: var(--shadow);
-  cursor: grabbing;
-}
-
 /* 언포커스 상태 한 글자 (폴리싱 #2) */
 .status-grid--compact {
   display: inline-flex;
