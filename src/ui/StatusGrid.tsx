@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 import type { TrackStatus } from "../types";
+import { cx } from "./cx";
+import styles from "./StatusGrid.module.css";
 
 interface StatusGridProps {
   value: TrackStatus;
@@ -25,20 +27,20 @@ export function StatusGrid({ value, onChange, compact }: StatusGridProps) {
   if (compact) {
     const m = STATUS_META.find((x) => x.status === value)!;
     return (
-      <div className="status-grid status-grid--compact" title={m.label} style={{ "--tone": m.color } as CSSProperties}>
-        <span className="status-grid__letter">{m.letter}</span>
+      <div className={cx(styles.statusGrid, styles.compact)} title={m.label} style={{ "--tone": m.color } as CSSProperties}>
+        <span className={styles.letter}>{m.letter}</span>
       </div>
     );
   }
   return (
-    <div className="status-grid" role="group" aria-label="트랙 상태">
+    <div className={styles.statusGrid} role="group" aria-label="트랙 상태">
       {STATUS_META.map((m) => {
         const selected = m.status === value;
         return (
           <button
             key={m.status}
             type="button"
-            className={selected ? "status-grid__cell status-grid__cell--on" : "status-grid__cell"}
+            className={cx(styles.cell, selected && styles.cellOn)}
             style={{ "--tone": m.color } as CSSProperties}
             title={m.label}
             aria-pressed={selected}

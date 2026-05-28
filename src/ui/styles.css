@@ -317,30 +317,6 @@
 /* TrackRow rules moved to TrackRow.module.css */
 /* MarkerEditor rules moved to MarkerEditor.module.css */
 
-/* 상태 2×2 그리드 (요구 2) */
-.status-grid {
-  flex: none;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2px;
-}
-.status-grid__cell {
-  width: 18px;
-  height: 16px;
-  padding: 0;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  border: 1px solid var(--tone);
-  border-radius: 4px;
-  color: var(--tone);
-  background: transparent;
-  cursor: pointer;
-}
-.status-grid__cell--on {
-  color: #0a0a0a;
-  background: var(--tone);
-}
 
 /* 볼륨 팝오버 (요구 1) */
 .volume-control {
@@ -397,22 +373,7 @@ input.volume-control__range:active::-webkit-slider-thumb {
 }
 
 /* 인라인 시퀀서 rules moved to TrackRow.module.css */
-/* 언포커스 상태 한 글자 (폴리싱 #2) */
-.status-grid--compact {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--tone);
-  border-radius: 6px;
-  color: var(--tone);
-}
-.status-grid__letter {
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
-}
+/* status-grid rules moved to StatusGrid.module.css */
 
 /* 트랙 행 펄스·삭제 affordance rules moved to TrackRow.module.css */
 
