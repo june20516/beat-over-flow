@@ -9,6 +9,7 @@ import { playSample } from "./SamplePlayer";
 import { markersInWindow, ctxTimeForMarker } from "./Scheduler";
 import { resolveTrackBehavior } from "../domain/mode";
 import { startPlaySession, endPlaySession, updatePlay } from "../scoring/playSession";
+import type { Project } from "../types";
 
 let engine: AudioEngine | null = null;
 let source: BaseFlowSource | null = null;
@@ -34,9 +35,31 @@ export async function preloadTrackSounds(): Promise<void> {
 }
 
 export function getEngine(): AudioEngine {
-  if (!engine) engine = new AudioEngine();
+  if (!engine) {
+    engine = new AudioEngine();
+    // 새로 만든 영구 노드를 즉시 현재 store 상태와 일치시킨다(생성 시점 동기화).
+    applyAudioState(engine, useStore.getState().project);
+  }
   return engine;
 }
+
+/**
+ * store 상태를 "수명이 긴 영구 오디오 노드"에 반영하는 단일 동기화 지점.
+ *
+ * 전역(트랙 무관) 오디오 파라미터를 새로 추가할 때는 반드시 이 함수에 연결한다.
+ * store 값만 바꾸고 여기에 연결하지 않으면 UI는 동작하지만 소리에는 반영되지 않는다
+ * (마스터 볼륨이 실제로 그랬던 버그). 개별 샘플/트랙 파라미터는 재생 시점에
+ * store에서 직접 읽으므로(예: playSample(track.volume)) 이 함수의 대상이 아니다.
+ */
+export function applyAudioState(eng: AudioEngine, project: Project | null): void {
+  eng.setMasterVolume(project?.master.volume ?? 1);
+}
+
+// store가 바뀔 때마다 영구 노드를 자동 재동기화한다. 엔진이 아직 없으면 무시하고,
+// 생성 시점 동기화(getEngine)가 최신 상태를 보장한다.
+useStore.subscribe((state) => {
+  if (engine) applyAudioState(engine, state.project);
+});
 
 export function getSource(): BaseFlowSource | null {
   return source;
