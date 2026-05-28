@@ -12,8 +12,7 @@
     "test:run": "vitest run",
     "analyze:demo": "node scripts/analyze-demo.mjs",
     "samples:fetch": "node scripts/fetch-samples.mjs",
-    "snap": "node scripts/visual-snap.mjs",
-    "e2e:card-click": "node scripts/e2e-project-card-click.mjs"
+    "snap": "node scripts/visual-snap.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
