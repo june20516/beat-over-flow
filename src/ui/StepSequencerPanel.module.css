@@ -39,6 +39,7 @@
   flex: 1;
   height: 40px;
   padding: 0;
+  cursor: pointer;
   border-radius: 8px;
   background: var(--bg-inset);
   border: 1px solid var(--line);

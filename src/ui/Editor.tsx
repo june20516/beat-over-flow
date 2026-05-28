@@ -34,7 +34,7 @@ export function Editor({ onExit }: Props) {
   // 트랙 에디터/마커 레인/파형 외의 빈 영역을 클릭하면 포커스 해제
   function handleMainClick(e: React.MouseEvent<HTMLDivElement>) {
     const target = e.target as HTMLElement;
-    if (target.closest(".track-row-wrap, .base-flow-lane, .timeline__head")) return;
+    if (target.closest("[data-track-row], [data-base-flow-lane], [data-timeline-head]")) return;
     if (selectedTrackId) setSelectedTrack(null);
   }
 

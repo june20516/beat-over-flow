@@ -95,7 +95,7 @@
   transform: translateX(0);
   pointer-events: auto;
 }
-/* 버튼 자체 hover 시 전역 button:hover(보라)가 덮지 않도록 빨강 유지(진하게) */
+/* deleteBtn hover: 빨강 명시 — controls.btn:hover 기본 override */
 .deleteBtn:hover {
   background: #dc2626;
   border: none;

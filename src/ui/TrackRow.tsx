@@ -43,9 +43,9 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
   );
 
   return (
-    <div>
+    <div data-track-row>
       <div className={rowClass} onClick={() => setSelectedTrack(track.id)}>
-        <div className={styles.editor}>
+        <div className={styles.editor} data-track-row-editor>
           <TrackEditor track={track} focused={focused} />
         </div>
         <div className={styles.lane}>

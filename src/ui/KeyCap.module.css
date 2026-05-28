@@ -5,6 +5,7 @@
   font-family: var(--font-mono);
   font-size: 10px;
   white-space: nowrap;
+  cursor: pointer;
   background: var(--bg-inset);
   border: 1px solid var(--line-strong);
   border-bottom-width: 3px;
