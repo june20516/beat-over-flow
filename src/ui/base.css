@@ -1,0 +1,92 @@
+/* ==========================================================================
+   BeatOverflow — 디자인 시스템
+   비비드/플레이풀: 깊은 인디고-블랙 배경 + 보라→핑크 그라데이션 + 네온 액센트
+   ========================================================================== */
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url("https://fonts.googleapis.com/css2?family=Jua&family=DM+Mono:wght@400;500&display=swap");
+
+:root {
+  /* 배경 레이어 */
+  --bg: #0c0a18;
+  --bg-elev: #161031;
+  --bg-elev-2: #1f1742;
+  --bg-inset: #100c24;
+
+  /* 텍스트 */
+  --text: #f3eefc;
+  --text-dim: #b3a7d6;
+  --text-faint: #7c719e;
+
+  /* 보더 / 라인 */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  /* 액센트 */
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #22d3ee;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --orange: #fb923c;
+
+  --grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  --grad-soft: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(236, 72, 153, 0.18));
+
+  /* 라운드 */
+  --r-sm: 9px;
+  --r: 14px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+
+  /* 그림자 / 글로우 */
+  --shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --glow-purple: 0 0 0 1px rgba(168, 85, 247, 0.5), 0 6px 22px -6px rgba(168, 85, 247, 0.6);
+
+  --font-body: "Pretendard", system-ui, sans-serif;
+  --font-display: "Jua", "Pretendard", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+}
+
+/* --- reset / base ------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(168, 85, 247, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(236, 72, 153, 0.18), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(236, 72, 153, 0.35);
+}
+
+/* 얇은 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: var(--r-pill);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
