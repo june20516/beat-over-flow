@@ -120,66 +120,89 @@ export function ProjectList({ onOpen }: Props) {
         <p className={styles.empty}>아직 프로젝트가 없어요. 오디오를 업로드하거나 예제로 시작하세요.</p>
       ) : (
         <ul className={styles.grid}>
-          {projects.map((p) => (
-            <li key={p.id} className={cx(styles.card, primitives.panel)}>
-              {editingId === p.id ? (
-                <input
-                  className={cx(controls.input, styles.rename)}
-                  autoFocus
-                  value={draftName}
-                  onChange={(e) => setDraftName(e.target.value)}
-                  onBlur={() => handleRenameBlur(p)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                    if (e.key === "Escape") {
-                      cancelRenameRef.current = true;
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                />
-              ) : (
-                <div className={styles.cardTitle}>
-                  <button
-                    className={styles.open}
-                    onClick={() => {
-                      setProject(p);
-                      onOpen(p);
+          {projects.map((p) => {
+            const isEditing = editingId === p.id;
+            const openProject = () => {
+              setProject(p);
+              onOpen(p);
+            };
+            return (
+              <li
+                key={p.id}
+                className={cx(styles.card, primitives.panel)}
+                role={isEditing ? undefined : "button"}
+                tabIndex={isEditing ? undefined : 0}
+                onClick={isEditing ? undefined : openProject}
+                onKeyDown={
+                  isEditing
+                    ? undefined
+                    : (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openProject();
+                        }
+                      }
+                }
+              >
+                {isEditing ? (
+                  <input
+                    className={cx(controls.input, styles.rename)}
+                    autoFocus
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onBlur={() => handleRenameBlur(p)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                      if (e.key === "Escape") {
+                        cancelRenameRef.current = true;
+                        (e.target as HTMLInputElement).blur();
+                      }
                     }}
-                  >
-                    {p.name}
-                  </button>
-                  <button
-                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.edit)}
-                    title="이름 수정"
-                    onClick={() => startRename(p)}
-                  >
-                    <PencilSimple size={15} weight="bold" />
-                  </button>
+                  />
+                ) : (
+                  <div className={styles.cardTitle}>
+                    <span className={styles.open}>{p.name}</span>
+                    <button
+                      className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.edit)}
+                      title="이름 수정"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startRename(p);
+                      }}
+                    >
+                      <PencilSimple size={15} weight="bold" />
+                    </button>
+                  </div>
+                )}
+                <div className={styles.footer}>
+                  <span>{p.tracks.length}개 트랙</span>
+                  <div className={styles.actions}>
+                    <button
+                      className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.actionSlot)}
+                      title="복사"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleDuplicate(p);
+                      }}
+                    >
+                      <Copy size={15} weight="bold" />
+                    </button>
+                    <button
+                      className={cx(controls.btn, controls.btnDanger, styles.dangerSlot)}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await deleteProject(p.id);
+                        await refresh();
+                      }}
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
-              )}
-              <div className={styles.footer}>
-                <span>{p.tracks.length}개 트랙</span>
-                <div className={styles.actions}>
-                  <button
-                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon, styles.actionSlot)}
-                    title="복사"
-                    onClick={() => handleDuplicate(p)}
-                  >
-                    <Copy size={15} weight="bold" />
-                  </button>
-                  <button
-                    className={cx(controls.btn, controls.btnDanger, styles.dangerSlot)}
-                    onClick={async () => {
-                      await deleteProject(p.id);
-                      await refresh();
-                    }}
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
