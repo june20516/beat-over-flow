@@ -1,31 +1,6 @@
 /* BeatOverflow — 컴포넌트/유틸리티 스타일 (글로벌 토큰: ui/base.css) */
 
-.transport {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 16px 20px 0;
-  padding: 12px 16px;
-}
-.transport__time {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--text-dim);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-.transport__seek {
-  flex: 1;
-}
-.transport__vol {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-dim);
-}
-.transport__vol input[type="range"] {
-  width: 90px;
-}
+/* transport rules moved to TransportBar.module.css */
 
 /* keycap rules moved to KeyCap.module.css */
 
