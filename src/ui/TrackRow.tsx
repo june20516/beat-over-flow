@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { X } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
 import styles from "./TrackRow.module.css";
@@ -22,29 +21,32 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
   const setSelectedTrack = useStore((s) => s.setSelectedTrack);
   const removeTrack = useStore((s) => s.removeTrack);
   const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
-  const pulseNonce = usePulse((s) => s.nonce[track.id] ?? 0);
+  const pulseEvent = usePulse((s) => s.events[track.id]);
   const mode = useStore((s) => s.mode);
   const showSequencer =
     focused && sequencerOpen && resolveTrackBehavior(mode, track.status) === "record";
 
-  const [pulsing, setPulsing] = useState(false);
-  useEffect(() => {
-    if (pulseNonce === 0) return;
-    setPulsing(true);
-    const id = setTimeout(() => setPulsing(false), 320);
-    return () => clearTimeout(id);
-  }, [pulseNonce]);
-
+  // 오버레이는 nonce를 key로 매번 remount되므로, 연타 시 호출 횟수만큼
+  // 별도 애니메이션이 시작된다. source에 따라 색을 다르게 입힌다.
   const rowClass = cx(
     styles.trackRow,
     focused && styles.focused,
     index % 2 === 0 ? styles.even : styles.odd,
-    pulsing && styles.pulse,
   );
 
   return (
     <div data-track-row>
       <div className={rowClass} onClick={() => setSelectedTrack(track.id)}>
+        {pulseEvent && (
+          <span
+            key={pulseEvent.nonce}
+            className={cx(
+              styles.pulseOverlay,
+              pulseEvent.source === "auto" ? styles.pulseAuto : styles.pulseKey,
+            )}
+            aria-hidden="true"
+          />
+        )}
         <div className={styles.editor} data-track-row-editor>
           <TrackEditor track={track} focused={focused} />
         </div>
