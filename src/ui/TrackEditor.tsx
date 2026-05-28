@@ -1,5 +1,7 @@
 import { type CSSProperties } from "react";
 import { Trash, DotsSixVertical } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import { cx } from "./cx";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useStore } from "../store/useStore";
@@ -56,13 +58,14 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
         <DotsSixVertical weight="bold" />
       </button>
       <input
-        className="track-editor__name"
+        className={cx(controls.input, "track-editor__name")}
         value={track.name}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackName(track.id, e.target.value)}
       />
       <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
       <select
+        className={controls.select}
         value={track.sound.kind === "builtin" ? track.sound.sampleId : ""}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackSound(track.id, { kind: "builtin", sampleId: e.target.value })}
@@ -78,7 +81,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
       {focused && (
         <button
           type="button"
-          className="btn--icon track-editor__clear"
+          className={cx(controls.btn, controls.btnIcon)}
           title="마커 전체 비우기"
           onClick={(e) => {
             e.stopPropagation();

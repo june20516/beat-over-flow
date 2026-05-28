@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import controls from "./controls.module.css";
+import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { getEngine, loadBaseFlow } from "../audio/runtime";
 import { getAsset } from "../persistence/assets";
@@ -109,7 +111,7 @@ export function Editor({ onExit }: Props) {
         <span className="top-bar__spacer" />
         <ModeSwitcher />
         <span className="top-bar__spacer" />
-        <button className="btn--ghost" onClick={onExit}>
+        <button className={cx(controls.btn, controls.btnGhost)} onClick={onExit}>
           ← 목록
         </button>
       </header>

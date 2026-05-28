@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 import { Play, Pause, SpeakerHigh } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { play, pause, seek } from "../audio/runtime";
 import { KeyCap } from "./KeyCap";
@@ -22,7 +24,7 @@ export function TransportBar() {
 
   return (
     <div className="transport panel">
-      <button className="btn--icon btn--primary" onClick={() => (playing ? pause() : void play())}>
+      <button className={cx(controls.btn, controls.btnIcon, controls.btnPrimary)} onClick={() => (playing ? pause() : void play())}>
         {playing ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}
       </button>
       <KeyCap code={playPauseKey} onCapture={(code) => setPlayPauseKey(code)} />
@@ -30,7 +32,7 @@ export function TransportBar() {
         {fmt(playheadMs)} / {fmt(durationMs)}
       </span>
       <input
-        className="transport__seek range-fill"
+        className={cx(controls.range, controls.rangeFill, "transport__seek")}
         style={{ "--pct": `${playedPct}%` } as CSSProperties}
         type="range"
         min={0}
@@ -41,7 +43,7 @@ export function TransportBar() {
       <label className="transport__vol">
         <SpeakerHigh size={18} />
         <input
-          className="range-fill"
+          className={cx(controls.range, controls.rangeFill)}
           style={{ "--pct": `${(project?.master.volume ?? 1) * 100}%` } as CSSProperties}
           type="range"
           min={0}

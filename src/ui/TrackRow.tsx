@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { useEditorUi } from "../store/editorUi";
 import { usePulse } from "../store/pulse";
@@ -53,7 +55,7 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
             <div className="track-row__delete-handle" aria-hidden="true" />
             <button
               type="button"
-              className="track-row__delete-btn"
+              className={cx(controls.btn, "track-row__delete-btn")}
               title="트랙 삭제"
               onClick={(e) => {
                 e.stopPropagation();

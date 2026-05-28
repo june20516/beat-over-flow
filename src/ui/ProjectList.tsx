@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Sparkle, Copy, PencilSimple } from "@phosphor-icons/react";
+import controls from "./controls.module.css";
+import { cx } from "./cx";
 import { listProjects, saveProject, deleteProject, duplicateProject } from "../persistence/projects";
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
@@ -94,11 +96,11 @@ export function ProjectList({ onOpen }: Props) {
         <h1 className="landing__title">BeatOverflow</h1>
         <p className="landing__tagline">오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
         <div className="landing__cta-row">
-          <button className="btn--primary landing__cta" onClick={() => fileRef.current?.click()}>
+          <button className={cx(controls.btn, controls.btnPrimary, "landing__cta")} onClick={() => fileRef.current?.click()}>
             <Plus size={18} weight="bold" />
             새 프로젝트 (오디오 업로드)
           </button>
-          <button className="btn--ghost landing__cta-secondary" onClick={createExample}>
+          <button className={cx(controls.btn, controls.btnGhost, "landing__cta-secondary")} onClick={createExample}>
             <Sparkle size={18} weight="bold" />
             예제 프로젝트
           </button>
@@ -120,7 +122,7 @@ export function ProjectList({ onOpen }: Props) {
             <li key={p.id} className="project-card panel">
               {editingId === p.id ? (
                 <input
-                  className="project-card__rename"
+                  className={cx(controls.input, "project-card__rename")}
                   autoFocus
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
@@ -145,7 +147,7 @@ export function ProjectList({ onOpen }: Props) {
                     {p.name}
                   </button>
                   <button
-                    className="btn--ghost btn--icon project-card__edit"
+                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon, "project-card__edit")}
                     title="이름 수정"
                     onClick={() => startRename(p)}
                   >
@@ -157,14 +159,14 @@ export function ProjectList({ onOpen }: Props) {
                 <span>{p.tracks.length}개 트랙</span>
                 <div className="project-card__actions">
                   <button
-                    className="btn--ghost btn--icon"
+                    className={cx(controls.btn, controls.btnGhost, controls.btnIcon)}
                     title="복사"
                     onClick={() => handleDuplicate(p)}
                   >
                     <Copy size={15} weight="bold" />
                   </button>
                   <button
-                    className="btn--danger"
+                    className={cx(controls.btn, controls.btnDanger)}
                     onClick={async () => {
                       await deleteProject(p.id);
                       await refresh();
