@@ -1,0 +1,35 @@
+/* 모드 스위처 — 세그먼트 컨트롤 */
+.seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+
+.segBtn {
+  border: none;
+  background: transparent;
+  border-radius: var(--r-pill);
+  padding: 7px 16px;
+  color: var(--text-dim);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.segBtnActive {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 4px 14px -4px rgba(236, 72, 153, 0.7);
+}
+
+.segBtnActive:hover {
+  background: var(--grad);
+  color: #fff;
+}

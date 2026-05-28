@@ -52,38 +52,7 @@
   }
 }
 
-/* ==========================================================================
-   모드 스위처 — 세그먼트 컨트롤
-   ========================================================================== */
-.seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--bg-inset);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-}
-.seg__btn {
-  border: none;
-  background: transparent;
-  border-radius: var(--r-pill);
-  padding: 7px 16px;
-  color: var(--text-dim);
-  font-weight: 600;
-}
-.seg__btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
-}
-.seg__btn--active {
-  background: var(--grad);
-  color: #fff;
-  box-shadow: 0 4px 14px -4px rgba(236, 72, 153, 0.7);
-}
-.seg__btn--active:hover {
-  background: var(--grad);
-  color: #fff;
-}
+/* seg rules moved to ModeSwitcher.module.css */
 
 /* ==========================================================================
    스텝 시퀀서
@@ -318,59 +287,7 @@
 /* MarkerEditor rules moved to MarkerEditor.module.css */
 
 
-/* 볼륨 팝오버 (요구 1) */
-.volume-control {
-  position: relative;
-  flex: none;
-  display: inline-flex;
-}
-/* 위치는 body 포털에서 인라인(position:fixed)으로 지정한다(클리핑 방지). 여기선 외형만. */
-.volume-control__popover {
-  padding: 14px 10px;
-  background: var(--bg-elev-2);
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-/* 세로 range: 가로 슬라이더를 회전해 세로로 배치 */
-.volume-control__pct {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-dim);
-  min-width: 24px;
-  text-align: center;
-}
-/* 세로 볼륨 슬라이더: 아래=0, 위=100%. 아래에서 위로 그라데이션 채움.
-   전역 input[type=range](특이도 0,1,1)를 이기려고 input. 접두사로 특이도 상향. */
-input.volume-control__range {
-  -webkit-appearance: none;
-  appearance: none;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 8px;
-  height: 120px;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  background:
-    linear-gradient(var(--bg-inset), var(--bg-inset)) no-repeat top center,
-    linear-gradient(0deg, var(--purple), var(--pink)) no-repeat bottom center;
-  background-size:
-    100% calc(100% - var(--pct, 0%)),
-    100% 100%;
-}
-input.volume-control__range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--r-pill);
-  background: #fff;
-  border: 2px solid var(--purple);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  cursor: grab;
-}
-input.volume-control__range:active::-webkit-slider-thumb {
-  cursor: grabbing;
-}
+/* volume-control rules moved to VolumeControl.module.css */
 
 /* 인라인 시퀀서 rules moved to TrackRow.module.css */
 /* status-grid rules moved to StatusGrid.module.css */
