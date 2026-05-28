@@ -316,31 +316,6 @@
 /* --- v2 행 분해: TrackRow = TrackEditor | MarkerEditor --------------------- */
 /* TrackRow rules moved to TrackRow.module.css */
 
-.track-editor {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 100%;
-  padding: 0 10px 0 8px;
-  border-left: 4px solid var(--track-color, var(--purple));
-}
-.track-editor__name {
-  width: 52px;
-  flex: none;
-  padding: 5px 6px;
-  font-size: 12px;
-}
-.track-editor select {
-  flex: none;
-  width: 58px;
-  font-size: 11px;
-  padding: 5px 18px 5px 6px;
-}
-.track-editor input[type="range"] {
-  width: 40px;
-  flex: none;
-}
-
 .marker-editor {
   width: 100%;
   height: 100%;
@@ -429,21 +404,6 @@ input.volume-control__range::-webkit-slider-thumb {
   cursor: grab;
 }
 input.volume-control__range:active::-webkit-slider-thumb {
-  cursor: grabbing;
-}
-
-/* 트랙 드래그 핸들 (요구 8) */
-.track-editor__drag-handle {
-  cursor: grab;
-  background: none;
-  border: none;
-  padding: 4px;
-  color: #9ca3af;
-  display: inline-flex;
-  align-items: center;
-  touch-action: none;
-}
-.track-editor__drag-handle:active {
   cursor: grabbing;
 }
 

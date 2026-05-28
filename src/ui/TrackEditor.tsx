@@ -1,6 +1,7 @@
 import { type CSSProperties } from "react";
 import { Trash, DotsSixVertical } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import styles from "./TrackEditor.module.css";
 import { cx } from "./cx";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -44,13 +45,13 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   return (
     <div
       ref={setNodeRef}
-      className={focused ? "track-editor track-editor--focused" : "track-editor"}
+      className={styles.trackEditor}
       style={style}
     >
       <button
         type="button"
         ref={setActivatorNodeRef}
-        className="track-editor__drag-handle"
+        className={styles.dragHandle}
         aria-label={`${track.name} 트랙 순서 이동`}
         {...attributes}
         {...listeners}
@@ -58,14 +59,14 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
         <DotsSixVertical weight="bold" />
       </button>
       <input
-        className={cx(controls.input, "track-editor__name")}
+        className={cx(controls.input, styles.name)}
         value={track.name}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackName(track.id, e.target.value)}
       />
       <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
       <select
-        className={controls.select}
+        className={cx(controls.select, styles.selectSlot)}
         value={track.sound.kind === "builtin" ? track.sound.sampleId : ""}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => setTrackSound(track.id, { kind: "builtin", sampleId: e.target.value })}
