@@ -52,11 +52,25 @@
   min-width: 0;
 }
 
-/* 트랙 행 펄스(키 입력 피드백, 폴리싱 #9) */
-.pulse { animation: track-pulse 0.32s ease; }
+/*
+ * 트랙 행 펄스(키 입력 / 자동 재생 피드백).
+ * 오버레이는 매 펄스마다 nonce를 key로 remount되어 호출 횟수만큼 애니메이션이 재시작된다.
+ * - .pulseKey: 사용자 키 입력(보라).
+ * - .pulseAuto: 자동 재생 마커(시안). 비-play status의 자동 트리거를 키 입력과 구분한다.
+ */
+.pulseOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* 콘텐츠 위에 그려져도 색만 더하도록 screen blend로 합성한다(가독성 보존). */
+  mix-blend-mode: screen;
+  animation: track-pulse 0.32s ease forwards;
+}
+.pulseKey { background: rgba(168, 85, 247, 0.45); }
+.pulseAuto { background: rgba(34, 211, 238, 0.40); }
 @keyframes track-pulse {
-  0% { background: rgba(168, 85, 247, 0.45); }
-  100% { background: transparent; }
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */

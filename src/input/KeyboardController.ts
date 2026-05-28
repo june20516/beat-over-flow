@@ -9,7 +9,7 @@ import type { Track } from "../types";
 
 /** 한 트랙에 대해 현재 모드의 record/perform 동작을 실행한다(기존 동작 유지). */
 function triggerTrack(track: Track): void {
-  usePulse.getState().pulse(track.id);
+  usePulse.getState().pulse(track.id, "key");
   const state = useStore.getState();
   const behavior = resolveTrackBehavior(state.mode, track.status);
   if (behavior === "record") {

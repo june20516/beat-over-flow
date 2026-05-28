@@ -9,6 +9,7 @@ import { playSample } from "./SamplePlayer";
 import { markersInWindow, ctxTimeForMarker } from "./Scheduler";
 import { resolveTrackBehavior } from "../domain/mode";
 import { startPlaySession, endPlaySession, updatePlay } from "../scoring/playSession";
+import { usePulse } from "../store/pulse";
 import type { Project } from "../types";
 
 let engine: AudioEngine | null = null;
@@ -18,6 +19,8 @@ let rafId: number | null = null;
 let library: SampleLibrary | null = null;
 let schedulerTimer: ReturnType<typeof setInterval> | null = null;
 let lastScheduledMs = 0;
+/** 미래 시각에 예약된 자동-펄스 타이머들. pause/seek 시 일괄 취소한다. */
+const pendingPulseTimers: Set<ReturnType<typeof setTimeout>> = new Set();
 
 const LOOKAHEAD_INTERVAL_MS = 25;
 const SCHEDULE_AHEAD_MS = 120;
@@ -131,6 +134,14 @@ function startScheduler(): void {
       if (!buffer) continue;
       const whenSec = ctxTimeForMarker(eng.ctx.currentTime, marker.timeMs, nowMs);
       playSample(eng.ctx, buffer, eng.masterGain, whenSec, track.volume);
+      // 시각 피드백: 실제로 소리가 나는 시점에 맞춰 펄스를 발화한다.
+      // 동일 트랙 연타도 별개의 setTimeout이므로 호출 횟수만큼 펄스가 발생한다.
+      const delayMs = Math.max(0, marker.timeMs - nowMs);
+      const timer = setTimeout(() => {
+        pendingPulseTimers.delete(timer);
+        usePulse.getState().pulse(trackId, "auto");
+      }, delayMs);
+      pendingPulseTimers.add(timer);
     }
     lastScheduledMs = windowEnd;
   }, LOOKAHEAD_INTERVAL_MS);
@@ -141,6 +152,9 @@ function stopScheduler(): void {
     clearInterval(schedulerTimer);
     schedulerTimer = null;
   }
+  // 아직 발화 전인 자동-펄스 타이머는 사운드 예약이 취소되지 않아도 시각 신호는 더 이상 의미가 없다.
+  for (const t of pendingPulseTimers) clearTimeout(t);
+  pendingPulseTimers.clear();
 }
 
 function startRaf(): void {
