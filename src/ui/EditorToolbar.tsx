@@ -1,5 +1,6 @@
 import { GridFour, MagnifyingGlassPlus, MagnifyingGlassMinus, CornersOut } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import styles from "./EditorToolbar.module.css";
 import { cx } from "./cx";
 import { useEditorUi } from "../store/editorUi";
 import { useViewport } from "../store/viewport";
@@ -10,11 +11,11 @@ export function EditorToolbar() {
   const zoomByAtCenter = useViewport((s) => s.zoomByAtCenter);
   const fitAll = useViewport((s) => s.fitAll);
   return (
-    <div className="editor-toolbar">
-      <button type="button" className={cx(controls.btn, controls.btnGhost, sequencerOpen && "is-active")} aria-pressed={sequencerOpen} onClick={toggleSequencer} title="스텝 시퀀서 열기/닫기">
+    <div className={styles.editorToolbar}>
+      <button type="button" className={cx(controls.btn, controls.btnGhost, sequencerOpen && styles.isActive)} aria-pressed={sequencerOpen} onClick={toggleSequencer} title="스텝 시퀀서 열기/닫기">
         <GridFour size={15} weight="bold" />시퀀서
       </button>
-      <span className="editor-toolbar__sep" />
+      <span className={styles.editorToolbarSep} />
       <button type="button" className={cx(controls.btn, controls.btnGhost, controls.btnIcon)} onClick={() => zoomByAtCenter(1.4)} title="확대">
         <MagnifyingGlassPlus size={15} weight="bold" />
       </button>

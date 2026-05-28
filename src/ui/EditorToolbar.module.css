@@ -1,0 +1,19 @@
+.editorToolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid #222833;
+}
+
+.isActive {
+  background: #2a3550;
+  color: #fff;
+}
+
+.editorToolbarSep {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+  margin: 0 4px;
+}

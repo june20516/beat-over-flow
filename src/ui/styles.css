@@ -524,19 +524,6 @@ input.volume-control__range:active::-webkit-slider-thumb {
   cursor: grabbing;
 }
 
-/* 전역 에디터 툴바 (요구 4) */
-.editor-toolbar {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  padding: 6px 10px;
-  border-bottom: 1px solid #222833;
-}
-.editor-toolbar .btn--ghost.is-active {
-  background: #2a3550;
-  color: #fff;
-}
-
 /* 인라인 시퀀서: 포커스 행 바로 아래, 좌측 gutter = TrackEditor 컬럼 폭(384px) */
 .track-row__sequencer {
   display: flex;
@@ -550,8 +537,6 @@ input.volume-control__range:active::-webkit-slider-thumb {
   flex: 1 1 auto;
   min-width: 0;
 }
-.editor-toolbar__sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
-
 /* 트랙 드래그 고스트 (폴리싱 #5) */
 .track-drag-overlay {
   display: flex;
