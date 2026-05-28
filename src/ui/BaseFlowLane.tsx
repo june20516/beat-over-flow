@@ -63,7 +63,6 @@ export function BaseFlowLane({ peaks, durationMs }: BaseFlowLaneProps) {
 
   return (
     <div
-      className="base-flow-lane"
       {...gesture}
       style={{ position: "relative", width: "100%", height: HEIGHT, overflow: "hidden", cursor: "pointer" }}
     >

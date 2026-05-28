@@ -13,7 +13,6 @@ export function PlayheadOverlay() {
 
   return (
     <div
-      className="playhead-overlay"
       style={{
         position: "absolute",
         top: 0,
@@ -26,7 +25,6 @@ export function PlayheadOverlay() {
     >
       {visible && (
         <div
-          className="playhead-overlay__line"
           style={{
             position: "absolute",
             top: 0,
