@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import styles from "./TrackRow.module.css";
 import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { useEditorUi } from "../store/editorUi";
@@ -34,28 +35,28 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
     return () => clearTimeout(id);
   }, [pulseNonce]);
 
-  const rowClass = [
-    "track-row",
-    focused ? "track-row--focused" : "track-row--collapsed",
-    index % 2 === 0 ? "track-row--even" : "track-row--odd",
-    pulsing ? "track-row--pulse" : "",
-  ].join(" ");
+  const rowClass = cx(
+    styles.trackRow,
+    focused && styles.focused,
+    index % 2 === 0 ? styles.even : styles.odd,
+    pulsing && styles.pulse,
+  );
 
   return (
-    <div className="track-row-wrap">
+    <div>
       <div className={rowClass} onClick={() => setSelectedTrack(track.id)}>
-        <div className="track-row__editor">
+        <div className={styles.editor}>
           <TrackEditor track={track} focused={focused} />
         </div>
-        <div className="track-row__lane">
+        <div className={styles.lane}>
           <MarkerEditor track={track} focused={focused} />
         </div>
         {focused && (
-          <div className="track-row__delete">
-            <div className="track-row__delete-handle" aria-hidden="true" />
+          <div className={styles.delete}>
+            <div className={styles.deleteHandle} aria-hidden="true" />
             <button
               type="button"
-              className={cx(controls.btn, "track-row__delete-btn")}
+              className={cx(controls.btn, styles.deleteBtn)}
               title="트랙 삭제"
               onClick={(e) => {
                 e.stopPropagation();
@@ -68,9 +69,9 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
         )}
       </div>
       {showSequencer && (
-        <div className="track-row__sequencer">
-          <div className="track-row__sequencer-gutter" aria-hidden="true" />
-          <div className="track-row__sequencer-body">
+        <div className={styles.sequencer}>
+          <div className={styles.sequencerGutter} aria-hidden="true" />
+          <div className={styles.sequencerBody}>
             <StepSequencerPanel />
           </div>
         </div>

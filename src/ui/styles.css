@@ -314,42 +314,7 @@
 }
 
 /* --- v2 행 분해: TrackRow = TrackEditor | MarkerEditor --------------------- */
-.track-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  height: 40px; /* 언포커스 기본 높이 */
-  border-bottom: 1px solid var(--line);
-  cursor: pointer;
-  overflow: hidden;
-  transition: height 0.18s ease, background 0.15s ease;
-}
-.track-row--even {
-  background: #130d33;
-}
-.track-row--odd {
-  background: #171041;
-}
-.track-row:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-.track-row--focused {
-  height: 88px; /* 포커스 확장 */
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.track-row__editor {
-  width: 384px;
-  flex: none;
-  border-right: 1px solid var(--line);
-  overflow: hidden;
-}
-.track-row__lane {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  overflow: hidden;
-}
+/* TrackRow rules moved to TrackRow.module.css */
 
 .track-editor {
   display: flex;
@@ -482,19 +447,7 @@ input.volume-control__range:active::-webkit-slider-thumb {
   cursor: grabbing;
 }
 
-/* 인라인 시퀀서: 포커스 행 바로 아래, 좌측 gutter = TrackEditor 컬럼 폭(384px) */
-.track-row__sequencer {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--line);
-}
-.track-row__sequencer-gutter {
-  flex: 0 0 384px; /* .track-row__editor / .timeline__fixed-col 폭과 동일 */
-}
-.track-row__sequencer-body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
+/* 인라인 시퀀서 rules moved to TrackRow.module.css */
 /* 언포커스 상태 한 글자 (폴리싱 #2) */
 .status-grid--compact {
   display: inline-flex;
@@ -512,56 +465,7 @@ input.volume-control__range:active::-webkit-slider-thumb {
   line-height: 1;
 }
 
-/* 트랙 행 펄스(키 입력 피드백, 폴리싱 #9) */
-.track-row--pulse { animation: track-pulse 0.32s ease; }
-@keyframes track-pulse {
-  0% { background: rgba(168, 85, 247, 0.45); }
-  100% { background: transparent; }
-}
-
-/* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */
-.track-row { position: relative; }
-.track-row__delete {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 6px;
-  z-index: 6;
-  pointer-events: none;
-}
-.track-row__delete-handle {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 10px;
-  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.25));
-  pointer-events: auto;
-  cursor: pointer;
-}
-.track-row__delete-btn {
-  width: 26px; height: 26px; padding: 0;
-  border-radius: var(--r-pill);
-  background: #ef4444;
-  border: none;
-  color: #fff;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: opacity 0.16s ease, transform 0.16s ease;
-  pointer-events: none;
-}
-.track-row__delete:hover .track-row__delete-btn {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-/* 버튼 자체 hover 시 전역 button:hover(보라)가 덮지 않도록 빨강 유지(진하게) */
-.track-row__delete-btn:hover {
-  background: #dc2626;
-  border: none;
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
-}
+/* 트랙 행 펄스·삭제 affordance rules moved to TrackRow.module.css */
 
 /* 시퀀서 선택 구간 지속 표시 밴드 (폴리싱 #7·#4) */
 .region-overlay {
