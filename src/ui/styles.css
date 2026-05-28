@@ -315,18 +315,7 @@
 
 /* --- v2 행 분해: TrackRow = TrackEditor | MarkerEditor --------------------- */
 /* TrackRow rules moved to TrackRow.module.css */
-
-.marker-editor {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.marker-editor--editable {
-  cursor: crosshair;
-}
-.marker-editor--overview {
-  opacity: 0.7;
-}
+/* MarkerEditor rules moved to MarkerEditor.module.css */
 
 /* 상태 2×2 그리드 (요구 2) */
 .status-grid {

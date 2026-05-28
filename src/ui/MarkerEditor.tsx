@@ -1,4 +1,6 @@
 import { useEffect, useRef, type CSSProperties } from "react";
+import styles from "./MarkerEditor.module.css";
+import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { xToTime, type Viewport } from "../timeline/viewportMath";
@@ -76,7 +78,7 @@ function FocusedMarkerEditor({ track }: { track: Track }) {
 
   return (
     <svg
-      className={editable ? "marker-editor marker-editor--editable" : "marker-editor"}
+      className={cx(styles.markerEditor, editable && styles.editable)}
       width={containerWidthPx}
       height="100%"
       style={{ "--track-color": track.color } as CSSProperties}
@@ -112,7 +114,7 @@ function OverviewMarkerEditor({ track }: { track: Track }) {
   return (
     <canvas
       ref={canvasRef}
-      className="marker-editor marker-editor--overview"
+      className={cx(styles.markerEditor, styles.overview)}
       width={Math.max(1, Math.round(containerWidthPx))}
       height={OVERVIEW_HEIGHT}
       style={{ width: "100%", height: "100%", display: "block" }}
