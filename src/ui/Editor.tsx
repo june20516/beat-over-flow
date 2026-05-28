@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import controls from "./controls.module.css";
+import styles from "./Editor.module.css";
 import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { getEngine, loadBaseFlow } from "../audio/runtime";
@@ -70,12 +71,12 @@ export function Editor({ onExit }: Props) {
   if (!project) return null;
 
   return (
-    <div className="app-shell">
+    <div className={styles.appShell}>
       <ScoreHud />
-      <header className="top-bar">
+      <header className={styles.topBar}>
         {editingName ? (
           <input
-            className="top-bar__name-input"
+            className={styles.topBarNameInput}
             autoFocus
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -98,7 +99,7 @@ export function Editor({ onExit }: Props) {
           />
         ) : (
           <button
-            className="top-bar__name"
+            className={styles.topBarName}
             title="이름 수정"
             onClick={() => {
               setDraft(project.name);
@@ -108,17 +109,17 @@ export function Editor({ onExit }: Props) {
             {project.name}
           </button>
         )}
-        <span className="top-bar__spacer" />
+        <span className={styles.topBarSpacer} />
         <ModeSwitcher />
-        <span className="top-bar__spacer" />
+        <span className={styles.topBarSpacer} />
         <button className={cx(controls.btn, controls.btnGhost)} onClick={onExit}>
           ← 목록
         </button>
       </header>
       <TransportBar />
       <EditorToolbar />
-      <div className="editor-main" onClick={handleMainClick}>
-        <div className="editor-main__timeline">
+      <div className={styles.editorMain} onClick={handleMainClick}>
+        <div className={styles.editorMainTimeline}>
           <Timeline peaks={peaks} durationMs={project.baseFlow.durationMs} />
         </div>
       </div>

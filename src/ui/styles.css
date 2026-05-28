@@ -1,45 +1,5 @@
 /* BeatOverflow — 컴포넌트/유틸리티 스타일 (글로벌 토큰: ui/base.css) */
 
-/* ==========================================================================
-   레이아웃 — Editor
-   ========================================================================== */
-.app-shell {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 20px;
-  background: rgba(12, 10, 24, 0.72);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
-}
-.top-bar__name {
-  font-family: var(--font-display);
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.top-bar__name::before {
-  content: "";
-  width: 11px;
-  height: 11px;
-  border-radius: var(--r-pill);
-  background: var(--grad);
-  box-shadow: 0 0 10px rgba(236, 72, 153, 0.9);
-}
-.top-bar__spacer {
-  flex: 1;
-}
-
 .transport {
   display: flex;
   align-items: center;
@@ -65,21 +25,6 @@
 }
 .transport__vol input[type="range"] {
   width: 90px;
-}
-
-.editor-main {
-  display: flex;
-  gap: 0;
-  margin: 16px 20px 0;
-  overflow: hidden;
-  flex: 1;
-  min-height: 0;
-}
-.editor-main__timeline {
-  flex: 1;
-  min-width: 0;
-  background: var(--bg-inset);
-  overflow: hidden;
 }
 
 /* --- v2 Timeline 레이아웃: 헤더 행 + 트랙 행들 ---------------------------- */
@@ -749,27 +694,6 @@ input.volume-control__range:active::-webkit-slider-thumb {
   font-family: var(--font-display);
   font-size: 18px;
   padding: 6px 10px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--bg-inset);
-  color: var(--text);
-}
-
-/* --- 에디터 상단 프로젝트 이름 인라인 수정 ----------------------------- */
-button.top-bar__name {
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--text);
-}
-button.top-bar__name:hover {
-  opacity: 0.85;
-}
-.top-bar__name-input {
-  font-family: var(--font-display);
-  font-size: 18px;
-  padding: 4px 10px;
   border-radius: var(--r-sm);
   border: 1px solid var(--line-strong);
   background: var(--bg-inset);
