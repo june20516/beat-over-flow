@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "analyze:demo": "node scripts/analyze-demo.mjs"
+    "analyze:demo": "node scripts/analyze-demo.mjs",
+    "samples:fetch": "node scripts/fetch-samples.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

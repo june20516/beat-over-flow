@@ -13,5 +13,5 @@ export const BUILTIN_SAMPLES: BuiltinSample[] = [
 ];
 
 export function sampleUrl(id: string): string {
-  return `/samples/${id}.ogg`;
+  return `/samples/${id}.wav`;
 }

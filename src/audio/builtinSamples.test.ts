@@ -10,6 +10,6 @@ describe("builtinSamples", () => {
   });
 
   it("sampleUrl은 id로 경로를 만든다", () => {
-    expect(sampleUrl("kick")).toBe("/samples/kick.ogg");
+    expect(sampleUrl("kick")).toBe("/samples/kick.wav");
   });
 });
