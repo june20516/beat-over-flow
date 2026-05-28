@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Sparkle, Copy, PencilSimple } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
 import { cx } from "./cx";
 import { listProjects, saveProject, deleteProject, duplicateProject } from "../persistence/projects";
 import { putAsset } from "../persistence/assets";
@@ -119,7 +120,7 @@ export function ProjectList({ onOpen }: Props) {
       ) : (
         <ul className="project-grid">
           {projects.map((p) => (
-            <li key={p.id} className="project-card panel">
+            <li key={p.id} className={cx("project-card", primitives.panel)}>
               {editingId === p.id ? (
                 <input
                   className={cx(controls.input, "project-card__rename")}

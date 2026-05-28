@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Repeat } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
 import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { useEditorUi } from "../store/editorUi";
@@ -30,7 +31,7 @@ export function StepSequencerPanel() {
 
   const track = tracks.find((t) => t.id === selectedTrackId) ?? null;
   if (!track) {
-    return <div className="empty-hint panel">트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
+    return <div className={cx("empty-hint", primitives.panel)}>트랙을 선택하면 스텝 시퀀서가 표시됩니다.</div>;
   }
 
   const steps = stepTimes(region.startMs, region.endMs, stepCount);
@@ -67,9 +68,9 @@ export function StepSequencerPanel() {
   }
 
   return (
-    <div className="seq-panel panel">
+    <div className={cx("seq-panel", primitives.panel)}>
       <div className="seq-panel__head">
-        <h2 className="section-title">스텝 시퀀서 — {track.name}</h2>
+        <h2 className={primitives.sectionTitle}>스텝 시퀀서 — {track.name}</h2>
         <label className="field">
           구간 시작(ms)
           <input

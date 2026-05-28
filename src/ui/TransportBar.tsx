@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Play, Pause, SpeakerHigh } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
 import { cx } from "./cx";
 import { useStore } from "../store/useStore";
 import { play, pause, seek } from "../audio/runtime";
@@ -23,7 +24,7 @@ export function TransportBar() {
   const playedPct = durationMs > 0 ? (playheadMs / durationMs) * 100 : 0;
 
   return (
-    <div className="transport panel">
+    <div className={cx("transport", primitives.panel)}>
       <button className={cx(controls.btn, controls.btnIcon, controls.btnPrimary)} onClick={() => (playing ? pause() : void play())}>
         {playing ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}
       </button>

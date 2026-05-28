@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Plus } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
+import primitives from "./primitives.module.css";
 import { cx } from "./cx";
 import {
   DndContext,
@@ -120,7 +121,7 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
       <div className="timeline__header-row">
         <div className="timeline__fixed-col">
           <div className="timeline__head">
-            <h2 className="section-title">트랙</h2>
+            <h2 className={primitives.sectionTitle}>트랙</h2>
             <button className={cx(controls.btn, controls.btnPrimary)} onClick={addTrack}>
               <Plus size={15} weight="bold" />
               트랙
