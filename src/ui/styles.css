@@ -56,67 +56,7 @@
 
 /* seq-panel, field, step-grid, step-cell, seq-controls rules moved to StepSequencerPanel.module.css */
 
-/* ==========================================================================
-   스코어 HUD — 게임 점수 강조
-   ========================================================================== */
-.score-hud {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 40;
-  min-width: 168px;
-  padding: 14px 18px;
-  background: rgba(22, 16, 49, 0.86);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  text-align: right;
-}
-.score-hud__label {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.score-hud__value {
-  font-family: var(--font-display);
-  font-size: 40px;
-  line-height: 1.05;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.score-hud__combo {
-  font-size: 13px;
-  color: var(--text);
-  margin-top: 2px;
-}
-.score-hud__combo b {
-  color: var(--cyan);
-}
-.score-hud__acc {
-  font-size: 12px;
-  color: var(--text-dim);
-}
-.score-hud__judge {
-  margin-top: 6px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-.score-hud__judge .p {
-  color: var(--green);
-}
-.score-hud__judge .g {
-  color: var(--yellow);
-}
-.score-hud__judge .m {
-  color: var(--pink);
-}
+/* score-hud rules moved to ScoreHud.module.css */
 
 /* empty-hint moved to StepSequencerPanel.module.css */
 
