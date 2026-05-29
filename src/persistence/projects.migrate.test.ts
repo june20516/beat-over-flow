@@ -71,6 +71,33 @@ describe("project load normalize", () => {
     expect(loaded!.libraryAssetIds).toContain("asset-orphan");
   });
 
+  it("레거시 status \"write\" 트랙은 \"record\"로 정규화된다", async () => {
+    const db = await getDb();
+    const stored = {
+      id: "p-legacy-write",
+      name: "legacy",
+      createdAt: 0,
+      updatedAt: 0,
+      baseFlow: { kind: "audioFile", assetId: "bf", durationMs: 1000 },
+      master: { volume: 1 },
+      tracks: [
+        {
+          id: "t1",
+          name: "T1",
+          status: "write",
+          sound: { kind: "builtin", sampleId: "kick" },
+          keyBinding: null,
+          markers: [],
+          volume: 1,
+          color: "#fff",
+        },
+      ],
+    } as unknown as Project;
+    await db.put("projects", stored);
+    const loaded = await loadProject("p-legacy-write");
+    expect(loaded!.tracks[0].status).toBe("record");
+  });
+
   it("이미 정상 형태인 프로젝트는 그대로 통과 (저장 → 로드 라운드트립)", async () => {
     const p: Project = {
       id: "p3",

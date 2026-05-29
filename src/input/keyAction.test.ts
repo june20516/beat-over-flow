@@ -6,7 +6,7 @@ function track(over: Partial<Track> = {}): Track {
   return {
     id: "t1",
     name: "t",
-    status: "write",
+    status: "record",
     sound: { kind: "builtin", sampleId: "kick" },
     keyBinding: "KeyA",
     markers: [],

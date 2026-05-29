@@ -10,17 +10,17 @@ import type { Marker } from "../types";
 const vp: Viewport = { pxPerMs: 0.1, scrollLeftPx: 0, containerWidthPx: 100 };
 
 describe("isMarkerEditingEnabled", () => {
-  it("record 모드 + write 트랙에서만 true", () => {
-    expect(isMarkerEditingEnabled("record", "write")).toBe(true);
+  it("record 모드 + record 트랙에서만 true", () => {
+    expect(isMarkerEditingEnabled("record", "record")).toBe(true);
   });
-  it("record 모드라도 write가 아니면 false", () => {
+  it("record 모드라도 record가 아니면 false", () => {
     expect(isMarkerEditingEnabled("record", "play")).toBe(false);
     expect(isMarkerEditingEnabled("record", "listening")).toBe(false);
     expect(isMarkerEditingEnabled("record", "mute")).toBe(false);
   });
   it("record가 아닌 모드는 항상 false", () => {
-    expect(isMarkerEditingEnabled("listening", "write")).toBe(false);
-    expect(isMarkerEditingEnabled("play", "write")).toBe(false);
+    expect(isMarkerEditingEnabled("listening", "record")).toBe(false);
+    expect(isMarkerEditingEnabled("play", "record")).toBe(false);
   });
 });
 

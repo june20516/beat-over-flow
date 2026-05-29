@@ -6,6 +6,6 @@ export type TrackBehavior = "silent" | "auto" | "perform" | "record";
 export function resolveTrackBehavior(mode: GlobalMode, status: TrackStatus): TrackBehavior {
   if (status === "mute") return "silent";
   if (mode === "play" && status === "play") return "perform";
-  if (mode === "record" && status === "write") return "record";
+  if (mode === "record" && status === "record") return "record";
   return "auto";
 }

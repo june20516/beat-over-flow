@@ -1,4 +1,4 @@
-export type TrackStatus = "mute" | "listening" | "play" | "write";
+export type TrackStatus = "mute" | "listening" | "play" | "record";
 export type GlobalMode = "listening" | "play" | "record";
 
 export type BaseFlowRef = { kind: "audioFile"; assetId: string; durationMs: number };

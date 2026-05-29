@@ -7,7 +7,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useStore } from "../store/useStore";
 import { useAssetLibrary } from "../store/assetLibrary";
-import { StatusGrid } from "./StatusGrid";
+import { StatusBadge } from "./StatusBadge";
+import { StatusButtons } from "./StatusButtons";
 import { VolumeControl } from "./VolumeControl";
 import { KeyCap } from "./KeyCap";
 import { TrackSoundSelect } from "./asset-library/TrackSoundSelect";
@@ -63,7 +64,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => setTrackName(track.id, e.target.value)}
         />
-        <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
+        <StatusBadge value={track.status} onChange={(next) => setTrackStatus(track.id, next)} />
         <div className={styles.selectSlot}>
           <TrackSoundSelect
             trackId={track.id}
@@ -78,6 +79,8 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
       </div>
       {focused && (
         <div className={styles.actionRow}>
+          <StatusButtons value={track.status} onChange={(s) => setTrackStatus(track.id, s)} />
+          <span className={styles.actionSpacer} />
           <button
             type="button"
             className={cx(controls.btn, styles.actionBtn)}

@@ -16,14 +16,15 @@
   gap: 6px;
 }
 
-/* 포커스 전용 액션 줄 — Trash, 향후 액션 슬롯이 여기에 들어간다. */
+/* 포커스 전용 액션 줄 — 좌측: 상태 풀버튼, 우측: 액션 슬롯(Trash 등). */
 .actionRow {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 6px;
   padding-top: 2px;
 }
+/* 좌우 정렬용 spacer. */
+.actionSpacer { flex: 1; }
 
 /* row 내부 인터랙티브 요소를 32px 높이로 통일 — StatusGrid는 자체 grid라 예외. */
 .row > .name,

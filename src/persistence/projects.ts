@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import type { Project, SoundRef, Track } from "../types";
+import type { Project, SoundRef, Track, TrackStatus } from "../types";
 import { newId } from "../domain/ids";
 import { copyAsset } from "./assets";
 import { seedRecentSounds, fillWithBuiltins } from "../domain/recentSounds";
@@ -9,7 +9,9 @@ function normalizeTrack(t: Track): Track {
     t.recentSounds && t.recentSounds.length > 0
       ? fillWithBuiltins(t.recentSounds)
       : seedRecentSounds(t.sound);
-  return { ...t, recentSounds };
+  // 레거시 status "write"는 새 단어 "record"로 정규화. 의미는 동일(전역 record 모드에서 키 입력 받음).
+  const status = (t.status as string) === "write" ? ("record" as TrackStatus) : t.status;
+  return { ...t, recentSounds, status };
 }
 
 function normalizeProject(p: Project): Project {

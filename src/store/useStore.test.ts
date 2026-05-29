@@ -171,7 +171,7 @@ function makeProject(): Project {
       {
         id: "t1",
         name: "트랙 1",
-        status: "write",
+        status: "record",
         sound: { kind: "builtin", sampleId: "kick" },
         keyBinding: null,
         markers: [

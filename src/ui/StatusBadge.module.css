@@ -1,0 +1,21 @@
+.badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  border: 1px solid var(--tone);
+  border-radius: 6px;
+  color: var(--tone);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.badge:hover {
+  background: color-mix(in srgb, var(--tone) 18%, transparent);
+}
