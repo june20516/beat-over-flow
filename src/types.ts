@@ -33,7 +33,7 @@ export interface Project {
   baseFlow: BaseFlowRef;
   tracks: Track[];
   master: { volume: number }; // 0..1
-  transport?: { playPauseKey: string | null };
+  transport?: { playPauseKey: string | null }; // 신규(영속). 기존 저장본엔 없을 수 있어 optional. 읽을 때 ?? null.
   /** 이 프로젝트의 "내 에셋" 멤버십(업로드만). 빌트인은 미포함. */
   libraryAssetIds: string[];
 }
