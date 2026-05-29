@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { putAsset, getAsset, copyAsset } from "./assets";
 import { resetDbCache } from "./db";
+// Task 4–6: listAssetsByIds/deleteAsset/renameAsset will be exported from ./assets
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { listAssetsByIds, deleteAsset, renameAsset } from "./assets";
 
 describe("AssetRepository", () => {
   beforeEach(() => {
@@ -31,5 +34,30 @@ describe("AssetRepository", () => {
 
   it("copyAsset은 없는 id면 throw 한다", async () => {
     await expect(copyAsset("nope")).rejects.toThrow();
+  });
+});
+
+describe("StoredAsset.createdAt", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("putAsset은 createdAt을 epoch ms로 자동 부여한다", async () => {
+    const before = Date.now();
+    const id = await putAsset(new Blob(["x"]), "a.wav");
+    const after = Date.now();
+    const got = await getAsset(id);
+    expect(got!.createdAt).toBeGreaterThanOrEqual(before);
+    expect(got!.createdAt).toBeLessThanOrEqual(after);
+  });
+
+  it("createdAt 누락 저장본을 로드하면 0으로 정규화된다", async () => {
+    // 직접 IDB에 createdAt 없이 저장
+    const { getDb } = await import("./db");
+    const db = await getDb();
+    await db.put("assets", { id: "legacy-1", name: "old", blob: new Blob(["y"]) } as never);
+    const got = await getAsset("legacy-1");
+    expect(got!.createdAt).toBe(0);
   });
 });
