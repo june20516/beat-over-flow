@@ -61,3 +61,21 @@ describe("StoredAsset.createdAt", () => {
     expect(got!.createdAt).toBe(0);
   });
 });
+
+describe("listAssetsByIds", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("주어진 id들만 반환, 누락된 id는 결과에서 빠진다", async () => {
+    const a = await putAsset(new Blob(["a"]), "A");
+    const b = await putAsset(new Blob(["b"]), "B");
+    const got = await listAssetsByIds([a, "nope", b]);
+    expect(got.map((x) => x.name).sort()).toEqual(["A", "B"]);
+  });
+
+  it("빈 배열이면 빈 배열 반환", async () => {
+    expect(await listAssetsByIds([])).toEqual([]);
+  });
+});

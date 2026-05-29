@@ -21,4 +21,11 @@ export async function copyAsset(id: string): Promise<string> {
   return putAsset(asset.blob, asset.name);
 }
 
-// 신규 API들(listAssetsByIds/deleteAsset/renameAsset)은 후속 Task에서 추가.
+export async function listAssetsByIds(ids: string[]): Promise<StoredAsset[]> {
+  if (ids.length === 0) return [];
+  const db = await getDb();
+  const results = await Promise.all(ids.map((id) => db.get("assets", id)));
+  return results
+    .filter((a): a is StoredAsset => a !== undefined)
+    .map((a) => ({ ...a, createdAt: a.createdAt ?? 0 }));
+}
