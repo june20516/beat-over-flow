@@ -3,7 +3,7 @@
 .tab, .tabActive { padding: 6px 14px; border-radius: 6px; border: 1px solid #2a2a44; background: transparent; color: #9ca3c4; cursor: pointer; }
 .tabActive { background: #2a1b45; color: #fff; border-color: #7c2d92; }
 .body { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
-.input { padding: 8px 10px; border-radius: 6px; border: 1px solid #2a2a44; background: #0d0a1f; color: #fff; }
+.input { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 6px; border: 1px solid #2a2a44; background: #0d0a1f; color: #fff; }
 .apply { align-self: flex-end; padding: 6px 16px; border-radius: 6px; border: none; background: #7c2d92; color: #fff; cursor: pointer; }
 .apply:disabled { opacity: 0.5; cursor: default; }
 .error { color: #f87171; font-size: 12px; margin: 0; }

@@ -24,9 +24,19 @@ export function NewProjectModal({ open, onOpenChange, onCreated }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  function handleOpenChange(next: boolean) {
+    // 닫힐 때 입력/에러 상태를 리셋한다(Radix Dialog는 unmount하지 않으므로 잔류 방지).
+    if (!next) {
+      setUrl("");
+      setName("");
+      setError(null);
+    }
+    onOpenChange(next);
+  }
+
   async function handleFiles(files: File[]) {
     const file = files[0];
-    if (!file) return;
+    if (!file || busy) return;
     setError(null);
     setBusy(true);
     try {
@@ -65,16 +75,18 @@ export function NewProjectModal({ open, onOpenChange, onCreated }: Props) {
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="새 프로젝트" size="sm">
+    <Modal open={open} onOpenChange={handleOpenChange} title="새 프로젝트" size="sm">
       <div className={styles.picker}>
         <div className={styles.tabs}>
           <button
+            type="button"
             className={tab === "file" ? styles.tabActive : styles.tab}
             onClick={() => { setTab("file"); setError(null); }}
           >
             오디오 업로드
           </button>
           <button
+            type="button"
             className={tab === "youtube" ? styles.tabActive : styles.tab}
             onClick={() => { setTab("youtube"); setError(null); }}
           >
