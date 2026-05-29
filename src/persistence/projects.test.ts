@@ -13,6 +13,7 @@ function sampleProject(id: string): Project {
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
     tracks: [],
     master: { volume: 1 },
+    libraryAssetIds: [],
   };
 }
 
@@ -52,12 +53,15 @@ describe("ProjectRepository", () => {
       baseFlow: { kind: "audioFile", assetId, durationMs: 1000 },
       tracks: [
         { id: "t1", name: "킥", status: "listening", sound: { kind: "builtin", sampleId: "kick" },
-          keyBinding: "KeyS", markers: [{ id: "m1", timeMs: 100 }], volume: 1, color: "#22d3ee" },
+          keyBinding: "KeyS", markers: [{ id: "m1", timeMs: 100 }], volume: 1, color: "#22d3ee",
+          recentSounds: [{ kind: "builtin", sampleId: "kick" }] },
         { id: "t2", name: "업로드", status: "listening", sound: { kind: "upload", assetId: uploadId },
-          keyBinding: null, markers: [], volume: 1, color: "#f472b6" },
+          keyBinding: null, markers: [], volume: 1, color: "#f472b6",
+          recentSounds: [{ kind: "upload", assetId: uploadId }] },
       ],
       master: { volume: 1 },
       transport: { playPauseKey: null },
+      libraryAssetIds: [],
     };
     await saveProject(original);
 
@@ -84,5 +88,62 @@ describe("ProjectRepository", () => {
     // 사본이 저장되어 다시 읽힌다
     const reloaded = await loadProject(copy.id);
     expect(reloaded?.name).toBe("원본곡 (사본)");
+  });
+
+  it("duplicateProject는 libraryAssetIds를 깊은 복사하고 idMap으로 중복 copyAsset을 방지한다", async () => {
+    const origAsset = await putAsset(new Blob(["x"]), "shared");
+    const baseFlow = await putAsset(new Blob(["bf"]), "bf");
+    const original: Project = {
+      id: "p",
+      name: "orig",
+      createdAt: 0,
+      updatedAt: 0,
+      baseFlow: { kind: "audioFile", assetId: baseFlow, durationMs: 1000 },
+      master: { volume: 1 },
+      tracks: [
+        {
+          id: "t1",
+          name: "T1",
+          status: "listening",
+          sound: { kind: "upload", assetId: origAsset },
+          keyBinding: null,
+          markers: [],
+          volume: 1,
+          color: "#fff",
+          recentSounds: [{ kind: "upload", assetId: origAsset }, { kind: "builtin", sampleId: "kick" }],
+        },
+        {
+          id: "t2",
+          name: "T2",
+          status: "listening",
+          sound: { kind: "builtin", sampleId: "snare" },
+          keyBinding: null,
+          markers: [],
+          volume: 1,
+          color: "#fff",
+          recentSounds: [{ kind: "builtin", sampleId: "snare" }, { kind: "upload", assetId: origAsset }],
+        },
+      ],
+      libraryAssetIds: [origAsset],
+    };
+    await saveProject(original);
+
+    const copy = await duplicateProject(original);
+
+    expect(copy.libraryAssetIds).toHaveLength(1);
+    expect(copy.libraryAssetIds[0]).not.toBe(origAsset);
+
+    const t1Sound = copy.tracks[0].sound;
+    const t2RecentUpload = copy.tracks[1].recentSounds.find((s) => s.kind === "upload");
+    expect(t1Sound.kind).toBe("upload");
+    if (t1Sound.kind === "upload") {
+      expect(t1Sound.assetId).toBe(copy.libraryAssetIds[0]);
+    }
+    expect(t2RecentUpload?.kind).toBe("upload");
+    if (t2RecentUpload?.kind === "upload") {
+      expect(t2RecentUpload.assetId).toBe(copy.libraryAssetIds[0]);
+    }
+
+    expect(JSON.stringify(copy.tracks[0].recentSounds[0])).toBe(JSON.stringify(copy.tracks[0].sound));
   });
 });

@@ -1,0 +1,81 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(168, 85, 247, 0.10);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 10px;
+  min-height: 84px;
+}
+.clickable { cursor: pointer; }
+.clickable:hover { background: rgba(168, 85, 247, 0.18); }
+.current { outline: 2px solid #ec4899; outline-offset: -2px; }
+
+.previewBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.meta { display: flex; flex-direction: column; gap: 2px; }
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub { font-size: 11px; color: #b8aedc; }
+
+.actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.iconBtn:hover { background: rgba(168, 85, 247, 0.25); }
+
+.lockBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.editRow { display: flex; gap: 4px; align-items: center; }
+.editInput {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 6px;
+}

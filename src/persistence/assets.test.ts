@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { putAsset, getAsset, copyAsset } from "./assets";
 import { resetDbCache } from "./db";
+import { listAssetsByIds, deleteAsset, renameAsset } from "./assets";
 
 describe("AssetRepository", () => {
   beforeEach(() => {
@@ -31,5 +32,84 @@ describe("AssetRepository", () => {
 
   it("copyAsset은 없는 id면 throw 한다", async () => {
     await expect(copyAsset("nope")).rejects.toThrow();
+  });
+});
+
+describe("StoredAsset.createdAt", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("putAsset은 createdAt을 epoch ms로 자동 부여한다", async () => {
+    const before = Date.now();
+    const id = await putAsset(new Blob(["x"]), "a.wav");
+    const after = Date.now();
+    const got = await getAsset(id);
+    expect(got!.createdAt).toBeGreaterThanOrEqual(before);
+    expect(got!.createdAt).toBeLessThanOrEqual(after);
+  });
+
+  it("createdAt 누락 저장본을 로드하면 0으로 정규화된다", async () => {
+    // 직접 IDB에 createdAt 없이 저장
+    const { getDb } = await import("./db");
+    const db = await getDb();
+    await db.put("assets", { id: "legacy-1", name: "old", blob: new Blob(["y"]) } as never);
+    const got = await getAsset("legacy-1");
+    expect(got!.createdAt).toBe(0);
+  });
+});
+
+describe("listAssetsByIds", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("주어진 id들만 반환, 누락된 id는 결과에서 빠진다", async () => {
+    const a = await putAsset(new Blob(["a"]), "A");
+    const b = await putAsset(new Blob(["b"]), "B");
+    const got = await listAssetsByIds([a, "nope", b]);
+    expect(got.map((x) => x.name).sort()).toEqual(["A", "B"]);
+  });
+
+  it("빈 배열이면 빈 배열 반환", async () => {
+    expect(await listAssetsByIds([])).toEqual([]);
+  });
+});
+
+describe("deleteAsset", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("저장된 id를 삭제한다", async () => {
+    const id = await putAsset(new Blob(["x"]), "X");
+    await deleteAsset(id);
+    expect(await getAsset(id)).toBeNull();
+  });
+
+  it("없는 id를 삭제해도 throw 하지 않는다", async () => {
+    await expect(deleteAsset("nope")).resolves.toBeUndefined();
+  });
+});
+
+describe("renameAsset", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("이름만 갱신하고 나머지 필드는 유지한다", async () => {
+    const id = await putAsset(new Blob(["x"]), "old");
+    await renameAsset(id, "new");
+    const got = await getAsset(id);
+    expect(got!.name).toBe("new");
+    expect(await got!.blob.text()).toBe("x");
+  });
+
+  it("없는 id를 rename하면 throw", async () => {
+    await expect(renameAsset("nope", "x")).rejects.toThrow();
   });
 });

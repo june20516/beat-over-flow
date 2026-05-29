@@ -47,6 +47,12 @@ export function getEngine(): AudioEngine {
 }
 
 /**
+ * AudioEngine 싱글턴 접근자 — getEngine의 alias.
+ * useAudioDecoder 등 audio/ 외부 모듈이 AudioContext를 얻을 때 사용한다.
+ */
+export const getAudioEngine = getEngine;
+
+/**
  * store 상태를 "수명이 긴 영구 오디오 노드"에 반영하는 단일 동기화 지점.
  *
  * 전역(트랙 무관) 오디오 파라미터를 새로 추가할 때는 반드시 이 함수에 연결한다.

@@ -12,6 +12,7 @@ function sampleProject(): Project {
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 5000 },
     tracks: [],
     master: { volume: 1 },
+    libraryAssetIds: [],
   };
 }
 
@@ -165,11 +166,12 @@ function makeProject(): Project {
     updatedAt: 1000,
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 60000 },
     master: { volume: 1 },
+    libraryAssetIds: [],
     tracks: [
       {
         id: "t1",
         name: "트랙 1",
-        status: "write",
+        status: "record",
         sound: { kind: "builtin", sampleId: "kick" },
         keyBinding: null,
         markers: [
@@ -178,6 +180,7 @@ function makeProject(): Project {
         ],
         volume: 1,
         color: "#fff",
+        recentSounds: [{ kind: "builtin", sampleId: "kick" }],
       },
       {
         id: "t2",
@@ -188,6 +191,7 @@ function makeProject(): Project {
         markers: [{ id: "m3", timeMs: 300 }],
         volume: 1,
         color: "#000",
+        recentSounds: [{ kind: "builtin", sampleId: "snare" }],
       },
     ],
   };
@@ -238,6 +242,7 @@ describe("useStore reorderTracks", () => {
         markers: [],
         volume: 1,
         color: "#fff",
+        recentSounds: [{ kind: "builtin" as const, sampleId: "kick" }],
       })),
     };
   }
@@ -323,6 +328,7 @@ describe("setPlayPauseKey", () => {
       baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
       tracks: [],
       master: { volume: 1 },
+      libraryAssetIds: [],
       ...overrides,
     };
   }

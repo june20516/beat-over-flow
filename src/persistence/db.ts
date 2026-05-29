@@ -4,6 +4,7 @@ export interface StoredAsset {
   id: string;
   name: string;
   blob: Blob;
+  createdAt: number; // epoch ms. 누락 저장본은 로드 시 0으로 정규화
 }
 
 interface BeatOverflowDB extends DBSchema {

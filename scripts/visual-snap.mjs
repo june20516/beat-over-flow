@@ -58,6 +58,29 @@ try {
   await trackRow.click();
   await snap("06-track-focused");
 
+  // 7) 샘플 라이브러리 모달 (manage 모드, 빈 상태)
+  // 에디터에서 toolbar의 [라이브러리] 버튼을 클릭하면 manage 모드로 열린다.
+  // 빌트인 섹션은 기본 접힌 상태로 표시된다.
+  await page.getByRole("button", { name: /라이브러리/ }).click();
+  await page.getByRole("dialog", { name: /샘플 라이브러리/ }).waitFor({ timeout: 5000 });
+  await snap("07-library-modal-manage-empty");
+
+  // 8) 빌트인 섹션 펼침
+  await page.getByRole("button", { name: /빌트인 샘플/ }).click();
+  await page.waitForTimeout(120); // 펼침 애니메이션
+  await snap("08-library-modal-builtins-expanded");
+
+  // 모달 닫기
+  await page.getByRole("button", { name: /닫기/ }).last().click();
+  await page.waitForTimeout(120);
+
+  // 9) TrackSoundSelect 드롭다운 펼침
+  // 첫 트랙 행의 사운드 선택 트리거(aria-label에 '사운드 선택' 포함)를 클릭.
+  // TrackSoundSelect의 aria-label은 "사운드 선택: {currentLabel}" 형태다(Task 24 fixup).
+  await page.getByRole("button", { name: /사운드 선택/ }).first().click();
+  await page.waitForTimeout(120);
+  await snap("09-tracksoundselect-open");
+
   console.log(`✔ snapshots written to ${outDir}`);
 } finally {
   // Fix C: 예외 발생 시에도 Chrome 프로세스가 고아로 남지 않도록 보장

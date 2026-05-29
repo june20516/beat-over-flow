@@ -15,6 +15,7 @@ function track(id: string, name: string): Track {
     markers: [],
     volume: 1,
     color: "#fff",
+    recentSounds: [{ kind: "builtin", sampleId: "kick" }],
   };
 }
 
@@ -27,6 +28,7 @@ function projectWith3Tracks(): Project {
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 5000 },
     tracks: [track("t0", "A"), track("t1", "B"), track("t2", "C")],
     master: { volume: 1 },
+    libraryAssetIds: [],
   };
 }
 

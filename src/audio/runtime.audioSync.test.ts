@@ -32,6 +32,7 @@ function makeProject(masterVolume: number): Project {
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
     tracks: [],
     master: { volume: masterVolume },
+    libraryAssetIds: [],
   };
 }
 

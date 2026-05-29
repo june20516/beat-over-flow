@@ -1,5 +1,3 @@
-import { X } from "@phosphor-icons/react";
-import controls from "./controls.module.css";
 import styles from "./TrackRow.module.css";
 import { cx } from "./cx";
 import { useStore } from "../store/useStore";
@@ -19,7 +17,6 @@ interface TrackRowProps {
 
 export function TrackRow({ track, index, focused }: TrackRowProps) {
   const setSelectedTrack = useStore((s) => s.setSelectedTrack);
-  const removeTrack = useStore((s) => s.removeTrack);
   const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
   const pulseEvent = usePulse((s) => s.events[track.id]);
   const mode = useStore((s) => s.mode);
@@ -53,22 +50,6 @@ export function TrackRow({ track, index, focused }: TrackRowProps) {
         <div className={styles.lane}>
           <MarkerEditor track={track} focused={focused} />
         </div>
-        {focused && (
-          <div className={styles.delete}>
-            <div className={styles.deleteHandle} aria-hidden="true" />
-            <button
-              type="button"
-              className={cx(controls.btn, styles.deleteBtn)}
-              title="트랙 삭제"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeTrack(track.id);
-              }}
-            >
-              <X size={14} weight="bold" />
-            </button>
-          </div>
-        )}
       </div>
       {showSequencer && (
         <div className={styles.sequencer}>

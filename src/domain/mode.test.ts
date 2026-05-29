@@ -12,17 +12,17 @@ describe("resolveTrackBehavior", () => {
   it("리스닝 모드에서는 mute 외 모두 auto", () => {
     expect(resolveTrackBehavior("listening", "listening")).toBe("auto");
     expect(resolveTrackBehavior("listening", "play")).toBe("auto");
-    expect(resolveTrackBehavior("listening", "write")).toBe("auto");
+    expect(resolveTrackBehavior("listening", "record")).toBe("auto");
   });
 
   it("플레이 모드: play 상태만 perform, 나머지는 auto", () => {
     expect(resolveTrackBehavior("play", "play")).toBe("perform");
     expect(resolveTrackBehavior("play", "listening")).toBe("auto");
-    expect(resolveTrackBehavior("play", "write")).toBe("auto");
+    expect(resolveTrackBehavior("play", "record")).toBe("auto");
   });
 
-  it("레코드 모드: write 상태만 record, 나머지는 auto", () => {
-    expect(resolveTrackBehavior("record", "write")).toBe("record");
+  it("레코드 모드: record 상태만 record, 나머지는 auto", () => {
+    expect(resolveTrackBehavior("record", "record")).toBe("record");
     expect(resolveTrackBehavior("record", "listening")).toBe("auto");
     expect(resolveTrackBehavior("record", "play")).toBe("auto");
   });

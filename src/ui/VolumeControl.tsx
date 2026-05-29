@@ -8,9 +8,11 @@ import { cx } from "./cx";
 interface VolumeControlProps {
   value: number;
   onChange: (v: number) => void;
+  /** trigger 버튼에 합성될 클래스 — 호출자가 사이즈/스타일 override 가능. */
+  buttonClassName?: string;
 }
 
-export function VolumeControl({ value, onChange }: VolumeControlProps) {
+export function VolumeControl({ value, onChange, buttonClassName }: VolumeControlProps) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -52,7 +54,7 @@ export function VolumeControl({ value, onChange }: VolumeControlProps) {
       <button
         ref={triggerRef}
         type="button"
-        className={cx(controls.btn, controls.btnIcon)}
+        className={cx(controls.btn, controls.btnIcon, buttonClassName)}
         title={`볼륨 ${Math.round(value * 100)}%`}
         aria-label="볼륨"
         onClick={(e) => {

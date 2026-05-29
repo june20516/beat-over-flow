@@ -90,3 +90,36 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ==========================================================================
+   포커스 표시 — primary(보라→핑크) 방사형 글로우 보더
+   브라우저 디폴트(시퍼런 outline)를 끄고 디자인 시스템 톤으로 통일.
+
+   :focus(마우스 포함)에서는 표시하지 않고 :focus-visible(키보드 / 명확한
+   포커스 의도)에서만 표시 — 클릭 후 잔류 outline 없음.
+   ========================================================================== */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: none;
+  /* 다중 box-shadow로 "방사형 보더" 효과:
+     1) 보라 단색 보더(2px) — 명확한 경계.
+     2) 핑크 반투명 링(3px) — 보더 외곽 부드러운 전이.
+     3) 핑크 발광(18px 블러) — 방사형 그라데이션 느낌.
+     컴포넌트별 box-shadow를 갖는 곳은 자체 룰로 override 가능. */
+  box-shadow:
+    0 0 0 2px var(--purple),
+    0 0 0 5px rgba(236, 72, 153, 0.28),
+    0 0 18px 2px rgba(236, 72, 153, 0.5);
+  transition: box-shadow 0.18s ease;
+}
+/* range/slider/checkbox 등 form 요소는 box-shadow 기반이라
+   ring 효과가 어색할 수 있어 outline로 단순화 (요청 시 조정). */
+input[type="range"]:focus-visible,
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}

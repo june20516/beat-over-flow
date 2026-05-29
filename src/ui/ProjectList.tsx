@@ -8,7 +8,9 @@ import { listProjects, saveProject, deleteProject, duplicateProject } from "../p
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
 import { useStore } from "../store/useStore";
+import { useLoadingOverlay } from "../store/loadingOverlay";
 import { newId } from "../domain/ids";
+import { normalizeAssetName } from "../domain/assetName";
 import { buildProjectFromBlueprint, EXAMPLE_BLUEPRINT } from "../example/exampleProject";
 import type { Project } from "../types";
 
@@ -35,16 +37,19 @@ export function ProjectList({ onOpen }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     const buffer = await getEngine().decode(file);
-    const assetId = await putAsset(file, file.name);
+    // 다른 업로드 경로(uploadAssets)와 동일하게 확장자 제거 + 32자 컷.
+    const cleanName = normalizeAssetName(file.name);
+    const assetId = await putAsset(file, cleanName);
     const project: Project = {
       id: newId(),
-      name: file.name.replace(/\.[^.]+$/, ""),
+      name: cleanName,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       baseFlow: { kind: "audioFile", assetId, durationMs: buffer.duration * 1000 },
       tracks: [],
       master: { volume: 1 },
       transport: { playPauseKey: null },
+      libraryAssetIds: [],
     };
     await saveProject(project);
     setProject(project);
@@ -52,23 +57,43 @@ export function ProjectList({ onOpen }: Props) {
   }
 
   async function createExample() {
-    const res = await fetch("/samples/moodmode-demo.mp3");
-    const blob = await res.blob();
-    const assetId = await putAsset(blob, "moodmode-demo.mp3");
-    const buffer = await getEngine().decode(blob);
-    const project = buildProjectFromBlueprint(
-      EXAMPLE_BLUEPRINT,
-      assetId,
-      Math.round(buffer.duration * 1000),
-    );
-    await saveProject(project);
-    setProject(project);
-    onOpen(project);
+    const { show, hide } = useLoadingOverlay.getState();
+    show({ mode: "indeterminate", label: "예제 프로젝트 준비 중..." });
+    try {
+      const res = await fetch("/samples/moodmode-demo.mp3");
+      const blob = await res.blob();
+      const assetId = await putAsset(blob, "moodmode-demo.mp3");
+      const buffer = await getEngine().decode(blob);
+      const project = buildProjectFromBlueprint(
+        EXAMPLE_BLUEPRINT,
+        assetId,
+        Math.round(buffer.duration * 1000),
+      );
+      await saveProject(project);
+      setProject(project);
+      onOpen(project);
+    } catch (e) {
+      console.error("[ProjectList] createExample failed", e);
+      alert(`예제 프로젝트 준비에 실패했습니다: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      hide();
+    }
   }
 
   async function handleDuplicate(p: Project) {
-    await duplicateProject(p);
-    await refresh();
+    const { show, setProgress, hide } = useLoadingOverlay.getState();
+    show({ mode: "determinate", label: "복사 중..." });
+    try {
+      setProgress(0.1);
+      await duplicateProject(p);
+      setProgress(1);
+      await refresh();
+    } catch (e) {
+      console.error("[ProjectList] duplicateProject failed", e);
+      alert(`복사에 실패했습니다: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      hide();
+    }
   }
 
   function startRename(p: Project) {

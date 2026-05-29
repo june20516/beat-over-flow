@@ -1,0 +1,79 @@
+/* trigger — 현재 선택 라벨 + 우측 caret. 최대 너비/위치는 호출자가 triggerClassName으로 제어. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.triggerLabel {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.triggerCaret {
+  flex-shrink: 0;
+  opacity: 0.55;
+  margin-left: 6px;
+}
+
+/* content — 포털 드롭다운 박스. */
+.menu {
+  min-width: 200px;
+  background: #1a1230;
+  color: #e8e2ff;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  z-index: 50;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.item[data-highlighted] {
+  background: rgba(168, 85, 247, 0.25);
+  outline: none;
+}
+.itemIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.itemLabel {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.itemSelected {
+  font-weight: 700;
+}
+.currentMark {
+  color: #ec4899;
+}
+.itemAction {
+  color: #d8cffc;
+}
+.sep {
+  height: 1px;
+  background: rgba(168, 85, 247, 0.2);
+  margin: 4px 0;
+}

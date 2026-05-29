@@ -10,6 +10,7 @@ function sampleProject(): Project {
     id: "p1", name: "곡", createdAt: 1, updatedAt: 1,
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 5000 },
     tracks: [], master: { volume: 1 },
+    libraryAssetIds: [],
   };
 }
 

@@ -21,7 +21,9 @@
   background: rgba(255, 255, 255, 0.03);
 }
 .focused {
-  height: 88px; /* 포커스 확장 */
+  /* 트랙 인포 영역의 2단(주 컨트롤 row + actionRow)을 담을 수 있는 높이.
+     row 32 + gap 6 + actionRow 32 + padding 8 ≈ 80px → 여유 +12 = 92px. */
+  height: 92px;
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -73,45 +75,5 @@
   100% { opacity: 0; }
 }
 
-/* 삭제 affordance(포커스 행 우측 끝, 폴리싱 #8) */
-.delete {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 6px;
-  z-index: 6;
-  pointer-events: none;
-}
-.deleteHandle {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 10px;
-  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.25));
-  pointer-events: auto;
-  cursor: pointer;
-}
-.deleteBtn {
-  width: 26px; height: 26px; padding: 0;
-  border-radius: var(--r-pill);
-  background: #ef4444;
-  border: none;
-  color: #fff;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: opacity 0.16s ease, transform 0.16s ease;
-  pointer-events: none;
-}
-.delete:hover .deleteBtn {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-/* deleteBtn hover: 빨강 명시 — controls.btn:hover 기본 override */
-.deleteBtn:hover {
-  background: #dc2626;
-  border: none;
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
-}
+/* 트랙 삭제 어포던스는 TrackEditor의 actionRow에서 처리한다(<ConfirmDialog> 동반).
+   기존의 우측 hover 어포던스는 제거됨. */

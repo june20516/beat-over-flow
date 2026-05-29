@@ -3,6 +3,8 @@ import type { GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "
 import { newId } from "../domain/ids";
 import { pickColor } from "../domain/palette";
 import { emptyScore, type ScoreState } from "../scoring/scoring";
+import { fillWithBuiltins, removeAssetFromRecents, seedRecentSounds, pushRecent } from "../domain/recentSounds";
+import { clamp01 } from "../domain/math";
 
 interface StoreState {
   project: Project | null;
@@ -24,7 +26,8 @@ interface StoreState {
   setTrackStatus: (trackId: string, status: TrackStatus) => void;
   setTrackName: (trackId: string, name: string) => void;
   setTrackVolume: (trackId: string, v: number) => void;
-  setTrackSound: (trackId: string, sound: SoundRef) => void;
+  /** 트랙 sound 변경의 단일 진입점. MRU 큐(recentSounds)를 함께 갱신한다. */
+  selectTrackSound: (trackId: string, sound: SoundRef) => void;
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
   removeMarker: (trackId: string, markerId: string) => void;
@@ -40,11 +43,12 @@ interface StoreState {
   resetScore: () => void;
 
   setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
+
+  addAssetToLibrary: (assetId: string) => void;
+  canDeleteAsset: (assetId: string) => { ok: true } | { ok: false; usedBy: Track[] };
+  removeAssetFromLibrary: (assetId: string) => void;
 }
 
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
-}
 
 /** 트랙 배열을 변환하며 project.updatedAt을 갱신하는 헬퍼. */
 function mutate(
@@ -67,7 +71,12 @@ function mapTrack(tracks: Track[], id: string, fn: (t: Track) => Track): Track[]
   return tracks.map((t) => (t.id === id ? fn(t) : t));
 }
 
-export const useStore = create<StoreState>((set) => ({
+/** 트랙의 현재 sound가 주어진 assetId의 업로드 에셋인가. recents는 검사하지 않는다. */
+function trackUsesAsset(t: Track, assetId: string): boolean {
+  return t.sound.kind === "upload" && t.sound.assetId === assetId;
+}
+
+export const useStore = create<StoreState>((set, get) => ({
   project: null,
   mode: "listening",
   playing: false,
@@ -90,19 +99,23 @@ export const useStore = create<StoreState>((set) => ({
 
   addTrack: () =>
     set((s) =>
-      mutate(s, (tracks) => [
-        ...tracks,
-        {
-          id: newId(),
-          name: `트랙 ${tracks.length + 1}`,
-          status: "listening",
-          sound: { kind: "builtin", sampleId: "kick" },
-          keyBinding: null,
-          markers: [],
-          volume: 1,
-          color: pickColor(tracks.length),
-        },
-      ]),
+      mutate(s, (tracks) => {
+        const sound: SoundRef = { kind: "builtin", sampleId: "kick" };
+        return [
+          ...tracks,
+          {
+            id: newId(),
+            name: `트랙 ${tracks.length + 1}`,
+            status: "listening",
+            sound,
+            keyBinding: null,
+            markers: [],
+            volume: 1,
+            color: pickColor(tracks.length),
+            recentSounds: seedRecentSounds(sound),
+          },
+        ];
+      }),
     ),
 
   removeTrack: (trackId) => set((s) => mutate(s, (tracks) => tracks.filter((t) => t.id !== trackId))),
@@ -116,8 +129,16 @@ export const useStore = create<StoreState>((set) => ({
   setTrackVolume: (trackId, v) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, volume: clamp01(v) })))),
 
-  setTrackSound: (trackId, sound) =>
-    set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, sound })))),
+  selectTrackSound: (trackId, sound) =>
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => ({
+          ...t,
+          sound,
+          recentSounds: pushRecent(t.recentSounds, sound),
+        })),
+      ),
+    ),
 
   setTrackKeyBinding: (trackId, key) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, keyBinding: key })))),
@@ -203,4 +224,42 @@ export const useStore = create<StoreState>((set) => ({
         ? { project: { ...s.project, transport: { playPauseKey: key }, updatedAt: Date.now() } }
         : s,
     ),
+
+  addAssetToLibrary: (assetId) =>
+    set((s) => {
+      if (!s.project) return s;
+      if (s.project.libraryAssetIds.includes(assetId)) return s;
+      return {
+        project: {
+          ...s.project,
+          libraryAssetIds: [...s.project.libraryAssetIds, assetId],
+          updatedAt: Date.now(),
+        },
+      };
+    }),
+
+  canDeleteAsset: (assetId) => {
+    const p = get().project;
+    if (!p) return { ok: true };
+    const usedBy = p.tracks.filter((t) => trackUsesAsset(t, assetId));
+    return usedBy.length === 0 ? { ok: true } : { ok: false, usedBy };
+  },
+
+  removeAssetFromLibrary: (assetId) =>
+    set((s) => {
+      if (!s.project) return s;
+      const usedBy = s.project.tracks.filter((t) => trackUsesAsset(t, assetId));
+      if (usedBy.length > 0) return s;
+      return {
+        project: {
+          ...s.project,
+          libraryAssetIds: s.project.libraryAssetIds.filter((id) => id !== assetId),
+          tracks: s.project.tracks.map((t) => ({
+            ...t,
+            recentSounds: fillWithBuiltins(removeAssetFromRecents(t.recentSounds, assetId)),
+          })),
+          updatedAt: Date.now(),
+        },
+      };
+    }),
 }));

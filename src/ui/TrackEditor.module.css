@@ -1,23 +1,58 @@
+/* 트랙 인포 컨테이너. 포커스 시 row + actionRow 2단으로 펼침. */
 .trackEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 4px 10px 4px 8px;
+  border-left: 4px solid var(--track-color, var(--purple));
+  justify-content: center;
+}
+
+/* 주 컨트롤 한 줄 — 모든 트랙에서 동일한 폭/정렬 유지. */
+.row {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 100%;
-  padding: 0 10px 0 8px;
-  border-left: 4px solid var(--track-color, var(--purple));
 }
+
+/* 포커스 전용 액션 줄 — 좌측: 상태 풀버튼, 우측: 액션 슬롯(Trash 등). */
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+/* 좌우 정렬용 spacer. */
+.actionSpacer { flex: 1; }
+
+/* row 내부 인터랙티브 요소를 32px 높이로 통일.
+   StatusBadge는 자체 모듈(.badge)에서 32×32px로 명시하므로 여기엔 포함하지 않는다. */
+.row > .name,
+.row > .selectSlot,
+.row :global(.keycap) {
+  height: 32px;
+}
+
 .name {
-  width: 52px;
+  width: 56px;
   flex: none;
   padding: 5px 6px;
   font-size: 12px;
 }
+
 .selectSlot {
+  /* row1 폭 합산(384px 안):
+     padding 18 + dragHandle 22 + name 56 + StatusBadge 32 + selectSlot
+       + KeyCap 56 + volumeBtn 32 + gaps(6×6=36) = 252 + selectSlot.
+     384 - 252 = 132 → 안전 마진 2px 두고 130px 고정. */
   flex: none;
-  width: 58px;
-  font-size: 11px;
-  padding: 5px 18px 5px 6px;
+  width: 130px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
+
 .dragHandle {
   cursor: grab;
   background: none;
@@ -30,4 +65,38 @@
 }
 .dragHandle:active {
   cursor: grabbing;
+}
+
+/* VolumeControl trigger — 트랙 행 내에서 32×32px로 정렬. controls.btnIcon(40)을 덮어쓴다. */
+.volumeBtn {
+  width: 32px;
+  height: 32px;
+}
+
+/* actionRow 내부 버튼 — 32px 높이, 라벨 동반. controls.btn이 nowrap을 보장하지만
+   actionBtn은 controls.btn 없이 단독으로 쓰이는 경우(destructive)도 있어 명시. */
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  gap: 6px;
+}
+
+/* 위험 액션(트랙 삭제 등) — 빨강 톤. 호버 시 채움. */
+.destructive {
+  color: #f87171;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.destructive:hover {
+  color: #fff;
+  background: #dc2626;
+  border-color: #ef4444;
 }
