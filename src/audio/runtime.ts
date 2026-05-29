@@ -10,7 +10,9 @@ import { markersInWindow, ctxTimeForMarker } from "./Scheduler";
 import { resolveTrackBehavior } from "../domain/mode";
 import { startPlaySession, endPlaySession, updatePlay } from "../scoring/playSession";
 import { usePulse } from "../store/pulse";
-import type { Project } from "../types";
+import type { BaseFlowRef, Project } from "../types";
+import { YouTubeSource } from "./YouTubeSource";
+import { createYouTubePlayer } from "./youtubeApi";
 
 let engine: AudioEngine | null = null;
 let source: BaseFlowSource | null = null;
@@ -74,14 +76,37 @@ export function getSource(): BaseFlowSource | null {
   return source;
 }
 
-/** 현재 프로젝트의 베이스 플로우 에셋을 디코드해 소스를 만든다. */
-export async function loadBaseFlow(assetId: string): Promise<void> {
+/**
+ * 현재 프로젝트의 베이스 플로우 ref로 소스를 만든다.
+ * - audioFile: 에셋을 디코드해 AudioFileSource.
+ * - youtube: container에 플레이어를 생성해 YouTubeSource. container 필수.
+ */
+export async function loadBaseFlow(ref: BaseFlowRef, container?: HTMLElement): Promise<void> {
   const eng = getEngine();
-  const asset = await getAsset(assetId);
-  if (!asset) throw new Error("base flow asset not found: " + assetId);
-  const buffer = await eng.decode(asset.blob);
+  if (ref.kind === "audioFile") {
+    const asset = await getAsset(ref.assetId);
+    if (!asset) throw new Error("base flow asset not found: " + ref.assetId);
+    const buffer = await eng.decode(asset.blob);
+    disposeSource();
+    source = new AudioFileSource(eng.ctx, buffer, eng.masterGain);
+    return;
+  }
+  // youtube
+  if (!container) throw new Error("youtube base flow requires a container element");
   disposeSource();
-  source = new AudioFileSource(eng.ctx, buffer, eng.masterGain);
+  let ytSource: YouTubeSource | null = null;
+  const player = await createYouTubePlayer(container, ref.videoId, (ref.startMs ?? 0) / 1000, {
+    onReady: () => {},
+    onStateChange: (state) => ytSource?.onStateChange(state),
+    onError: (code) => {
+      useStore.getState().setBaseFlowLoading(false);
+      console.error("yt error", code);
+    },
+  });
+  ytSource = new YouTubeSource(player, ref.offsetMs ?? 0);
+  source = ytSource;
+  // 준비 후 확정된 길이를 store에 write-back.
+  useStore.getState().setBaseFlowDurationMs(ytSource.durationMs);
 }
 
 export async function play(): Promise<void> {
