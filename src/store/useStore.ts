@@ -4,6 +4,7 @@ import { newId } from "../domain/ids";
 import { pickColor } from "../domain/palette";
 import { emptyScore, type ScoreState } from "../scoring/scoring";
 import { fillWithBuiltins, removeAssetFromRecents, seedRecentSounds, pushRecent } from "../domain/recentSounds";
+import { clamp01 } from "../domain/math";
 
 interface StoreState {
   project: Project | null;
@@ -25,7 +26,7 @@ interface StoreState {
   setTrackStatus: (trackId: string, status: TrackStatus) => void;
   setTrackName: (trackId: string, name: string) => void;
   setTrackVolume: (trackId: string, v: number) => void;
-  setTrackSound: (trackId: string, sound: SoundRef) => void;
+  /** 트랙 sound 변경의 단일 진입점. MRU 큐(recentSounds)를 함께 갱신한다. */
   selectTrackSound: (trackId: string, sound: SoundRef) => void;
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
@@ -48,9 +49,6 @@ interface StoreState {
   removeAssetFromLibrary: (assetId: string) => void;
 }
 
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
-}
 
 /** 트랙 배열을 변환하며 project.updatedAt을 갱신하는 헬퍼. */
 function mutate(
@@ -131,7 +129,7 @@ export const useStore = create<StoreState>((set, get) => ({
   setTrackVolume: (trackId, v) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, volume: clamp01(v) })))),
 
-  setTrackSound: (trackId, sound) =>
+  selectTrackSound: (trackId, sound) =>
     set((s) =>
       mutate(s, (tracks) =>
         mapTrack(tracks, trackId, (t) => ({
@@ -141,9 +139,6 @@ export const useStore = create<StoreState>((set, get) => ({
         })),
       ),
     ),
-
-  // selectTrackSound는 setTrackSound의 공식 별칭 — MRU 경로가 항상 한 곳에서 갱신되도록 위임.
-  selectTrackSound: (trackId, sound) => get().setTrackSound(trackId, sound),
 
   setTrackKeyBinding: (trackId, key) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, keyBinding: key })))),

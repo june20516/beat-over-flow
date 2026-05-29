@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { clamp01 } from "../domain/math";
 
 export type OverlayMode = "indeterminate" | "determinate";
 
@@ -11,10 +12,6 @@ interface LoadingOverlayState {
   show: (opts: { mode: OverlayMode; label?: string }) => void;
   setProgress: (p: number) => void;
   hide: () => void;
-}
-
-function clamp01(p: number): number {
-  return Math.max(0, Math.min(1, p));
 }
 
 export const useLoadingOverlay = create<LoadingOverlayState>((set) => ({

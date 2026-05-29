@@ -3,11 +3,14 @@ import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
 
 export const RECENT_SLOTS = 6;
 
-function sameRef(a: SoundRef, b: SoundRef): boolean {
-  if (a.kind !== b.kind) return false;
-  if (a.kind === "builtin" && b.kind === "builtin") return a.sampleId === b.sampleId;
-  if (a.kind === "upload" && b.kind === "upload") return a.assetId === b.assetId;
-  return false;
+/** SoundRef의 정규 식별 키. React key, MRU 비교, 안정적 비교 등에 사용. */
+export function refKey(s: SoundRef): string {
+  return s.kind === "builtin" ? `b:${s.sampleId}` : `u:${s.assetId}`;
+}
+
+/** SoundRef 구조 동등 비교. 키 순서 의존 없는 안전한 방식. */
+export function sameRef(a: SoundRef, b: SoundRef): boolean {
+  return refKey(a) === refKey(b);
 }
 
 /** sound를 [0]에 두고 prev에서 중복 제거. 최대 RECENT_SLOTS 개로 자른다. */
