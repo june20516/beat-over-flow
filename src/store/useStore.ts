@@ -3,7 +3,7 @@ import type { GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "
 import { newId } from "../domain/ids";
 import { pickColor } from "../domain/palette";
 import { emptyScore, type ScoreState } from "../scoring/scoring";
-import { seedRecentSounds, pushRecent } from "../domain/recentSounds";
+import { fillWithBuiltins, removeAssetFromRecents, seedRecentSounds, pushRecent } from "../domain/recentSounds";
 
 interface StoreState {
   project: Project | null;
@@ -44,6 +44,8 @@ interface StoreState {
   setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
 
   addAssetToLibrary: (assetId: string) => void;
+  canDeleteAsset: (assetId: string) => { ok: true } | { ok: false; usedBy: Track[] };
+  removeAssetFromLibrary: (assetId: string) => void;
 }
 
 function clamp01(v: number): number {
@@ -71,7 +73,7 @@ function mapTrack(tracks: Track[], id: string, fn: (t: Track) => Track): Track[]
   return tracks.map((t) => (t.id === id ? fn(t) : t));
 }
 
-export const useStore = create<StoreState>((set) => ({
+export const useStore = create<StoreState>((set, get) => ({
   project: null,
   mode: "listening",
   playing: false,
@@ -239,6 +241,35 @@ export const useStore = create<StoreState>((set) => ({
         project: {
           ...s.project,
           libraryAssetIds: [...s.project.libraryAssetIds, assetId],
+          updatedAt: Date.now(),
+        },
+      };
+    }),
+
+  canDeleteAsset: (assetId) => {
+    const p = get().project;
+    if (!p) return { ok: true };
+    const usedBy = p.tracks.filter(
+      (t) => t.sound.kind === "upload" && t.sound.assetId === assetId,
+    );
+    return usedBy.length === 0 ? { ok: true } : { ok: false, usedBy };
+  },
+
+  removeAssetFromLibrary: (assetId) =>
+    set((s) => {
+      if (!s.project) return s;
+      const usedBy = s.project.tracks.filter(
+        (t) => t.sound.kind === "upload" && t.sound.assetId === assetId,
+      );
+      if (usedBy.length > 0) return s;
+      return {
+        project: {
+          ...s.project,
+          libraryAssetIds: s.project.libraryAssetIds.filter((id) => id !== assetId),
+          tracks: s.project.tracks.map((t) => ({
+            ...t,
+            recentSounds: fillWithBuiltins(removeAssetFromRecents(t.recentSounds, assetId)),
+          })),
           updatedAt: Date.now(),
         },
       };
