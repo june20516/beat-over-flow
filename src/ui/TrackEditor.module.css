@@ -78,3 +78,17 @@
   align-items: center;
   gap: 6px;
 }
+
+/* 위험 액션(트랙 삭제 등) — 빨강 톤. 호버 시 채움. */
+.destructive {
+  color: #f87171;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.destructive:hover {
+  color: #fff;
+  background: #dc2626;
+  border-color: #ef4444;
+}

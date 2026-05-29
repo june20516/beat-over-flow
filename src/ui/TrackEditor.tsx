@@ -1,5 +1,5 @@
-import { type CSSProperties } from "react";
-import { Trash, DotsSixVertical } from "@phosphor-icons/react";
+import { useState, type CSSProperties } from "react";
+import { Trash, DotsSixVertical, X } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
 import styles from "./TrackEditor.module.css";
 import { cx } from "./cx";
@@ -12,6 +12,7 @@ import { StatusButtons } from "./StatusButtons";
 import { VolumeControl } from "./VolumeControl";
 import { KeyCap } from "./KeyCap";
 import { TrackSoundSelect } from "./asset-library/TrackSoundSelect";
+import { ConfirmDialog } from "./primitives/ConfirmDialog";
 import type { Track } from "../types";
 
 interface TrackEditorProps {
@@ -26,7 +27,9 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   const selectTrackSound = useStore((s) => s.selectTrackSound);
   const setTrackKeyBinding = useStore((s) => s.setTrackKeyBinding);
   const clearMarkers = useStore((s) => s.clearMarkers);
+  const removeTrack = useStore((s) => s.removeTrack);
   const openSelect = useAssetLibrary((s) => s.openSelect);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const {
     attributes,
@@ -93,8 +96,36 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
             <Trash size={14} />
             <span>마커 비우기</span>
           </button>
+          <button
+            type="button"
+            className={cx(styles.actionBtn, styles.destructive)}
+            title="트랙 삭제"
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmDelete(true);
+            }}
+          >
+            <X size={14} weight="bold" />
+            <span>트랙 삭제</span>
+          </button>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="트랙 삭제"
+        description={
+          <>
+            <strong>{track.name}</strong> 트랙과 모든 마커가 사라집니다.
+            <br />
+            되돌릴 수 없습니다.
+          </>
+        }
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        destructive
+        onConfirm={() => removeTrack(track.id)}
+      />
     </div>
   );
 }
