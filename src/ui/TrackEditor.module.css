@@ -15,8 +15,7 @@
 .selectSlot {
   flex: none;
   width: 58px;
-  font-size: 11px;
-  padding: 5px 18px 5px 6px;
+  overflow: hidden;
 }
 .dragHandle {
   cursor: grab;

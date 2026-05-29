@@ -6,10 +6,11 @@ import { cx } from "./cx";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useStore } from "../store/useStore";
-import { BUILTIN_SAMPLES } from "../audio/builtinSamples";
+import { useAssetLibrary } from "../store/assetLibrary";
 import { StatusGrid } from "./StatusGrid";
 import { VolumeControl } from "./VolumeControl";
 import { KeyCap } from "./KeyCap";
+import { TrackSoundSelect } from "./asset-library/TrackSoundSelect";
 import type { Track } from "../types";
 
 interface TrackEditorProps {
@@ -21,9 +22,10 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   const setTrackStatus = useStore((s) => s.setTrackStatus);
   const setTrackName = useStore((s) => s.setTrackName);
   const setTrackVolume = useStore((s) => s.setTrackVolume);
-  const setTrackSound = useStore((s) => s.setTrackSound);
+  const selectTrackSound = useStore((s) => s.selectTrackSound);
   const setTrackKeyBinding = useStore((s) => s.setTrackKeyBinding);
   const clearMarkers = useStore((s) => s.clearMarkers);
+  const openSelect = useAssetLibrary((s) => s.openSelect);
 
   const {
     attributes,
@@ -65,18 +67,15 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
         onChange={(e) => setTrackName(track.id, e.target.value)}
       />
       <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
-      <select
-        className={cx(controls.select, styles.selectSlot)}
-        value={track.sound.kind === "builtin" ? track.sound.sampleId : ""}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => setTrackSound(track.id, { kind: "builtin", sampleId: e.target.value })}
-      >
-        {BUILTIN_SAMPLES.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.label}
-          </option>
-        ))}
-      </select>
+      <div className={styles.selectSlot}>
+        <TrackSoundSelect
+          trackId={track.id}
+          sound={track.sound}
+          recentSounds={track.recentSounds}
+          onChange={(next) => selectTrackSound(track.id, next)}
+          onOpenLibrary={() => openSelect(track.id)}
+        />
+      </div>
       <KeyCap code={track.keyBinding} onCapture={(code) => setTrackKeyBinding(track.id, code)} />
       <VolumeControl value={track.volume} onChange={(v) => setTrackVolume(track.id, v)} />
       {focused && (
