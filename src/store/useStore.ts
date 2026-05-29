@@ -42,6 +42,8 @@ interface StoreState {
   resetScore: () => void;
 
   setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
+
+  addAssetToLibrary: (assetId: string) => void;
 }
 
 function clamp01(v: number): number {
@@ -228,4 +230,17 @@ export const useStore = create<StoreState>((set) => ({
         ? { project: { ...s.project, transport: { playPauseKey: key }, updatedAt: Date.now() } }
         : s,
     ),
+
+  addAssetToLibrary: (assetId) =>
+    set((s) => {
+      if (!s.project) return s;
+      if (s.project.libraryAssetIds.includes(assetId)) return s;
+      return {
+        project: {
+          ...s.project,
+          libraryAssetIds: [...s.project.libraryAssetIds, assetId],
+          updatedAt: Date.now(),
+        },
+      };
+    }),
 }));
