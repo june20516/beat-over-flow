@@ -8,6 +8,7 @@ import { listProjects, saveProject, deleteProject, duplicateProject } from "../p
 import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
 import { useStore } from "../store/useStore";
+import { useLoadingOverlay } from "../store/loadingOverlay";
 import { newId } from "../domain/ids";
 import { buildProjectFromBlueprint, EXAMPLE_BLUEPRINT } from "../example/exampleProject";
 import type { Project } from "../types";
@@ -53,23 +54,37 @@ export function ProjectList({ onOpen }: Props) {
   }
 
   async function createExample() {
-    const res = await fetch("/samples/moodmode-demo.mp3");
-    const blob = await res.blob();
-    const assetId = await putAsset(blob, "moodmode-demo.mp3");
-    const buffer = await getEngine().decode(blob);
-    const project = buildProjectFromBlueprint(
-      EXAMPLE_BLUEPRINT,
-      assetId,
-      Math.round(buffer.duration * 1000),
-    );
-    await saveProject(project);
-    setProject(project);
-    onOpen(project);
+    const { show, hide } = useLoadingOverlay.getState();
+    show({ mode: "indeterminate", label: "예제 프로젝트 준비 중..." });
+    try {
+      const res = await fetch("/samples/moodmode-demo.mp3");
+      const blob = await res.blob();
+      const assetId = await putAsset(blob, "moodmode-demo.mp3");
+      const buffer = await getEngine().decode(blob);
+      const project = buildProjectFromBlueprint(
+        EXAMPLE_BLUEPRINT,
+        assetId,
+        Math.round(buffer.duration * 1000),
+      );
+      await saveProject(project);
+      setProject(project);
+      onOpen(project);
+    } finally {
+      hide();
+    }
   }
 
   async function handleDuplicate(p: Project) {
-    await duplicateProject(p);
-    await refresh();
+    const { show, setProgress, hide } = useLoadingOverlay.getState();
+    show({ mode: "determinate", label: "복사 중..." });
+    try {
+      setProgress(0.1);
+      await duplicateProject(p);
+      setProgress(1);
+      await refresh();
+    } finally {
+      hide();
+    }
   }
 
   function startRename(p: Project) {
