@@ -29,3 +29,8 @@ export async function listAssetsByIds(ids: string[]): Promise<StoredAsset[]> {
     .filter((a): a is StoredAsset => a !== undefined)
     .map((a) => ({ ...a, createdAt: a.createdAt ?? 0 }));
 }
+
+export async function deleteAsset(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete("assets", id);
+}

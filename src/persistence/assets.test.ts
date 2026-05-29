@@ -79,3 +79,20 @@ describe("listAssetsByIds", () => {
     expect(await listAssetsByIds([])).toEqual([]);
   });
 });
+
+describe("deleteAsset", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("저장된 id를 삭제한다", async () => {
+    const id = await putAsset(new Blob(["x"]), "X");
+    await deleteAsset(id);
+    expect(await getAsset(id)).toBeNull();
+  });
+
+  it("없는 id를 삭제해도 throw 하지 않는다", async () => {
+    await expect(deleteAsset("nope")).resolves.toBeUndefined();
+  });
+});
