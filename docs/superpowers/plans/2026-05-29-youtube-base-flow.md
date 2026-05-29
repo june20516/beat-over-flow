@@ -1157,9 +1157,9 @@ git commit -m "feat(ui): YouTubePlayer host with mini/ambient layout"
 **Files:**
 - Create: `src/ui/ProgressBarLane.tsx`
 - Modify: `src/ui/Timeline.tsx:30-33,37,136` (props + BaseFlowLane 렌더 분기)
-- Modify: `src/ui/MarkerEditor.tsx` (마커 클립)
+- Modify: `src/ui/MarkerEditor.tsx:59,109` (마커 클립 — 두 서브컴포넌트)
 
-> 확인된 구조: `Timeline`이 `BaseFlowLane`을 136번 줄에서 렌더한다. 마커는 `TrackRow.tsx:51`이 레인에 렌더하는 `MarkerEditor`(`src/ui/MarkerEditor.tsx`)에서 `track.markers`를 map해 그린다. (주의: `MarkerLane`/`TrackLane`은 존재하지 않는다.)
+> 확인된 구조: `Timeline`이 `BaseFlowLane`을 136번 줄에서 렌더한다. 마커는 `TrackRow.tsx:51`이 레인에 렌더하는 `MarkerEditor`(`src/ui/MarkerEditor.tsx`)가 그린다. 단, 직접 `track.markers.map`이 아니라 뷰포트 컬링 헬퍼 `visibleMarkers(track.markers, vp, containerWidthPx)`(from `../timeline/markerMath`)를 두 곳에서 호출한다: `FocusedMarkerEditor`(59줄, SVG) / `OverviewMarkerEditor`(109줄, canvas). (주의: `MarkerLane`/`TrackLane`은 존재하지 않는다.)
 
 - [ ] **Step 1: ProgressBarLane 작성**
 
@@ -1248,29 +1248,51 @@ import 추가: `import { ProgressBarLane } from "./ProgressBarLane";`
 
 (Editor가 `Timeline`에 `baseFlowKind={project.baseFlow.kind}`를 넘기는 부분은 Task 12 Step 3에서 처리.)
 
-- [ ] **Step 3: MarkerEditor 마커 렌더에 클립 적용**
+- [ ] **Step 3: MarkerEditor 두 서브컴포넌트의 렌더 입력을 클립**
 
-먼저 `src/ui/MarkerEditor.tsx`를 읽고, 렌더를 위해 `track.markers`를 순회(`.map`)하는 지점을 찾는다. 그 입력을 클립 결과로 교체한다:
+`src/ui/MarkerEditor.tsx` 상단 import에 추가:
 
 ```ts
 import { clipMarkersForDisplay } from "../domain/markerClip";
 ```
 
-렌더 직전에 클립한 배열을 만들어 map 대상으로 사용:
+**(a) `FocusedMarkerEditor`** — `durationMs`는 47번 줄에서 이미 보유. 59번 줄:
 
 ```ts
-const visibleMarkers = clipMarkersForDisplay(track.markers, durationMs);
-// ... 기존 track.markers.map(...) → visibleMarkers.map(...)
+  const visible = visibleMarkers(track.markers, vp, containerWidthPx);
 ```
 
-`durationMs`는 같은 컴포넌트에서 베이스 플로우 길이를 얻는 기존 경로를 사용한다(다른 레인 컴포넌트처럼 `useViewport((s) => s.durationMs)`). 해당 구독이 없으면 한 줄 추가한다:
+를 교체:
 
 ```ts
-import { useViewport } from "../store/viewport";
-const durationMs = useViewport((s) => s.durationMs);
+  const visible = visibleMarkers(clipMarkersForDisplay(track.markers, durationMs), vp, containerWidthPx);
 ```
 
-> 표시(렌더) 경로에만 적용한다. 편집(store 액션)·스케줄(`runtime.ts`/`Scheduler.ts`의 `markersInWindow`)은 원본 `track.markers`를 그대로 쓰므로 데이터는 보존된다. viewport의 `durationMs`는 Timeline의 `setDuration(durationMs)` effect로 갱신되어 유튜브 길이 write-back 후 자동 반영된다.
+**(b) `OverviewMarkerEditor`** — `durationMs` 구독이 없으므로 추가(96-98줄의 `useViewport` 구독들 근처):
+
+```ts
+  const durationMs = useStore((s) => s.project?.baseFlow.durationMs ?? 0);
+```
+
+(`useStore`는 이 파일에 이미 import되어 있다.) 그리고 109번 줄:
+
+```ts
+    for (const { x } of visibleMarkers(track.markers, vp, containerWidthPx)) {
+```
+
+를 교체:
+
+```ts
+    for (const { x } of visibleMarkers(clipMarkersForDisplay(track.markers, durationMs), vp, containerWidthPx)) {
+```
+
+useEffect 의존성 배열(112번 줄)에 `durationMs` 추가:
+
+```ts
+  }, [track.markers, track.color, pxPerMs, scrollLeftPx, containerWidthPx, durationMs]);
+```
+
+> 표시(렌더) 경로에만 적용한다. 편집(`addMarker`/`removeMarker`)·스케줄(`Scheduler.ts`의 `markersInWindow`)은 원본 `track.markers`를 그대로 쓰므로 데이터는 보존된다. `clipMarkersForDisplay`(Marker[]→Marker[])는 뷰포트 컬링 `visibleMarkers` 입력 앞단에 끼워 타입이 자연스럽게 합성된다.
 
 - [ ] **Step 4: 타입체크 + 기존 테스트 회귀**
 
@@ -1591,6 +1613,6 @@ git add -A && git commit -m "chore: youtube base flow final polish"
 - `duplicateProject` 유튜브 분기(스펙에 암시된 asset 무관성) → Task 3 Step 6에서 명시 처리.
 - 타입 시그니처 일관성: `loadBaseFlow(ref, container?)`, `setBaseFlowDurationMs`, `setBaseFlowOffsetMs`,
   `YouTubeSource(player, offsetMs, now?)` + `onStateChange`/`setOffsetMs`, `BaseFlowView` 일관 사용.
-- 확인 완료: 마커 렌더는 `MarkerEditor.tsx`(TrackRow:51이 레인에 렌더), 베이스 레인 렌더는 `Timeline.tsx:136`(Task 11에 반영). `MarkerLane`/`TrackLane`은 없음.
+- 확인 완료: 마커 렌더는 `MarkerEditor.tsx`의 `visibleMarkers(...)` 호출 2곳(59/109줄), 베이스 레인 렌더는 `Timeline.tsx:136`(Task 11에 반영). `MarkerLane`/`TrackLane`은 없음.
 - 미해결 가정(실행 중 검증): Radix Dialog 배선 패턴(Task 12 — 기존 AssetLibraryModal 참고),
   앰비언트 전환 시 ref 재생성(Task 12 Step 3). 둘 다 기존 패턴 참고로 해소 가능.
