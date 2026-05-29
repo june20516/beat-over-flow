@@ -41,9 +41,12 @@
 }
 
 .selectSlot {
-  /* 포커스 시 Trash가 actionRow로 빠지므로 row 1에 충분한 여유. */
+  /* row1 폭 합산(384px 안):
+     padding 18 + dragHandle 22 + name 56 + StatusBadge 32 + selectSlot
+       + KeyCap 56 + volumeBtn 32 + gaps(6×6=36) = 252 + selectSlot.
+     384 - 252 = 132 → 안전 마진 2px 두고 130px 고정. */
   flex: none;
-  width: 140px;
+  width: 130px;
   overflow: hidden;
   display: flex;
   align-items: center;

@@ -34,7 +34,13 @@ export function KeyCap({ code, onCapture }: KeyCapProps) {
         setCapturing((c) => !c);
       }}
       onBlur={() => setCapturing(false)}
-      title={capturing ? "키를 누르세요. 다시 클릭하거나 Esc로 취소." : "클릭 후 키를 누르세요"}
+      title={
+        capturing
+          ? "키를 누르세요. 다시 클릭하거나 Esc로 취소."
+          : code
+            ? `키: ${code} (${formatKeyCode(code)})`
+            : "클릭 후 키를 누르세요"
+      }
     >
       {capturing ? "…" : formatKeyCode(code)}
     </button>

@@ -3,12 +3,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
+  /* 고정폭 — modifier 6자(LShift)까지 잘림 없이 들어가는 최소치.
+     매핑되지 않은 더 긴 코드는 ellipsis로 점진 손상되며 풀 코드는 title에서 확인. */
+  width: 56px;
   min-height: 32px;
-  padding: 0 10px;
+  padding: 0 4px;
   font-family: var(--font-mono);
   font-size: 11px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   background: var(--bg-inset);
   border: 1px solid var(--line-strong);
