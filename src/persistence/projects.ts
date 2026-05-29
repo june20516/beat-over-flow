@@ -3,6 +3,7 @@ import type { Project, SoundRef, Track, TrackStatus } from "../types";
 import { newId } from "../domain/ids";
 import { copyAsset } from "./assets";
 import { seedRecentSounds, fillWithBuiltins } from "../domain/recentSounds";
+import { DEFAULT_BASE_FLOW_VIEW } from "../domain/baseFlowView";
 
 function normalizeTrack(t: Track): Track {
   const recentSounds =
@@ -23,7 +24,12 @@ function normalizeProject(p: Project): Project {
       if (s.kind === "upload") declared.add(s.assetId);
     }
   }
-  return { ...p, tracks, libraryAssetIds: Array.from(declared) };
+  return {
+    ...p,
+    tracks,
+    libraryAssetIds: Array.from(declared),
+    baseFlowView: p.baseFlowView ?? DEFAULT_BASE_FLOW_VIEW,
+  };
 }
 
 export async function saveProject(project: Project): Promise<void> {
@@ -70,7 +76,10 @@ export async function duplicateProject(project: Project): Promise<Project> {
   const now = Date.now();
   clone.createdAt = now;
   clone.updatedAt = now;
-  clone.baseFlow = { ...clone.baseFlow, assetId: await copyAsset(clone.baseFlow.assetId) };
+  if (clone.baseFlow.kind === "audioFile") {
+    clone.baseFlow = { ...clone.baseFlow, assetId: await copyAsset(clone.baseFlow.assetId) };
+  }
+  // youtube baseFlow는 blob 자산이 없어 그대로 복제된다.
 
   const idMap = new Map<string, string>();
   const remap = async (oldId: string): Promise<string> => {

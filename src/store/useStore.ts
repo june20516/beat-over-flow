@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import type { GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "../types";
+import type { BaseFlowRef, GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "../types";
 import { newId } from "../domain/ids";
+import { resolveBaseFlowView } from "../domain/baseFlowView";
 import { pickColor } from "../domain/palette";
 import { emptyScore, type ScoreState } from "../scoring/scoring";
 import { fillWithBuiltins, removeAssetFromRecents, seedRecentSounds, pushRecent } from "../domain/recentSounds";
@@ -13,6 +14,7 @@ interface StoreState {
   playheadMs: number;
   selectedTrackId: string | null;
   score: ScoreState;
+  baseFlowLoading: boolean;
 
   setProject: (project: Project | null) => void;
   renameProject: (name: string) => void;
@@ -43,6 +45,12 @@ interface StoreState {
   resetScore: () => void;
 
   setPlayPauseKey: (key: string | null) => void; // project.transport.playPauseKey 갱신
+
+  setBaseFlow: (ref: BaseFlowRef) => void;
+  setBaseFlowDurationMs: (ms: number) => void;
+  setBaseFlowView: (patch: Partial<{ layout: "mini" | "ambient"; ambientIntensity: number }>) => void;
+  setBaseFlowOffsetMs: (ms: number) => void;
+  setBaseFlowLoading: (loading: boolean) => void;
 
   addAssetToLibrary: (assetId: string) => void;
   canDeleteAsset: (assetId: string) => { ok: true } | { ok: false; usedBy: Track[] };
@@ -83,6 +91,7 @@ export const useStore = create<StoreState>((set, get) => ({
   playheadMs: 0,
   selectedTrackId: null,
   score: emptyScore(),
+  baseFlowLoading: false,
 
   setProject: (project) => set({ project }),
   renameProject: (name) =>
@@ -224,6 +233,43 @@ export const useStore = create<StoreState>((set, get) => ({
         ? { project: { ...s.project, transport: { playPauseKey: key }, updatedAt: Date.now() } }
         : s,
     ),
+
+  setBaseFlow: (ref) =>
+    set((s) => (s.project ? { project: { ...s.project, baseFlow: ref, updatedAt: Date.now() } } : s)),
+
+  setBaseFlowDurationMs: (ms) =>
+    set((s) =>
+      s.project
+        ? { project: { ...s.project, baseFlow: { ...s.project.baseFlow, durationMs: ms }, updatedAt: Date.now() } }
+        : s,
+    ),
+
+  setBaseFlowView: (patch) =>
+    set((s) =>
+      s.project
+        ? {
+            project: {
+              ...s.project,
+              baseFlowView: { ...resolveBaseFlowView(s.project.baseFlowView), ...patch },
+              updatedAt: Date.now(),
+            },
+          }
+        : s,
+    ),
+
+  setBaseFlowOffsetMs: (ms) =>
+    set((s) => {
+      if (!s.project || s.project.baseFlow.kind !== "youtube") return s;
+      return {
+        project: {
+          ...s.project,
+          baseFlow: { ...s.project.baseFlow, offsetMs: ms },
+          updatedAt: Date.now(),
+        },
+      };
+    }),
+
+  setBaseFlowLoading: (loading) => set({ baseFlowLoading: loading }),
 
   addAssetToLibrary: (assetId) =>
     set((s) => {

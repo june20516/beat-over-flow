@@ -12,6 +12,7 @@ import {
 import { useLaneGesture } from "../input/useLaneGesture";
 import { dragToRegion } from "../timeline/laneGesture";
 import { useEditorUi } from "../store/editorUi";
+import { clipMarkersForDisplay } from "../domain/markerClip";
 import type { Track } from "../types";
 import { LanePlayhead } from "./LanePlayhead";
 import { RegionOverlay } from "./RegionOverlay";
@@ -56,7 +57,7 @@ function FocusedMarkerEditor({ track }: { track: Track }) {
   const vp: Viewport = { pxPerMs, scrollLeftPx, containerWidthPx };
   const editable = isMarkerEditingEnabled(mode, track.status);
   const sequencerActive = sequencerOpen && editable;
-  const visible = visibleMarkers(track.markers, vp, containerWidthPx);
+  const visible = visibleMarkers(clipMarkersForDisplay(track.markers, durationMs), vp, containerWidthPx);
 
   const gesture = useLaneGesture({
     onClick: (x) => {
@@ -96,6 +97,7 @@ function OverviewMarkerEditor({ track }: { track: Track }) {
   const pxPerMs = useViewport((s) => s.pxPerMs);
   const scrollLeftPx = useViewport((s) => s.scrollLeftPx);
   const containerWidthPx = useViewport((s) => s.containerWidthPx);
+  const durationMs = useStore((s) => s.project?.baseFlow.durationMs ?? 0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -106,10 +108,10 @@ function OverviewMarkerEditor({ track }: { track: Track }) {
     const vp: Viewport = { pxPerMs, scrollLeftPx, containerWidthPx };
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = track.color;
-    for (const { x } of visibleMarkers(track.markers, vp, containerWidthPx)) {
+    for (const { x } of visibleMarkers(clipMarkersForDisplay(track.markers, durationMs), vp, containerWidthPx)) {
       ctx.fillRect(x, 0, 1, canvas.height);
     }
-  }, [track.markers, track.color, pxPerMs, scrollLeftPx, containerWidthPx]);
+  }, [track.markers, track.color, pxPerMs, scrollLeftPx, containerWidthPx, durationMs]);
 
   return (
     <canvas

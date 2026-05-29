@@ -24,17 +24,19 @@ import { useStore } from "../store/useStore";
 import { useViewport } from "../store/viewport";
 import { resolveWheelIntent } from "../timeline/wheelIntent";
 import { BaseFlowLane } from "./BaseFlowLane";
+import { ProgressBarLane } from "./ProgressBarLane";
 import { PlayheadOverlay } from "./PlayheadOverlay";
 import { TrackRow } from "./TrackRow";
 
 interface TimelineProps {
   peaks: Float32Array | null;
   durationMs: number;
+  baseFlowKind: "audioFile" | "youtube";
 }
 
 const ZOOM_IN_FACTOR = 1.0015; // wheel 1deltaY당 줌 배율(부드럽게)
 
-export function Timeline({ peaks, durationMs }: TimelineProps) {
+export function Timeline({ peaks, durationMs, baseFlowKind }: TimelineProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const arrangeRef = useRef<HTMLDivElement>(null);
   const setContainerWidth = useViewport((s) => s.setContainerWidth);
@@ -133,7 +135,9 @@ export function Timeline({ peaks, durationMs }: TimelineProps) {
           ref={arrangeRef}
           style={{ position: "relative", flex: 1, overflow: "hidden" }}
         >
-          <BaseFlowLane peaks={peaks} durationMs={durationMs} />
+          {baseFlowKind === "youtube"
+            ? <ProgressBarLane durationMs={durationMs} />
+            : <BaseFlowLane peaks={peaks} durationMs={durationMs} />}
           <PlayheadOverlay />
         </div>
       </div>
