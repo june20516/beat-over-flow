@@ -126,4 +126,16 @@ describe("project load normalize", () => {
     expect(loaded!.libraryAssetIds).toEqual(["a", "b"]);
     expect(loaded!.tracks[0].recentSounds.length).toBe(6);
   });
+
+  it("baseFlowView 누락 시 기본값(mini/0.5)으로 채운다", async () => {
+    const db = await getDb();
+    const legacy = {
+      id: "p-bfv", name: "t", createdAt: 0, updatedAt: 0,
+      baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
+      tracks: [], master: { volume: 1 }, libraryAssetIds: [],
+    } as unknown as Project;
+    await db.put("projects", legacy);
+    const loaded = await loadProject("p-bfv");
+    expect(loaded?.baseFlowView).toEqual({ layout: "mini", ambientIntensity: 0.5 });
+  });
 });
