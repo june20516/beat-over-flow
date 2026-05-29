@@ -5,13 +5,12 @@ import controls from "./controls.module.css";
 import primitives from "./primitives.module.css";
 import { cx } from "./cx";
 import { listProjects, saveProject, deleteProject, duplicateProject } from "../persistence/projects";
-import { putAsset } from "../persistence/assets";
 import { getEngine } from "../audio/runtime";
 import { useStore } from "../store/useStore";
 import { useLoadingOverlay } from "../store/loadingOverlay";
-import { newId } from "../domain/ids";
-import { normalizeAssetName } from "../domain/assetName";
 import { buildProjectFromBlueprint, EXAMPLE_BLUEPRINT } from "../example/exampleProject";
+import { NewProjectModal } from "./NewProjectModal";
+import { putAsset } from "../persistence/assets";
 import type { Project } from "../types";
 
 interface Props {
@@ -23,7 +22,7 @@ export function ProjectList({ onOpen }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
   const cancelRenameRef = useRef(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [newOpen, setNewOpen] = useState(false);
   const setProject = useStore((s) => s.setProject);
 
   async function refresh() {
@@ -33,25 +32,8 @@ export function ProjectList({ onOpen }: Props) {
     void refresh();
   }, []);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const buffer = await getEngine().decode(file);
-    // 다른 업로드 경로(uploadAssets)와 동일하게 확장자 제거 + 32자 컷.
-    const cleanName = normalizeAssetName(file.name);
-    const assetId = await putAsset(file, cleanName);
-    const project: Project = {
-      id: newId(),
-      name: cleanName,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      baseFlow: { kind: "audioFile", assetId, durationMs: buffer.duration * 1000 },
-      tracks: [],
-      master: { volume: 1 },
-      transport: { playPauseKey: null },
-      libraryAssetIds: [],
-    };
-    await saveProject(project);
+  function handleCreated(project: Project) {
+    setNewOpen(false);
     setProject(project);
     onOpen(project);
   }
@@ -123,22 +105,15 @@ export function ProjectList({ onOpen }: Props) {
         <h1 className={styles.title}>BeatOverflow</h1>
         <p className={styles.tagline}>오디오 위에 비트를 쌓고, 플레이하며 점수를 노려보세요.</p>
         <div className={styles.ctaRow}>
-          <button className={cx(controls.btn, controls.btnPrimary, styles.cta)} onClick={() => fileRef.current?.click()}>
+          <button className={cx(controls.btn, controls.btnPrimary, styles.cta)} onClick={() => setNewOpen(true)}>
             <Plus size={18} weight="bold" />
-            새 프로젝트 (오디오 업로드)
+            새 프로젝트
           </button>
           <button className={cx(controls.btn, controls.btnGhost, styles.ctaSecondary)} onClick={createExample}>
             <Sparkle size={18} weight="bold" />
             예제 프로젝트
           </button>
         </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="audio/*"
-          style={{ display: "none" }}
-          onChange={handleFile}
-        />
       </header>
 
       {projects.length === 0 ? (
@@ -230,6 +205,7 @@ export function ProjectList({ onOpen }: Props) {
           })}
         </ul>
       )}
+      <NewProjectModal open={newOpen} onOpenChange={setNewOpen} onCreated={handleCreated} />
     </div>
   );
 }
