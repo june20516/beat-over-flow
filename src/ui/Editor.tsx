@@ -15,9 +15,7 @@ import { startKeyboard } from "../input/KeyboardController";
 import { startPlaySession, endPlaySession } from "../scoring/playSession";
 import { useEditorUi } from "../store/editorUi";
 import { YouTubePlayer } from "./YouTubePlayer";
-import { BaseFlowPicker } from "./BaseFlowPicker";
 import { resolveBaseFlowView } from "../domain/baseFlowView";
-import { Modal } from "./primitives/Modal";
 
 interface Props {
   onExit: () => void;
@@ -35,7 +33,6 @@ export function Editor({ onExit }: Props) {
   const setBaseFlowView = useStore((s) => s.setBaseFlowView);
   const [editingName, setEditingName] = useState(false);
   const [draft, setDraft] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(false);
   const cancelNameRef = useRef(false);
   const playerHostRef = useRef<HTMLDivElement>(null);
 
@@ -133,14 +130,6 @@ export function Editor({ onExit }: Props) {
         <span className={styles.topBarSpacer} />
         <ModeSwitcher />
         <span className={styles.topBarSpacer} />
-        <button
-          className={cx(controls.btn, controls.btnGhost)}
-          onClick={() => setPickerOpen(true)}
-          aria-haspopup="dialog"
-          title="베이스 플로우 변경"
-        >
-          베이스 플로우
-        </button>
         {isYouTube && (
           <>
             <button
@@ -176,9 +165,6 @@ export function Editor({ onExit }: Props) {
         </div>
       </div>
       {isYouTube && view.layout === "mini" && <YouTubePlayer view={view} ref={playerHostRef} />}
-      <Modal open={pickerOpen} onOpenChange={setPickerOpen} title="베이스 플로우 변경" size="sm">
-        <BaseFlowPicker onClose={() => setPickerOpen(false)} />
-      </Modal>
     </div>
   );
 }
