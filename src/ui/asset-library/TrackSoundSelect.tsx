@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { DropdownSelect } from "../primitives/DropdownSelect";
 import { BUILTIN_SAMPLES } from "../../audio/builtinSamples";
 import { listAssetsByIds } from "../../persistence/assets";
+import { refKey, sameRef } from "../../domain/recentSounds";
 import type { SoundRef } from "../../types";
 import styles from "./TrackSoundSelect.module.css";
 
@@ -13,11 +14,6 @@ interface Props {
   recentSounds: SoundRef[];
   onChange(next: SoundRef): void;
   onOpenLibrary(): void;
-}
-
-/** SoundRef의 안정적 React key. recentSounds 재정렬 시에도 동일 항목이 동일 키를 갖는다. */
-function refKey(s: SoundRef): string {
-  return s.kind === "builtin" ? `b:${s.sampleId}` : `u:${s.assetId}`;
 }
 
 function builtinLabel(id: string): string {
@@ -68,9 +64,7 @@ export function TrackSoundSelect({ sound, recentSounds, onChange, onOpenLibrary 
     >
       {recentSounds.map((s) => {
         const l = labelOf(s);
-        // SoundRef 리터럴은 코드베이스 전반에서 키 순서가 고정돼 있어 stringify 비교가 안전.
-        // 향후 SoundRef에 선택적 필드가 추가되면 이 비교를 재검토해야 한다.
-        const isCurrent = JSON.stringify(s) === JSON.stringify(sound);
+        const isCurrent = sameRef(s, sound);
         return (
           <DropdownSelect.Item
             key={refKey(s)}
