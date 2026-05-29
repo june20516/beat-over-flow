@@ -46,7 +46,6 @@ export async function deleteProject(id: string): Promise<void> {
   await db.delete("projects", id);
 }
 
-// Task 11 will rewrite duplicateProject. Keep existing implementation for now.
 export async function duplicateProject(project: Project): Promise<Project> {
   const clone: Project = structuredClone(project);
   clone.id = newId();
@@ -55,13 +54,31 @@ export async function duplicateProject(project: Project): Promise<Project> {
   clone.createdAt = now;
   clone.updatedAt = now;
   clone.baseFlow = { ...clone.baseFlow, assetId: await copyAsset(clone.baseFlow.assetId) };
+
+  const idMap = new Map<string, string>();
+  const remap = async (oldId: string): Promise<string> => {
+    const hit = idMap.get(oldId);
+    if (hit) return hit;
+    const next = await copyAsset(oldId);
+    idMap.set(oldId, next);
+    return next;
+  };
+
+  clone.libraryAssetIds = await Promise.all((clone.libraryAssetIds ?? []).map(remap));
+
   for (const track of clone.tracks) {
     track.id = newId();
     track.markers = track.markers.map((m) => ({ ...m, id: newId() }));
     if (track.sound.kind === "upload") {
-      track.sound = { kind: "upload", assetId: await copyAsset(track.sound.assetId) };
+      track.sound = { kind: "upload", assetId: await remap(track.sound.assetId) };
     }
+    track.recentSounds = await Promise.all(
+      (track.recentSounds ?? []).map(async (s): Promise<SoundRef> =>
+        s.kind === "upload" ? { kind: "upload", assetId: await remap(s.assetId) } : s,
+      ),
+    );
   }
+
   await saveProject(clone);
   return clone;
 }
