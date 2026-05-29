@@ -64,7 +64,6 @@ export function TrackSoundSelect({ sound, recentSounds, onChange, onOpenLibrary 
         aria-label={`사운드 선택: ${triggerLabel.text}`}
         title={triggerLabel.text}
       >
-        {triggerLabel.locked && <Lock size={11} weight="bold" />}
         <span className={styles.triggerLabel}>{triggerLabel.text}</span>
         <CaretDown size={11} weight="bold" />
       </DropdownMenu.Trigger>
