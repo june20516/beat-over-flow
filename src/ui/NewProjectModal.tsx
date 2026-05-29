@@ -25,11 +25,13 @@ export function NewProjectModal({ open, onOpenChange, onCreated }: Props) {
   const [busy, setBusy] = useState(false);
 
   function handleOpenChange(next: boolean) {
-    // 닫힐 때 입력/에러 상태를 리셋한다(Radix Dialog는 unmount하지 않으므로 잔류 방지).
+    // 닫힐 때 입력/에러/탭/진행 상태를 리셋한다(Radix Dialog는 unmount하지 않으므로 잔류 방지).
     if (!next) {
+      setTab("file");
       setUrl("");
       setName("");
       setError(null);
+      setBusy(false);
     }
     onOpenChange(next);
   }
