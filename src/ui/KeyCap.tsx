@@ -14,6 +14,11 @@ export function KeyCap({ code, onCapture }: KeyCapProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
     e.preventDefault();
     e.stopPropagation();
+    // Escape는 변경 없이 캡처 모드 종료(취소).
+    if (e.code === "Escape") {
+      setCapturing(false);
+      return;
+    }
     onCapture(e.code);
     setCapturing(false);
   }
@@ -25,10 +30,11 @@ export function KeyCap({ code, onCapture }: KeyCapProps) {
       onKeyDown={capturing ? handleKeyDown : undefined}
       onClick={(e) => {
         e.stopPropagation();
-        setCapturing(true);
+        // 캡처 중에 다시 클릭하면 변경 없이 취소.
+        setCapturing((c) => !c);
       }}
       onBlur={() => setCapturing(false)}
-      title="클릭 후 키를 누르세요"
+      title={capturing ? "키를 누르세요. 다시 클릭하거나 Esc로 취소." : "클릭 후 키를 누르세요"}
     >
       {capturing ? "…" : formatKeyCode(code)}
     </button>
