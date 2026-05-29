@@ -38,6 +38,12 @@ export function Editor({ onExit }: Props) {
 
   const view = resolveBaseFlowView(project?.baseFlowView);
   const isYouTube = project?.baseFlow.kind === "youtube";
+  // 소스 "정체성"(어떤 영상/에셋인지)만 추출한다. 로드 effect는 이것에만 의존해야 한다 —
+  // baseFlow 객체 전체에 의존하면 onReady 후 durationMs write-back이 baseFlow를 새 객체로
+  // 바꿔 effect가 재실행되고, 플레이어가 무한 재생성되는 루프에 빠진다.
+  const baseFlowKind = project?.baseFlow.kind;
+  const baseFlowSourceId =
+    project?.baseFlow.kind === "youtube" ? project.baseFlow.videoId : project?.baseFlow.assetId;
 
   // 트랙 에디터/마커 레인/파형 외의 빈 영역을 클릭하면 포커스 해제
   function handleMainClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -83,8 +89,10 @@ export function Editor({ onExit }: Props) {
       }
     })();
     return () => { cancelled = true; };
-    // view.layout 변경 시 플레이어 호스트 DOM이 재마운트되므로 재로드한다(의도된 짧은 재로드).
-  }, [project?.id, project?.baseFlow, view.layout, setBaseFlowLoading]);
+    // 소스 정체성 + 레이아웃에만 의존. durationMs write-back/offsetMs/updatedAt 변경으로는
+    // 재로드하지 않는다(무한 재생성 루프 방지). view.layout 변경 시엔 호스트 DOM이 바뀌어 재로드.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, baseFlowKind, baseFlowSourceId, view.layout, setBaseFlowLoading]);
 
   if (!project) return null;
 
