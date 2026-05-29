@@ -45,6 +45,7 @@ export function ProjectList({ onOpen }: Props) {
       tracks: [],
       master: { volume: 1 },
       transport: { playPauseKey: null },
+      libraryAssetIds: [],
     };
     await saveProject(project);
     setProject(project);

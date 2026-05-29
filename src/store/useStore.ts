@@ -3,6 +3,7 @@ import type { GlobalMode, Marker, Project, SoundRef, Track, TrackStatus } from "
 import { newId } from "../domain/ids";
 import { pickColor } from "../domain/palette";
 import { emptyScore, type ScoreState } from "../scoring/scoring";
+import { seedRecentSounds, pushRecent } from "../domain/recentSounds";
 
 interface StoreState {
   project: Project | null;
@@ -25,6 +26,7 @@ interface StoreState {
   setTrackName: (trackId: string, name: string) => void;
   setTrackVolume: (trackId: string, v: number) => void;
   setTrackSound: (trackId: string, sound: SoundRef) => void;
+  selectTrackSound: (trackId: string, sound: SoundRef) => void;
   setTrackKeyBinding: (trackId: string, key: string | null) => void;
   addMarker: (trackId: string, timeMs: number) => void;
   removeMarker: (trackId: string, markerId: string) => void;
@@ -90,19 +92,23 @@ export const useStore = create<StoreState>((set) => ({
 
   addTrack: () =>
     set((s) =>
-      mutate(s, (tracks) => [
-        ...tracks,
-        {
-          id: newId(),
-          name: `트랙 ${tracks.length + 1}`,
-          status: "listening",
-          sound: { kind: "builtin", sampleId: "kick" },
-          keyBinding: null,
-          markers: [],
-          volume: 1,
-          color: pickColor(tracks.length),
-        },
-      ]),
+      mutate(s, (tracks) => {
+        const sound: SoundRef = { kind: "builtin", sampleId: "kick" };
+        return [
+          ...tracks,
+          {
+            id: newId(),
+            name: `트랙 ${tracks.length + 1}`,
+            status: "listening",
+            sound,
+            keyBinding: null,
+            markers: [],
+            volume: 1,
+            color: pickColor(tracks.length),
+            recentSounds: seedRecentSounds(sound),
+          },
+        ];
+      }),
     ),
 
   removeTrack: (trackId) => set((s) => mutate(s, (tracks) => tracks.filter((t) => t.id !== trackId))),
@@ -117,7 +123,26 @@ export const useStore = create<StoreState>((set) => ({
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, volume: clamp01(v) })))),
 
   setTrackSound: (trackId, sound) =>
-    set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, sound })))),
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => ({
+          ...t,
+          sound,
+          recentSounds: pushRecent(t.recentSounds, sound),
+        })),
+      ),
+    ),
+
+  selectTrackSound: (trackId, sound) =>
+    set((s) =>
+      mutate(s, (tracks) =>
+        mapTrack(tracks, trackId, (t) => ({
+          ...t,
+          sound,
+          recentSounds: pushRecent(t.recentSounds, sound),
+        })),
+      ),
+    ),
 
   setTrackKeyBinding: (trackId, key) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, keyBinding: key })))),

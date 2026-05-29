@@ -9,6 +9,7 @@ function track(id: string, times: number[]): Track {
     keyBinding: null,
     markers: times.map((t, i) => ({ id: `${id}-${i}`, timeMs: t })),
     volume: 1, color: "#fff",
+    recentSounds: [{ kind: "builtin", sampleId: "kick" }],
   };
 }
 

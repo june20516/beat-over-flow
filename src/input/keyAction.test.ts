@@ -12,6 +12,7 @@ function track(over: Partial<Track> = {}): Track {
     markers: [],
     volume: 1,
     color: "#fff",
+    recentSounds: [{ kind: "builtin", sampleId: "kick" }],
     ...over,
   };
 }

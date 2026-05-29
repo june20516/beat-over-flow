@@ -8,12 +8,14 @@ function projectWithPerformTrack(): Project {
     id: "p1", name: "t", createdAt: 0, updatedAt: 0,
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 10000 },
     master: { volume: 1 },
+    libraryAssetIds: [],
     tracks: [
       {
         id: "t1", name: "T", status: "play",
         sound: { kind: "builtin", sampleId: "kick" },
         keyBinding: "KeyA", markers: [{ id: "m1", timeMs: 1000 }],
         volume: 1, color: "#fff",
+        recentSounds: [{ kind: "builtin", sampleId: "kick" }],
       },
     ],
   };

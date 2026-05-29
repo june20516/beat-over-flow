@@ -13,6 +13,7 @@ function sampleProject(id: string): Project {
     baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
     tracks: [],
     master: { volume: 1 },
+    libraryAssetIds: [],
   };
 }
 
@@ -52,12 +53,15 @@ describe("ProjectRepository", () => {
       baseFlow: { kind: "audioFile", assetId, durationMs: 1000 },
       tracks: [
         { id: "t1", name: "킥", status: "listening", sound: { kind: "builtin", sampleId: "kick" },
-          keyBinding: "KeyS", markers: [{ id: "m1", timeMs: 100 }], volume: 1, color: "#22d3ee" },
+          keyBinding: "KeyS", markers: [{ id: "m1", timeMs: 100 }], volume: 1, color: "#22d3ee",
+          recentSounds: [{ kind: "builtin", sampleId: "kick" }] },
         { id: "t2", name: "업로드", status: "listening", sound: { kind: "upload", assetId: uploadId },
-          keyBinding: null, markers: [], volume: 1, color: "#f472b6" },
+          keyBinding: null, markers: [], volume: 1, color: "#f472b6",
+          recentSounds: [{ kind: "upload", assetId: uploadId }] },
       ],
       master: { volume: 1 },
       transport: { playPauseKey: null },
+      libraryAssetIds: [],
     };
     await saveProject(original);
 
