@@ -18,7 +18,10 @@ function emptyProjectBase(name: string): Omit<Project, "baseFlow"> {
   };
 }
 
-/** 업로드한 오디오 자산으로 빈 프로젝트를 만든다. fetch/decode와 무관한 순수 함수. */
+/**
+ * 업로드한 오디오 자산으로 빈 프로젝트를 만든다. fetch/decode와 무관한 순수 함수.
+ * @param name 이미 정규화된 이름(호출부에서 normalizeAssetName 적용 후 전달).
+ */
 export function buildAudioFileProject(name: string, assetId: string, durationMs: number): Project {
   return {
     ...emptyProjectBase(name),
