@@ -14,9 +14,17 @@
   max-width: 160px;
 }
 .triggerLabel {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* trigger의 caret(svg)은 우측 끝에 약간 띄워 배치하고 시각 비중도 낮춤. */
+.trigger > svg {
+  flex-shrink: 0;
+  opacity: 0.55;
+  margin-left: 6px;
 }
 .menu {
   min-width: 200px;
