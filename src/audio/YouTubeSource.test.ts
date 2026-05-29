@@ -3,7 +3,7 @@ import { YouTubeSource } from "./YouTubeSource";
 import { YT_STATE, type YTPlayerLike } from "./youtubeApi";
 
 class FakePlayer implements YTPlayerLike {
-  state = YT_STATE.PAUSED;
+  state: number = YT_STATE.PAUSED;
   current = 0;        // seconds
   duration = 100;     // seconds
   played = false;
