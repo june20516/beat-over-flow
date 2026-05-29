@@ -73,6 +73,11 @@ function mapTrack(tracks: Track[], id: string, fn: (t: Track) => Track): Track[]
   return tracks.map((t) => (t.id === id ? fn(t) : t));
 }
 
+/** 트랙의 현재 sound가 주어진 assetId의 업로드 에셋인가. recents는 검사하지 않는다. */
+function trackUsesAsset(t: Track, assetId: string): boolean {
+  return t.sound.kind === "upload" && t.sound.assetId === assetId;
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   project: null,
   mode: "listening",
@@ -137,16 +142,8 @@ export const useStore = create<StoreState>((set, get) => ({
       ),
     ),
 
-  selectTrackSound: (trackId, sound) =>
-    set((s) =>
-      mutate(s, (tracks) =>
-        mapTrack(tracks, trackId, (t) => ({
-          ...t,
-          sound,
-          recentSounds: pushRecent(t.recentSounds, sound),
-        })),
-      ),
-    ),
+  // selectTrackSound는 setTrackSound의 공식 별칭 — MRU 경로가 항상 한 곳에서 갱신되도록 위임.
+  selectTrackSound: (trackId, sound) => get().setTrackSound(trackId, sound),
 
   setTrackKeyBinding: (trackId, key) =>
     set((s) => mutate(s, (tracks) => mapTrack(tracks, trackId, (t) => ({ ...t, keyBinding: key })))),
@@ -249,18 +246,14 @@ export const useStore = create<StoreState>((set, get) => ({
   canDeleteAsset: (assetId) => {
     const p = get().project;
     if (!p) return { ok: true };
-    const usedBy = p.tracks.filter(
-      (t) => t.sound.kind === "upload" && t.sound.assetId === assetId,
-    );
+    const usedBy = p.tracks.filter((t) => trackUsesAsset(t, assetId));
     return usedBy.length === 0 ? { ok: true } : { ok: false, usedBy };
   },
 
   removeAssetFromLibrary: (assetId) =>
     set((s) => {
       if (!s.project) return s;
-      const usedBy = s.project.tracks.filter(
-        (t) => t.sound.kind === "upload" && t.sound.assetId === assetId,
-      );
+      const usedBy = s.project.tracks.filter((t) => trackUsesAsset(t, assetId));
       if (usedBy.length > 0) return s;
       return {
         project: {
