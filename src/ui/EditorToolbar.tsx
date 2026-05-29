@@ -1,19 +1,29 @@
-import { GridFour, MagnifyingGlassPlus, MagnifyingGlassMinus, CornersOut } from "@phosphor-icons/react";
+import { GridFour, MagnifyingGlassPlus, MagnifyingGlassMinus, CornersOut, MusicNotes } from "@phosphor-icons/react";
 import controls from "./controls.module.css";
 import styles from "./EditorToolbar.module.css";
 import { cx } from "./cx";
 import { useEditorUi } from "../store/editorUi";
 import { useViewport } from "../store/viewport";
+import { useAssetLibrary } from "../store/assetLibrary";
 
 export function EditorToolbar() {
   const sequencerOpen = useEditorUi((s) => s.sequencerOpen);
   const toggleSequencer = useEditorUi((s) => s.toggleSequencer);
   const zoomByAtCenter = useViewport((s) => s.zoomByAtCenter);
   const fitAll = useViewport((s) => s.fitAll);
+  const openManage = useAssetLibrary((s) => s.openManage);
   return (
     <div className={styles.editorToolbar}>
       <button type="button" className={cx(controls.btn, controls.btnGhost, sequencerOpen && styles.isActive)} aria-pressed={sequencerOpen} onClick={toggleSequencer} title="스텝 시퀀서 열기/닫기">
         <GridFour size={15} weight="bold" />시퀀서
+      </button>
+      <button
+        type="button"
+        className={cx(controls.btn, controls.btnGhost)}
+        onClick={openManage}
+        title="샘플 라이브러리 열기"
+      >
+        <MusicNotes size={15} weight="bold" />라이브러리
       </button>
       <span className={styles.editorToolbarSep} />
       <button type="button" className={cx(controls.btn, controls.btnGhost, controls.btnIcon)} onClick={() => zoomByAtCenter(1.4)} title="확대">
