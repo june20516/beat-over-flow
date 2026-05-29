@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Play, Lock, Pencil, Trash, Check, X } from "@phosphor-icons/react";
 import { cx } from "../cx";
 import { NAME_MAX_LENGTH } from "../../domain/assetName";
@@ -31,6 +31,13 @@ export function AssetCard({ asset, mode, isCurrent, onSelect, onRename, onDelete
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(asset.kind === "upload" ? asset.name : "");
 
+  // 동일 인스턴스가 다른 asset을 받을 때 draft가 stale 되지 않도록 동기화.
+  // 편집 중에는 사용자 입력 보존을 위해 동기화하지 않음.
+  const externalName = asset.kind === "upload" ? asset.name : "";
+  useEffect(() => {
+    if (!editing) setDraft(externalName);
+  }, [externalName, editing]);
+
   const clickable = mode === "select";
   const isBuiltin = asset.kind === "builtin";
 
@@ -38,6 +45,16 @@ export function AssetCard({ asset, mode, isCurrent, onSelect, onRename, onDelete
     <div
       className={cx(styles.card, isCurrent && styles.current, clickable && styles.clickable)}
       onClick={clickable ? onSelect : undefined}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelect?.();
+              }
+            }
+          : undefined
+      }
       role={clickable ? "button" : undefined}
       tabIndex={clickable ? 0 : undefined}
       title={asset.kind === "upload" ? asset.name : undefined}

@@ -1,6 +1,5 @@
 import { useRef, useState, type DragEvent, type ChangeEvent, type ReactNode } from "react";
 import { Plus } from "@phosphor-icons/react";
-import { cx } from "../cx";
 import styles from "./AssetUploadDropzone.module.css";
 
 interface Props {
@@ -16,7 +15,12 @@ export function AssetUploadDropzone({ onFiles, children }: Props) {
     e.preventDefault();
     setDragging(true);
   }
-  function onDragLeave() { setDragging(false); }
+  function onDragLeave(e: DragEvent<HTMLDivElement>) {
+    // 자식 요소로 진입할 때 dragLeave가 발화하므로, 진짜 zone 밖으로 나갈 때만 끈다.
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      setDragging(false);
+    }
+  }
   function onDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setDragging(false);
@@ -48,7 +52,7 @@ export function AssetUploadDropzone({ onFiles, children }: Props) {
       </button>
       {children}
       {dragging && (
-        <div className={cx(styles.dropOverlay)}>여기에 드롭하여 업로드</div>
+        <div className={styles.dropOverlay}>여기에 드롭하여 업로드</div>
       )}
     </div>
   );
