@@ -9,13 +9,15 @@ export class YouTubeSource implements BaseFlowSource {
   readonly durationMs: number;
   private readonly clock: InterpolatedClock;
   private playing = false;
+  private offsetMs: number;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private readonly player: YTPlayerLike,
-    private readonly offsetMs: number,
+    offsetMs: number,
     now: () => number = () => performance.now(),
   ) {
+    this.offsetMs = offsetMs;
     this.durationMs = player.getDuration() * 1000;
     this.clock = new InterpolatedClock(now);
     this.clock.sync(player.getCurrentTime() * 1000);
@@ -38,6 +40,11 @@ export class YouTubeSource implements BaseFlowSource {
 
   isPlaying(): boolean {
     return this.playing;
+  }
+
+  /** 마커 타이밍 보정(nudge) 값을 현재 소스에 즉시 반영. */
+  setOffsetMs(ms: number): void {
+    this.offsetMs = ms;
   }
 
   play(): void {

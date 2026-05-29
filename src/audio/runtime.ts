@@ -134,6 +134,11 @@ export function pause(): void {
   useStore.getState().setPlayheadMs(source.currentTimeMs());
 }
 
+/** nudge(offsetMs)를 현재 재생 중인 YouTubeSource에 즉시 반영. 다른 소스면 무시. */
+export function setBaseFlowOffsetMs(ms: number): void {
+  if (source instanceof YouTubeSource) source.setOffsetMs(ms);
+}
+
 export function seek(ms: number): void {
   if (!source) return;
   source.seek(ms);
