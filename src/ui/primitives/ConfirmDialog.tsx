@@ -44,10 +44,12 @@ export function ConfirmDialog({
           type="button"
           className={cx(styles.btn, destructive ? styles.destructive : styles.primary)}
           onClick={() => {
-            onConfirm();
+            // 다이얼로그를 먼저 닫아 Radix가 트리거 요소로 포커스를 복원할 시점에
+            // onConfirm의 동기 unmount(예: 트랙 삭제)가 아직 일어나지 않도록 한다.
             onOpenChange(false);
+            // onConfirm은 다음 마이크로태스크에서 실행 — 포커스 복원이 끝난 뒤 mutation.
+            queueMicrotask(onConfirm);
           }}
-          autoFocus
         >
           {confirmLabel}
         </button>

@@ -96,6 +96,15 @@ export function AssetCard({ asset, mode, isCurrent, onSelect, onRename, onDelete
                 setEditing(false);
               }
             }}
+            onBlur={(e) => {
+              // blur 시점에 확인/취소 버튼으로 포커스가 이동한 경우는 그 핸들러에 위임.
+              const next = e.relatedTarget as HTMLElement | null;
+              if (next && next.closest(`.${styles.editRow}`)) return;
+              // spec: blur = 확정 (Enter와 같은 동작).
+              const trimmed = draft.trim() || asset.name;
+              if (trimmed !== asset.name) onRename?.(trimmed);
+              setEditing(false);
+            }}
             autoFocus
           />
           <button
