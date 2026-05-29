@@ -74,8 +74,11 @@ describe("ProjectRepository", () => {
     expect(copy.tracks[0].markers[0].id).not.toBe("m1");
 
     // baseFlow 자산이 새 id이며 내용은 동일
-    expect(copy.baseFlow.assetId).not.toBe(assetId);
-    expect(await (await getAsset(copy.baseFlow.assetId))!.blob.text()).toBe("base");
+    expect(copy.baseFlow.kind).toBe("audioFile");
+    if (copy.baseFlow.kind === "audioFile") {
+      expect(copy.baseFlow.assetId).not.toBe(assetId);
+      expect(await (await getAsset(copy.baseFlow.assetId))!.blob.text()).toBe("base");
+    }
 
     // upload 사운드 자산도 분리되고 내용 동일
     const copyUpload = copy.tracks[1].sound;
