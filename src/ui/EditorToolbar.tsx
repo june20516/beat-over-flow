@@ -21,6 +21,7 @@ export function EditorToolbar() {
         type="button"
         className={cx(controls.btn, controls.btnGhost)}
         onClick={openManage}
+        aria-haspopup="dialog"
         title="샘플 라이브러리 열기"
       >
         <MusicNotes size={15} weight="bold" />라이브러리
