@@ -34,3 +34,10 @@ export async function deleteAsset(id: string): Promise<void> {
   const db = await getDb();
   await db.delete("assets", id);
 }
+
+export async function renameAsset(id: string, newName: string): Promise<void> {
+  const db = await getDb();
+  const asset = await db.get("assets", id);
+  if (!asset) throw new Error("asset not found: " + id);
+  await db.put("assets", { ...asset, name: newName });
+}

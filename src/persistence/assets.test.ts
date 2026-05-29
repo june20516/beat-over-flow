@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { putAsset, getAsset, copyAsset } from "./assets";
 import { resetDbCache } from "./db";
-// Task 4–6: listAssetsByIds/deleteAsset/renameAsset will be exported from ./assets
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { listAssetsByIds, deleteAsset, renameAsset } from "./assets";
 
 describe("AssetRepository", () => {
@@ -94,5 +92,24 @@ describe("deleteAsset", () => {
 
   it("없는 id를 삭제해도 throw 하지 않는다", async () => {
     await expect(deleteAsset("nope")).resolves.toBeUndefined();
+  });
+});
+
+describe("renameAsset", () => {
+  beforeEach(() => {
+    indexedDB = new IDBFactory();
+    resetDbCache();
+  });
+
+  it("이름만 갱신하고 나머지 필드는 유지한다", async () => {
+    const id = await putAsset(new Blob(["x"]), "old");
+    await renameAsset(id, "new");
+    const got = await getAsset(id);
+    expect(got!.name).toBe("new");
+    expect(await got!.blob.text()).toBe("x");
+  });
+
+  it("없는 id를 rename하면 throw", async () => {
+    await expect(renameAsset("nope", "x")).rejects.toThrow();
   });
 });
