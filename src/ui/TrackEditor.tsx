@@ -45,51 +45,52 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
   } as CSSProperties;
 
   return (
-    <div
-      ref={setNodeRef}
-      className={styles.trackEditor}
-      style={style}
-    >
-      <button
-        type="button"
-        ref={setActivatorNodeRef}
-        className={styles.dragHandle}
-        aria-label={`${track.name} 트랙 순서 이동`}
-        {...attributes}
-        {...listeners}
-      >
-        <DotsSixVertical weight="bold" />
-      </button>
-      <input
-        className={cx(controls.input, styles.name)}
-        value={track.name}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => setTrackName(track.id, e.target.value)}
-      />
-      <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
-      <div className={styles.selectSlot}>
-        <TrackSoundSelect
-          trackId={track.id}
-          sound={track.sound}
-          recentSounds={track.recentSounds}
-          onChange={(next) => selectTrackSound(track.id, next)}
-          onOpenLibrary={() => openSelect(track.id)}
-        />
-      </div>
-      <KeyCap code={track.keyBinding} onCapture={(code) => setTrackKeyBinding(track.id, code)} />
-      <VolumeControl value={track.volume} onChange={(v) => setTrackVolume(track.id, v)} />
-      {focused && (
+    <div ref={setNodeRef} className={cx(styles.trackEditor, focused && styles.focused)} style={style}>
+      <div className={styles.row}>
         <button
           type="button"
-          className={cx(controls.btn, controls.btnIcon)}
-          title="마커 전체 비우기"
-          onClick={(e) => {
-            e.stopPropagation();
-            clearMarkers(track.id);
-          }}
+          ref={setActivatorNodeRef}
+          className={styles.dragHandle}
+          aria-label={`${track.name} 트랙 순서 이동`}
+          {...attributes}
+          {...listeners}
         >
-          <Trash size={14} />
+          <DotsSixVertical weight="bold" />
         </button>
+        <input
+          className={cx(controls.input, styles.name)}
+          value={track.name}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => setTrackName(track.id, e.target.value)}
+        />
+        <StatusGrid value={track.status} onChange={(s) => setTrackStatus(track.id, s)} compact={!focused} />
+        <div className={styles.selectSlot}>
+          <TrackSoundSelect
+            trackId={track.id}
+            sound={track.sound}
+            recentSounds={track.recentSounds}
+            onChange={(next) => selectTrackSound(track.id, next)}
+            onOpenLibrary={() => openSelect(track.id)}
+          />
+        </div>
+        <KeyCap code={track.keyBinding} onCapture={(code) => setTrackKeyBinding(track.id, code)} />
+        <VolumeControl value={track.volume} onChange={(v) => setTrackVolume(track.id, v)} buttonClassName={styles.volumeBtn} />
+      </div>
+      {focused && (
+        <div className={styles.actionRow}>
+          <button
+            type="button"
+            className={cx(controls.btn, styles.actionBtn)}
+            title="마커 전체 비우기"
+            onClick={(e) => {
+              e.stopPropagation();
+              clearMarkers(track.id);
+            }}
+          >
+            <Trash size={14} />
+            <span>마커 비우기</span>
+          </button>
+        </div>
       )}
     </div>
   );

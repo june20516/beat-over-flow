@@ -1,27 +1,53 @@
+/* 트랙 인포 컨테이너. 포커스 시 row + actionRow 2단으로 펼침. */
 .trackEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 4px 10px 4px 8px;
+  border-left: 4px solid var(--track-color, var(--purple));
+  justify-content: center;
+}
+
+/* 주 컨트롤 한 줄 — 모든 트랙에서 동일한 폭/정렬 유지. */
+.row {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 100%;
-  padding: 0 10px 0 8px;
-  border-left: 4px solid var(--track-color, var(--purple));
 }
+
+/* 포커스 전용 액션 줄 — Trash, 향후 액션 슬롯이 여기에 들어간다. */
+.actionRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+/* row 내부 인터랙티브 요소를 32px 높이로 통일 — StatusGrid는 자체 grid라 예외. */
+.row > .name,
+.row > .selectSlot,
+.row :global(.keycap) {
+  height: 32px;
+}
+
 .name {
-  width: 52px;
+  width: 56px;
   flex: none;
   padding: 5px 6px;
   font-size: 12px;
 }
+
 .selectSlot {
-  /* 트랙 인포 영역(384px) 안에서 남은 여백을 샘플 라벨에 할당.
-     포커스 상태에서 추가되는 Trash(controls.btnIcon = 40px)까지 고려해 결정.
-     계산: padding 18 + dragHandle 22 + name 52 + StatusGrid 38 + KeyCap ~36
-           + Volume ~32 + Trash 40 + gaps(7×6) 42 = 280px → 384 - 280 = 104px 여유.
-     안전 마진 4px 두고 100px 고정. */
+  /* 포커스 시 Trash가 actionRow로 빠지므로 row 1에 충분한 여유. */
   flex: none;
-  width: 100px;
+  width: 140px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
 }
+
 .dragHandle {
   cursor: grab;
   background: none;
@@ -34,4 +60,20 @@
 }
 .dragHandle:active {
   cursor: grabbing;
+}
+
+/* VolumeControl trigger — 트랙 행 내에서 32×32px로 정렬. controls.btnIcon(40)을 덮어쓴다. */
+.volumeBtn {
+  width: 32px;
+  height: 32px;
+}
+
+/* actionRow 내부 버튼 — 32px 높이, 라벨 동반. */
+.actionBtn {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }

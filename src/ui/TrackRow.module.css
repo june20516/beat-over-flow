@@ -21,7 +21,9 @@
   background: rgba(255, 255, 255, 0.03);
 }
 .focused {
-  height: 88px; /* 포커스 확장 */
+  /* 트랙 인포 영역의 2단(주 컨트롤 row + actionRow)을 담을 수 있는 높이.
+     row 32 + gap 6 + actionRow 32 + padding 8 ≈ 80px → 여유 +12 = 92px. */
+  height: 92px;
   background: rgba(255, 255, 255, 0.04);
 }
 
