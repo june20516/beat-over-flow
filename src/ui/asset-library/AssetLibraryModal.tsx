@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CaretRight, CaretDown } from "@phosphor-icons/react";
 import { Modal } from "../primitives/Modal";
 import { AssetCard } from "./AssetCard";
@@ -46,13 +46,16 @@ export function AssetLibraryModal() {
   const [deleteWarn, setDeleteWarn] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(readBuiltinsCollapsed());
 
-  const ids = useMemo(() => project?.libraryAssetIds ?? [], [project]);
-
+  // idsKey로 의존성을 안정화 — 프로젝트 객체가 바뀌어도 libraryAssetIds 내용이
+  // 동일하면 effect/콜백이 재실행되지 않는다(불필요한 IDB 호출 방지).
+  const ids = project?.libraryAssetIds ?? [];
+  const idsKey = ids.join("|");
   const refetch = useCallback(async () => {
-    const xs = await listAssetsByIds(ids);
+    const currentIds = idsKey ? idsKey.split("|") : [];
+    const xs = await listAssetsByIds(currentIds);
     xs.sort((a, b) => b.createdAt - a.createdAt);
     setUploads(xs);
-  }, [ids]);
+  }, [idsKey]);
 
   useEffect(() => {
     if (open) {
@@ -84,7 +87,9 @@ export function AssetLibraryModal() {
   }
 
   function handleRename(assetId: string, newName: string) {
-    void renameAsset(assetId, newName).then(refetch);
+    void renameAsset(assetId, newName)
+      .then(refetch)
+      .catch((e) => console.error("[AssetLibrary] renameAsset failed", e));
   }
 
   function handleDelete(asset: StoredAsset) {
@@ -96,7 +101,9 @@ export function AssetLibraryModal() {
       return;
     }
     removeAssetFromLibrary(asset.id);
-    void deleteAsset(asset.id).then(refetch);
+    void deleteAsset(asset.id)
+      .then(refetch)
+      .catch((e) => console.error("[AssetLibrary] deleteAsset failed", e));
   }
 
   function handleSelect(sound: SoundRef) {
@@ -141,6 +148,8 @@ export function AssetLibraryModal() {
                 {uploads.map((a) => (
                   <AssetCard
                     key={a.id}
+                    // TODO: durationMs는 StoredAsset에 영속되면 a.durationMs로 교체.
+                    // 지금은 카드에 0.0s로 표시됨 — UX 한계로 인지.
                     asset={{ kind: "upload", id: a.id, name: a.name, durationMs: 0, createdAt: a.createdAt }}
                     mode={mode}
                     isCurrent={

@@ -9,8 +9,9 @@
   background: transparent;
   border: 0;
   padding: 6px 0;
-  cursor: pointer;
 }
+/* button 엘리먼트로 쓰일 때만 클릭 가능 표시. <header>는 default 커서 유지. */
+button.sectionHeader { cursor: pointer; }
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

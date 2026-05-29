@@ -28,9 +28,12 @@ export async function previewSound(ref: SoundRef): Promise<void> {
   // 이 경로를 쓰면 마스터 볼륨·뮤트가 미리듣기에도 적용된다.
   source.connect(engine.masterGain);
   source.start();
-  activePreview = { source };
+  // 캡처된 참조와 현재 활성 참조를 비교해, 이미 다른 소스로 교체된 뒤
+  // 늦게 발화하는 onended가 새 소스 슬롯을 null로 덮어쓰지 않게 한다.
+  const captured = { source };
+  activePreview = captured;
   source.onended = () => {
-    activePreview = null;
+    if (activePreview === captured) activePreview = null;
   };
 }
 
