@@ -74,16 +74,22 @@ export function AssetLibraryModal() {
     setFailures([]);
     const { show, setProgress, hide } = useLoadingOverlay.getState();
     show({ mode: "determinate", label: "업로드 중..." });
-    const { newAssetIds, failures: fs } = await uploadAssets(
-      files,
-      ids,
-      makeDecoder(),
-      ({ current, total }) => setProgress(current / total),
-    );
-    hide();
-    for (const id of newAssetIds) addAssetToLibrary(id);
-    setFailures(fs);
-    await refetch();
+    try {
+      // 항상 최신 libraryAssetIds로 collision check — 렌더 시점의 stale closure 회피.
+      const currentIds = useStore.getState().project?.libraryAssetIds ?? [];
+      const { newAssetIds, failures: fs } = await uploadAssets(
+        files,
+        currentIds,
+        makeDecoder(),
+        ({ current, total }) => setProgress(current / total),
+      );
+      for (const id of newAssetIds) addAssetToLibrary(id);
+      setFailures(fs);
+      // refetch는 호출하지 않는다 — idsKey 변경이 effect를 자동 재실행하여
+      // 항상 새 libraryAssetIds로 listAssetsByIds를 부른다.
+    } finally {
+      hide();
+    }
   }
 
   function handleRename(assetId: string, newName: string) {
@@ -92,7 +98,7 @@ export function AssetLibraryModal() {
       .catch((e) => console.error("[AssetLibrary] renameAsset failed", e));
   }
 
-  function handleDelete(asset: StoredAsset) {
+  async function handleDelete(asset: StoredAsset) {
     const guard = canDeleteAsset(asset.id);
     if (!guard.ok) {
       setDeleteWarn(
@@ -100,10 +106,14 @@ export function AssetLibraryModal() {
       );
       return;
     }
-    removeAssetFromLibrary(asset.id);
-    void deleteAsset(asset.id)
-      .then(refetch)
-      .catch((e) => console.error("[AssetLibrary] deleteAsset failed", e));
+    // IDB 먼저 → 성공 시 store 갱신. 실패 시 store는 그대로 유지되어 orphan blob을 만들지 않는다.
+    try {
+      await deleteAsset(asset.id);
+      removeAssetFromLibrary(asset.id);
+    } catch (e) {
+      console.error("[AssetLibrary] deleteAsset failed", e);
+      setDeleteWarn(`삭제에 실패했습니다: ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
 
   function handleSelect(sound: SoundRef) {
@@ -121,7 +131,7 @@ export function AssetLibraryModal() {
               <div className={styles.errorTitle}>⚠ {failures.length}개 파일을 추가하지 못했습니다.</div>
               <ul className={styles.errorList}>
                 {failures.map((f, i) => (
-                  <li key={i}>
+                  <li key={`${f.fileName}:${i}`}>
                     <code>{f.fileName}</code> — {reasonText(f.reason, f.detail)}
                   </li>
                 ))}
@@ -140,11 +150,9 @@ export function AssetLibraryModal() {
             <header className={styles.sectionHeader}>
               <CaretDown size={12} weight="bold" />
               <span>내 샘플 ({uploads.length})</span>
-              {mode === "manage" || mode === "select" ? (
-                <span className={styles.sectionAction}>
-                  <AssetUploadButton onFiles={handleFiles} />
-                </span>
-              ) : null}
+              <span className={styles.sectionAction}>
+                <AssetUploadButton onFiles={handleFiles} />
+              </span>
             </header>
             {uploads.length === 0 ? (
               <div className={styles.emptyHint}>업로드된 샘플이 없습니다. [업로드]를 누르거나 파일을 끌어다 놓으세요.</div>
@@ -206,10 +214,10 @@ export function AssetLibraryModal() {
             )}
           </section>
         </Modal.Body>
+        <Modal.Footer>
+          <button type="button" className={styles.closeBtn} onClick={close}>닫기</button>
+        </Modal.Footer>
       </AssetUploadDropzone>
-      <Modal.Footer>
-        <button type="button" className={styles.closeBtn} onClick={close}>닫기</button>
-      </Modal.Footer>
     </Modal>
   );
 }
