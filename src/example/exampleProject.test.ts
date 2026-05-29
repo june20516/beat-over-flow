@@ -31,4 +31,17 @@ describe("buildProjectFromBlueprint", () => {
     expect(a.id).not.toBe(b.id);
     expect(a.tracks[0].id).not.toBe(b.tracks[0].id);
   });
+
+  it("각 트랙은 recentSounds 6개를 가진다 (현재 sound가 [0])", () => {
+    const p = buildProjectFromBlueprint(EXAMPLE_BLUEPRINT, "asset-1", 136032);
+    for (const t of p.tracks) {
+      expect(t.recentSounds.length).toBe(6);
+      expect(JSON.stringify(t.recentSounds[0])).toBe(JSON.stringify(t.sound));
+    }
+  });
+
+  it("libraryAssetIds는 빈 배열 (예제는 빌트인만 사용)", () => {
+    const p = buildProjectFromBlueprint(EXAMPLE_BLUEPRINT, "asset-1", 136032);
+    expect(p.libraryAssetIds).toEqual([]);
+  });
 });

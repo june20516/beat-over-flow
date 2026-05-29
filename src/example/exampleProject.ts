@@ -2,6 +2,7 @@ import type { Project, SoundRef, Track, TrackStatus } from "../types";
 import { newId } from "../domain/ids";
 import { PALETTE } from "../domain/palette";
 import { EXAMPLE_TRACK_MARKERS, EXAMPLE_DURATION_MS } from "./exampleData.generated";
+import { seedRecentSounds } from "../domain/recentSounds";
 
 export interface ExampleTrackBlueprint {
   name: string;
@@ -60,6 +61,7 @@ export function buildProjectFromBlueprint(
     markers: t.markersMs.map((timeMs) => ({ id: newId(), timeMs })),
     volume: t.volume,
     color: t.color,
+    recentSounds: seedRecentSounds(t.sound),
   }));
   return {
     id: newId(),
@@ -70,5 +72,6 @@ export function buildProjectFromBlueprint(
     tracks,
     master: { volume: blueprint.master.volume },
     transport: { playPauseKey: null },
+    libraryAssetIds: [],
   };
 }
