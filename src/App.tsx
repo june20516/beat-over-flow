@@ -9,6 +9,7 @@ import { usePathname, matchRoute, navigate } from "./router/router";
 import { useStore } from "./store/useStore";
 import { loadProject } from "./persistence/projects";
 import { startAutosave } from "./store/autosave";
+import { LoadingOverlay } from "./ui/primitives/LoadingOverlay";
 
 function EditorRoute({ projectId }: { projectId: string }) {
   const setProject = useStore((s) => s.setProject);
@@ -58,16 +59,23 @@ export function App() {
     return stop;
   }, []);
 
-  switch (route.kind) {
-    case "home":
-      return <Home />;
-    case "projectList":
-      return <ProjectList onOpen={(project) => navigate(`/edit/${project.id}`)} />;
-    case "editor":
-      return <EditorRoute key={route.projectId} projectId={route.projectId} />;
-    case "play":
-      return <PlayPlaceholder />;
-    case "notFound":
-      return <NotFound />;
-  }
+  return (
+    <>
+      {(() => {
+        switch (route.kind) {
+          case "home":
+            return <Home />;
+          case "projectList":
+            return <ProjectList onOpen={(project) => navigate(`/edit/${project.id}`)} />;
+          case "editor":
+            return <EditorRoute key={route.projectId} projectId={route.projectId} />;
+          case "play":
+            return <PlayPlaceholder />;
+          case "notFound":
+            return <NotFound />;
+        }
+      })()}
+      <LoadingOverlay />
+    </>
+  );
 }
