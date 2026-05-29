@@ -2,13 +2,16 @@ import { useRef, useState, type DragEvent, type ChangeEvent, type ReactNode } fr
 import { Plus } from "@phosphor-icons/react";
 import styles from "./AssetUploadDropzone.module.css";
 
-interface Props {
+interface ZoneProps {
   onFiles(files: File[]): void;
   children: ReactNode;
 }
 
-export function AssetUploadDropzone({ onFiles, children }: Props) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+/**
+ * 영역 위에 파일을 드롭하면 onFiles를 호출한다. 자체 버튼은 노출하지 않는다 —
+ * "업로드" 버튼은 호출자가 원하는 위치(예: 섹션 헤더 우측)에 <AssetUploadButton>로 배치한다.
+ */
+export function AssetUploadDropzone({ onFiles, children }: ZoneProps) {
   const [dragging, setDragging] = useState(false);
 
   function onDragOver(e: DragEvent<HTMLDivElement>) {
@@ -27,6 +30,23 @@ export function AssetUploadDropzone({ onFiles, children }: Props) {
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) onFiles(files);
   }
+
+  return (
+    <div className={styles.zone} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+      {children}
+      {dragging && <div className={styles.dropOverlay}>여기에 드롭하여 업로드</div>}
+    </div>
+  );
+}
+
+interface ButtonProps {
+  onFiles(files: File[]): void;
+}
+
+/** 파일 선택 다이얼로그 트리거 버튼. <AssetUploadDropzone>과 동일 onFiles 핸들러를 공유한다. */
+export function AssetUploadButton({ onFiles }: ButtonProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   function onChange(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (files.length > 0) onFiles(files);
@@ -34,26 +54,15 @@ export function AssetUploadDropzone({ onFiles, children }: Props) {
   }
 
   return (
-    <div className={styles.zone} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="audio/*"
-        multiple
-        hidden
-        onChange={onChange}
-      />
+    <>
+      <input ref={inputRef} type="file" accept="audio/*" multiple hidden onChange={onChange} />
       <button
         type="button"
         className={styles.uploadBtn}
         onClick={() => inputRef.current?.click()}
       >
-        <Plus size={14} weight="bold" /> 업로드
+        <Plus size={12} weight="bold" /> 업로드
       </button>
-      {children}
-      {dragging && (
-        <div className={styles.dropOverlay}>여기에 드롭하여 업로드</div>
-      )}
-    </div>
+    </>
   );
 }

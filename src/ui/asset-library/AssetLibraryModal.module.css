@@ -1,17 +1,26 @@
 .section { margin-top: 16px; }
 .sectionHeader {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   font-size: 13px;
   font-weight: 700;
   color: #d8cffc;
   background: transparent;
   border: 0;
   padding: 6px 0;
+  text-align: left;
 }
 /* button 엘리먼트로 쓰일 때만 클릭 가능 표시. <header>는 default 커서 유지. */
 button.sectionHeader { cursor: pointer; }
+
+/* 헤더 우측 액션 슬롯 — 업로드 버튼 등. */
+.sectionAction {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

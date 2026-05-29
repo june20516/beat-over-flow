@@ -22,9 +22,9 @@ export function EditorToolbar() {
         className={cx(controls.btn, controls.btnGhost)}
         onClick={openManage}
         aria-haspopup="dialog"
-        title="샘플 라이브러리 열기"
+        title="샘플 보기 / 관리"
       >
-        <MusicNotes size={15} weight="bold" />라이브러리
+        <MusicNotes size={15} weight="bold" />샘플
       </button>
       <span className={styles.editorToolbarSep} />
       <button type="button" className={cx(controls.btn, controls.btnGhost, controls.btnIcon)} onClick={() => zoomByAtCenter(1.4)} title="확대">

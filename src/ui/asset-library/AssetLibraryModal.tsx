@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CaretRight, CaretDown } from "@phosphor-icons/react";
 import { Modal } from "../primitives/Modal";
 import { AssetCard } from "./AssetCard";
-import { AssetUploadDropzone } from "./AssetUploadDropzone";
+import { AssetUploadDropzone, AssetUploadButton } from "./AssetUploadDropzone";
 import { uploadAssets, type UploadFailure, type UploadFailureReason } from "./uploadAssets";
 import { makeDecoder } from "./useAudioDecoder";
 import { listAssetsByIds, deleteAsset, renameAsset } from "../../persistence/assets";
@@ -113,7 +113,7 @@ export function AssetLibraryModal() {
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => (o ? null : close())} title="샘플 라이브러리" size="lg">
+    <Modal open={open} onOpenChange={(o) => (o ? null : close())} title="샘플" size="lg">
       <AssetUploadDropzone onFiles={handleFiles}>
         <Modal.Body>
           {failures.length > 0 && (
@@ -139,10 +139,15 @@ export function AssetLibraryModal() {
           <section className={styles.section}>
             <header className={styles.sectionHeader}>
               <CaretDown size={12} weight="bold" />
-              <span>내 에셋 ({uploads.length})</span>
+              <span>내 샘플 ({uploads.length})</span>
+              {mode === "manage" || mode === "select" ? (
+                <span className={styles.sectionAction}>
+                  <AssetUploadButton onFiles={handleFiles} />
+                </span>
+              ) : null}
             </header>
             {uploads.length === 0 ? (
-              <div className={styles.emptyHint}>업로드된 에셋이 없습니다. 위 [업로드] 또는 파일을 끌어다 놓으세요.</div>
+              <div className={styles.emptyHint}>업로드된 샘플이 없습니다. [업로드]를 누르거나 파일을 끌어다 놓으세요.</div>
             ) : (
               <div className={styles.grid}>
                 {uploads.map((a) => (
@@ -179,7 +184,7 @@ export function AssetLibraryModal() {
               aria-expanded={!collapsed}
             >
               {collapsed ? <CaretRight size={12} weight="bold" /> : <CaretDown size={12} weight="bold" />}
-              <span>빌트인 샘플 ({BUILTIN_SAMPLES.length})</span>
+              <span>빌트인 ({BUILTIN_SAMPLES.length})</span>
             </button>
             {!collapsed && (
               <div className={styles.grid}>

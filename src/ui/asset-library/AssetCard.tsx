@@ -59,6 +59,9 @@ export function AssetCard({ asset, mode, isCurrent, onSelect, onRename, onDelete
       tabIndex={clickable ? 0 : undefined}
       title={asset.kind === "upload" ? asset.name : undefined}
     >
+      {isBuiltin && (
+        <Lock className={styles.lockBadge} size={10} weight="bold" aria-label="빌트인 — 삭제·이름변경 불가" />
+      )}
       <button
         type="button"
         className={styles.previewBtn}
@@ -73,10 +76,8 @@ export function AssetCard({ asset, mode, isCurrent, onSelect, onRename, onDelete
 
       {isBuiltin ? (
         <div className={styles.meta}>
-          <div className={styles.name}>
-            <Lock size={12} weight="bold" /> {asset.label}
-          </div>
-          <div className={styles.sub}>builtin</div>
+          <div className={styles.name}>{asset.label}</div>
+          <div className={styles.sub}>빌트인</div>
         </div>
       ) : editing ? (
         <div className={styles.editRow} onClick={(e) => e.stopPropagation()}>
