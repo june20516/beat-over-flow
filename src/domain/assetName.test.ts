@@ -19,6 +19,13 @@ describe("normalizeAssetName", () => {
   it("점이 여러 개여도 마지막 점 이후만 확장자로 본다", () => {
     expect(normalizeAssetName("my.cool.sample.mp3")).toBe("my.cool.sample");
   });
+
+  it("선행 점만 있는 이름은 확장자로 보지 않는다", () => {
+    // 의도: ".hidden"은 Unix 숨김 파일 관례상 이름이고,
+    // ".wav"는 사용자 입력으로 잘 안 나오는 경계이므로 안전 측으로 그대로 둔다.
+    expect(normalizeAssetName(".hidden")).toBe(".hidden");
+    expect(normalizeAssetName(".wav")).toBe(".wav");
+  });
 });
 
 describe("resolveNameCollision", () => {
@@ -40,5 +47,14 @@ describe("resolveNameCollision", () => {
     const result = resolveNameCollision(base, [base]);
     expect(result.length).toBeLessThanOrEqual(NAME_MAX_LENGTH);
     expect(result.endsWith(" (2)")).toBe(true);
+  });
+
+  it("1000회 이상 충돌은 호출 측 버그 — throw", () => {
+    const existing = ["kick"];
+    for (let n = 2; n < 1000; n++) {
+      const suffix = ` (${n})`;
+      existing.push("kick".slice(0, Math.max(0, NAME_MAX_LENGTH - suffix.length)) + suffix);
+    }
+    expect(() => resolveNameCollision("kick", existing)).toThrow(/1000회/);
   });
 });

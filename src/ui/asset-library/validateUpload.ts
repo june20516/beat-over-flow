@@ -14,6 +14,8 @@ export type ValidateResult =
     };
 
 export async function validateUpload(file: File, decode: DecodeFn): Promise<ValidateResult> {
+  // 클라이언트 사용자 의도 검사일 뿐 보안 검사가 아님 — file.type은 브라우저가 확장자로 추정함.
+  // 본 프로젝트는 서버 업로드가 없어 충분하나, 향후 업로드 경로가 추가되면 서버측 재검증 필요.
   if (!file.type.startsWith("audio/")) {
     return { ok: false, reason: "not-audio", detail: file.type || "unknown" };
   }

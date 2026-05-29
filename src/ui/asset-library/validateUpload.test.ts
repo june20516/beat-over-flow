@@ -26,6 +26,12 @@ describe("validateUpload", () => {
     if (!r.ok) expect(r.reason).toBe("too-large");
   });
 
+  it("정확히 MAX_BYTES는 통과 (경계값)", async () => {
+    const f = mkFile("edge.wav", MAX_BYTES, "audio/wav");
+    const r = await validateUpload(f, okDecode);
+    expect(r.ok).toBe(true);
+  });
+
   it("decode 실패는 decode-failed", async () => {
     const f = mkFile("a.wav", 100, "audio/wav");
     const r = await validateUpload(f, failDecode);
