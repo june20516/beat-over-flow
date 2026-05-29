@@ -285,19 +285,19 @@ import { DEFAULT_BASE_FLOW_VIEW } from "../domain/baseFlowView";
 
 ```ts
   it("baseFlowView 누락 시 기본값(mini/0.5)으로 채운다", async () => {
-    const id = newId();
+    const db = await getDb();
     const legacy = {
-      id, name: "t", createdAt: 0, updatedAt: 0,
+      id: "p-bfv", name: "t", createdAt: 0, updatedAt: 0,
       baseFlow: { kind: "audioFile", assetId: "a1", durationMs: 1000 },
       tracks: [], master: { volume: 1 }, libraryAssetIds: [],
     } as unknown as Project;
-    await saveProject(legacy);
-    const loaded = await loadProject(id);
+    await db.put("projects", legacy);
+    const loaded = await loadProject("p-bfv");
     expect(loaded?.baseFlowView).toEqual({ layout: "mini", ambientIntensity: 0.5 });
   });
 ```
 
-> 참고: 기존 마이그레이션 테스트 상단은 `fake-indexeddb/auto` import 패턴을 따른다. 새 케이스도 동일 `describe`에 두면 같은 셋업을 공유한다.
+> 참고: 이 케이스는 기존 `describe("project load normalize")` 블록 **안**에 추가한다. 그 블록의 `beforeEach`가 `indexedDB = new IDBFactory(); resetDbCache();`로 DB를 초기화하고, `getDb`/`loadProject`는 이미 import되어 있다(`newId` import는 불필요).
 
 - [ ] **Step 8: 테스트 통과 확인**
 
@@ -1156,10 +1156,10 @@ git commit -m "feat(ui): YouTubePlayer host with mini/ambient layout"
 
 **Files:**
 - Create: `src/ui/ProgressBarLane.tsx`
-- Modify: `src/ui/Timeline.tsx:10-15,29-30` (props + BaseFlowLane 렌더 분기)
-- Modify: `src/ui/TrackLane.tsx:12` (마커 클립)
+- Modify: `src/ui/Timeline.tsx:30-33,37,136` (props + BaseFlowLane 렌더 분기)
+- Modify: `src/ui/MarkerLane.tsx:21` (마커 클립)
 
-> 확인된 구조: `Timeline`(15줄)이 `BaseFlowLane`을 30줄에서 렌더하고, 마커는 트랙별 `TrackLane`(`src/ui/TrackLane.tsx:12` `const markers = track.markers`)에서 `MarkerView`로 그린다.
+> 확인된 구조: `Timeline`이 `BaseFlowLane`을 136번 줄에서 렌더한다. 마커는 트랙별 `MarkerLane`(`src/ui/MarkerLane.tsx:21` `const markers = track.markers`, `durationMs`는 20번 줄에서 `useViewport((s) => s.durationMs)`로 이미 보유)에서 `MarkerView`로 그린다.
 
 - [ ] **Step 1: ProgressBarLane 작성**
 
@@ -1236,7 +1236,7 @@ interface TimelineProps {
 
 함수 시그니처도 `export function Timeline({ peaks, durationMs, baseFlowKind }: TimelineProps)`로 수정.
 
-30번 줄의 `<BaseFlowLane peaks={peaks} durationMs={durationMs} />`를 분기로 교체:
+136번 줄의 `<BaseFlowLane peaks={peaks} durationMs={durationMs} />`를 분기로 교체:
 
 ```tsx
       {baseFlowKind === "youtube"
@@ -1248,15 +1248,15 @@ import 추가: `import { ProgressBarLane } from "./ProgressBarLane";`
 
 (Editor가 `Timeline`에 `baseFlowKind={project.baseFlow.kind}`를 넘기는 부분은 Task 12 Step 3에서 처리.)
 
-- [ ] **Step 3: TrackLane 마커 렌더에 클립 적용**
+- [ ] **Step 3: MarkerLane 마커 렌더에 클립 적용**
 
-`src/ui/TrackLane.tsx`의 12번 줄:
+`src/ui/MarkerLane.tsx`의 21번 줄:
 
 ```ts
   const markers = track.markers;
 ```
 
-를 교체:
+를 교체(`durationMs`는 20번 줄에서 이미 `useViewport`로 보유):
 
 ```ts
   const markers = clipMarkersForDisplay(track.markers, durationMs);
@@ -1264,7 +1264,7 @@ import 추가: `import { ProgressBarLane } from "./ProgressBarLane";`
 
 import 추가: `import { clipMarkersForDisplay } from "../domain/markerClip";`
 
-> 표시(렌더) 경로에만 적용한다. 편집(store 액션)·스케줄(`runtime.ts`/`Scheduler.ts`)은 원본 `track.markers`를 그대로 쓰므로 데이터는 보존된다.
+> 표시(렌더) 경로에만 적용한다. 편집(store 액션)·스케줄(`runtime.ts`/`Scheduler.ts`의 `markersInWindow`)은 원본 `track.markers`를 그대로 쓰므로 데이터는 보존된다. viewport의 `durationMs`는 Timeline의 `setDuration(durationMs)` effect로 갱신되어 유튜브 길이 write-back 후 자동 반영된다.
 
 - [ ] **Step 4: 타입체크 + 기존 테스트 회귀**
 
