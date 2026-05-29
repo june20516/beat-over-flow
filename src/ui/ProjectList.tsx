@@ -10,6 +10,7 @@ import { getEngine } from "../audio/runtime";
 import { useStore } from "../store/useStore";
 import { useLoadingOverlay } from "../store/loadingOverlay";
 import { newId } from "../domain/ids";
+import { normalizeAssetName } from "../domain/assetName";
 import { buildProjectFromBlueprint, EXAMPLE_BLUEPRINT } from "../example/exampleProject";
 import type { Project } from "../types";
 
@@ -36,10 +37,12 @@ export function ProjectList({ onOpen }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     const buffer = await getEngine().decode(file);
-    const assetId = await putAsset(file, file.name);
+    // 다른 업로드 경로(uploadAssets)와 동일하게 확장자 제거 + 32자 컷.
+    const cleanName = normalizeAssetName(file.name);
+    const assetId = await putAsset(file, cleanName);
     const project: Project = {
       id: newId(),
-      name: file.name.replace(/\.[^.]+$/, ""),
+      name: cleanName,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       baseFlow: { kind: "audioFile", assetId, durationMs: buffer.duration * 1000 },
@@ -69,6 +72,9 @@ export function ProjectList({ onOpen }: Props) {
       await saveProject(project);
       setProject(project);
       onOpen(project);
+    } catch (e) {
+      console.error("[ProjectList] createExample failed", e);
+      alert(`예제 프로젝트 준비에 실패했습니다: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       hide();
     }
@@ -82,6 +88,9 @@ export function ProjectList({ onOpen }: Props) {
       await duplicateProject(p);
       setProgress(1);
       await refresh();
+    } catch (e) {
+      console.error("[ProjectList] duplicateProject failed", e);
+      alert(`복사에 실패했습니다: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       hide();
     }

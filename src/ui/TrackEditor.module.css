@@ -26,7 +26,8 @@
 /* 좌우 정렬용 spacer. */
 .actionSpacer { flex: 1; }
 
-/* row 내부 인터랙티브 요소를 32px 높이로 통일 — StatusGrid는 자체 grid라 예외. */
+/* row 내부 인터랙티브 요소를 32px 높이로 통일.
+   StatusBadge는 자체 모듈(.badge)에서 32×32px로 명시하므로 여기엔 포함하지 않는다. */
 .row > .name,
 .row > .selectSlot,
 .row :global(.keycap) {
