@@ -13,10 +13,13 @@
   font-size: 12px;
 }
 .selectSlot {
-  /* 트랙 인포 영역(384px) 안에서 남은 여백을 샘플 라벨에 더 할당.
-     포커스 상태에서 Trash가 추가돼도 여유가 남는 폭으로 고정. */
+  /* 트랙 인포 영역(384px) 안에서 남은 여백을 샘플 라벨에 할당.
+     포커스 상태에서 추가되는 Trash(controls.btnIcon = 40px)까지 고려해 결정.
+     계산: padding 18 + dragHandle 22 + name 52 + StatusGrid 38 + KeyCap ~36
+           + Volume ~32 + Trash 40 + gaps(7×6) 42 = 280px → 384 - 280 = 104px 여유.
+     안전 마진 4px 두고 100px 고정. */
   flex: none;
-  width: 130px;
+  width: 100px;
   overflow: hidden;
 }
 .dragHandle {
