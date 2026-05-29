@@ -10,6 +10,7 @@ import { useStore } from "./store/useStore";
 import { loadProject } from "./persistence/projects";
 import { startAutosave } from "./store/autosave";
 import { LoadingOverlay } from "./ui/primitives/LoadingOverlay";
+import { AssetLibraryModal } from "./ui/asset-library/AssetLibraryModal";
 
 function EditorRoute({ projectId }: { projectId: string }) {
   const setProject = useStore((s) => s.setProject);
@@ -75,6 +76,7 @@ export function App() {
             return <NotFound />;
         }
       })()}
+      <AssetLibraryModal />
       <LoadingOverlay />
     </>
   );
