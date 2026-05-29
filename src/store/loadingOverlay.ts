@@ -5,7 +5,8 @@ export type OverlayMode = "indeterminate" | "determinate";
 interface LoadingOverlayState {
   open: boolean;
   mode: OverlayMode;
-  progress?: number; // 0..1
+  /** 0..1. undefined = "값 없음"(indeterminate 모드). 0과 의도적으로 구분한다. */
+  progress?: number;
   label?: string;
   show: (opts: { mode: OverlayMode; label?: string }) => void;
   setProgress: (p: number) => void;
@@ -23,6 +24,7 @@ export const useLoadingOverlay = create<LoadingOverlayState>((set) => ({
   label: undefined,
   show: ({ mode, label }) =>
     set({ open: true, mode, label, progress: mode === "determinate" ? 0 : undefined }),
-  setProgress: (p) => set({ progress: clamp01(p) }),
+  // indeterminate 모드에선 progress를 무시 — "값 없음" 불변량 유지.
+  setProgress: (p) => set((s) => (s.mode === "determinate" ? { progress: clamp01(p) } : {})),
   hide: () => set({ open: false, progress: undefined, label: undefined }),
 }));

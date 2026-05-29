@@ -22,6 +22,12 @@ describe("loadingOverlay", () => {
     expect(useLoadingOverlay.getState().progress).toBe(0);
   });
 
+  it("indeterminate 모드에선 setProgress가 무시된다", () => {
+    useLoadingOverlay.getState().show({ mode: "indeterminate" });
+    useLoadingOverlay.getState().setProgress(0.7);
+    expect(useLoadingOverlay.getState().progress).toBeUndefined();
+  });
+
   it("hide는 open=false로 리셋", () => {
     useLoadingOverlay.getState().show({ mode: "indeterminate" });
     useLoadingOverlay.getState().hide();

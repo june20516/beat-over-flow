@@ -20,7 +20,7 @@ export function Modal({ open, onOpenChange, title, description, size = "md", chi
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
-        <Dialog.Content className={cx(styles.content, styles[`size_${size}`])} role="dialog">
+        <Dialog.Content className={cx(styles.content, styles[`size_${size}`])}>
           <header className={styles.header}>
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
             <Dialog.Close className={styles.closeBtn} aria-label="닫기">
