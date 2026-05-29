@@ -68,10 +68,7 @@
   box-shadow: var(--shadow);
   transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
-.card:focus-visible {
-  outline: 2px solid var(--accent, currentColor);
-  outline-offset: 2px;
-}
+/* .card:focus-visible는 base.css 글로벌 룰(primary 방사형 글로우)을 사용한다. */
 .open {
   font-family: var(--font-display);
   font-size: 18px;

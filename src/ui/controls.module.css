@@ -31,10 +31,7 @@
 .btn:active {
   transform: translateY(1px);
 }
-.btn:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 2px;
-}
+/* .btn:focus-visible는 base.css의 글로벌 룰(primary 방사형 글로우)을 사용한다. */
 
 .btnPrimary {
   background: var(--grad);
