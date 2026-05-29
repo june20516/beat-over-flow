@@ -4,6 +4,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  /* 디자인 시스템 디폴트: 버튼 라벨은 한 줄, flex 압력에도 짜부 X.
+     overflow는 호출자가 라벨에 ellipsis 적용해 점진 손상으로 처리. */
+  white-space: nowrap;
+  flex-shrink: 0;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;

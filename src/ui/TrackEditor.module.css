@@ -69,13 +69,17 @@
   height: 32px;
 }
 
-/* actionRow 내부 버튼 — 32px 높이, 라벨 동반. */
+/* actionRow 내부 버튼 — 32px 높이, 라벨 동반. controls.btn이 nowrap을 보장하지만
+   actionBtn은 controls.btn 없이 단독으로 쓰이는 경우(destructive)도 있어 명시. */
 .actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
   height: 32px;
   padding: 0 10px;
   font-size: 12px;
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
 }
 

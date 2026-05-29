@@ -87,14 +87,14 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
           <button
             type="button"
             className={cx(controls.btn, styles.actionBtn)}
-            title="마커 전체 비우기"
+            title="이 트랙의 마커 전체 비우기"
             onClick={(e) => {
               e.stopPropagation();
               clearMarkers(track.id);
             }}
           >
             <Trash size={14} />
-            <span>마커 비우기</span>
+            <span>비우기</span>
           </button>
           <button
             type="button"
@@ -106,7 +106,7 @@ export function TrackEditor({ track, focused }: TrackEditorProps) {
             }}
           >
             <X size={14} weight="bold" />
-            <span>트랙 삭제</span>
+            <span>삭제</span>
           </button>
         </div>
       )}
