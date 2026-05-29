@@ -46,6 +46,14 @@ export async function deleteProject(id: string): Promise<void> {
   await db.delete("projects", id);
 }
 
+/**
+ * 프로젝트를 깊은 복사. `idMap`으로 동일 assetId가 여러 위치에 나타나도 copyAsset을 한 번만 호출한다.
+ *
+ * 입력 가정: `project`는 `normalizeProject`를 거친 정규화된 형태가 표준이지만,
+ * 일부 호출 경로(테스트 픽스처 등)는 raw Project를 직접 넘길 수 있다 — 이 경우를 위해
+ * `?? []` 방어를 둔다. baseFlow.assetId는 `libraryAssetIds`와 의미가 다르므로 의도적으로
+ * idMap을 우회해 별도 copyAsset을 호출한다(현재 타입상 교집합이 없으므로 안전).
+ */
 export async function duplicateProject(project: Project): Promise<Project> {
   const clone: Project = structuredClone(project);
   clone.id = newId();
