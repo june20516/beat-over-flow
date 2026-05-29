@@ -13,8 +13,10 @@
   font-size: 12px;
 }
 .selectSlot {
+  /* 트랙 인포 영역(384px) 안에서 남은 여백을 샘플 라벨에 더 할당.
+     포커스 상태에서 Trash가 추가돼도 여유가 남는 폭으로 고정. */
   flex: none;
-  width: 58px;
+  width: 130px;
   overflow: hidden;
 }
 .dragHandle {

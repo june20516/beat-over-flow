@@ -1,4 +1,5 @@
-/* 도메인 특화 — 트랙 행 슬롯에서의 폭 제약만 둔다. 나머지는 DropdownSelect 기본을 따른다. */
+/* 도메인 특화 — 트랙 행 슬롯에 꽉 차게. 폭은 selectSlot이 제어한다. */
 .trigger {
-  max-width: 160px;
+  width: 100%;
+  max-width: 100%;
 }
